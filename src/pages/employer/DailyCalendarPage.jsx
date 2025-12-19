@@ -1087,7 +1087,7 @@ export default function DailyCalendarPage() {
                   })}
                 </ul>
               </div>
-              <div className="detail-status-row">
+              {/* <div className="detail-status-row">
                 {isEditing ? (
                   <>
                     <label className="status-toggle">
@@ -1131,7 +1131,7 @@ export default function DailyCalendarPage() {
                     </div>
                   </>
                 )}
-              </div>
+              </div> */}
           </div>
         )}
       </div>

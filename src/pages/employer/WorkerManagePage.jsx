@@ -1,5 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
 import { FaUser, FaTimes } from "react-icons/fa";
 import Swal from "sweetalert2";
 import "../../styles/workerManagePage.css";
@@ -11,18 +10,13 @@ import {
 } from "./dummyData";
 import { formatCurrency } from "./utils/formatUtils";
 import TimeInput from "./components/TimeInput";
-import WorkplaceForm from "./components/WorkplaceForm";
-import ScheduleGrid from "./components/ScheduleGrid";
-import workplaceService from "../../services/workplaceService";
-import contractService from "../../services/contractService";
-import workerService from "../../services/workerService";
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
+const hours = Array.from({ length: 24 }, (_, i) => i);
 
 export default function WorkerManagePage() {
-  const navigate = useNavigate();
-  const [workplaces, setWorkplaces] = useState([]);
-  const [selectedWorkplaceId, setSelectedWorkplaceId] = useState(null);
+  const [workplaces, setWorkplaces] = useState(() => initialWorkplaces);
+  const [selectedWorkplaceId, setSelectedWorkplaceId] = useState(1);
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [hoveredBlockGroup, setHoveredBlockGroup] = useState(null);
   const [workersList, setWorkersList] = useState(() => workplaceWorkers);
@@ -53,50 +47,6 @@ export default function WorkerManagePage() {
     useState(null);
   const [editingWorkplace, setEditingWorkplace] = useState(null);
 
-  // 근무지 목록 조회
-  useEffect(() => {
-    const fetchWorkplaces = async () => {
-      try {
-        const data = await workplaceService.getWorkplaces();
-        setWorkplaces(data);
-        if (data.length > 0 && !selectedWorkplaceId) {
-          setSelectedWorkplaceId(data[0].id);
-        }
-      } catch (error) {
-        // 에러 시 더미 데이터 사용
-        setWorkplaces(initialWorkplaces);
-        if (!selectedWorkplaceId) {
-          setSelectedWorkplaceId(1);
-        }
-      }
-    };
-    fetchWorkplaces();
-  }, []);
-
-  // 근로자 목록 조회 함수 (재사용 가능하도록 분리)
-  const fetchWorkers = async (workplaceId) => {
-    if (!workplaceId) return;
-
-    try {
-      const contracts = await contractService.getContractsByWorkplace(workplaceId);
-      setWorkersList((prev) => ({
-        ...prev,
-        [workplaceId]: contracts,
-      }));
-    } catch (error) {
-      // 에러 시 빈 배열 사용
-      setWorkersList((prev) => ({
-        ...prev,
-        [workplaceId]: [],
-      }));
-    }
-  };
-
-  // 선택된 근무지의 근로자 목록 조회
-  useEffect(() => {
-    fetchWorkers(selectedWorkplaceId);
-  }, [selectedWorkplaceId]);
-
   const resetAddWorkerFlow = () => {
     setWorkerCode("");
     setSearchedWorker(null);
@@ -117,97 +67,27 @@ export default function WorkerManagePage() {
     if (isAddingWorker) {
       return null;
     }
-    if (selectedWorker && workers.find(w => w.id === selectedWorker.id)) {
+    if (selectedWorker && workers.includes(selectedWorker)) {
       return selectedWorker;
     }
     return workers.length > 0 ? workers[0] : null;
   }, [selectedWorker, workers, isAddingWorker]);
 
-  // 선택된 근로자의 전체 계약 정보 조회
-  const [fullContractData, setFullContractData] = useState(null);
-
-  useEffect(() => {
-    const fetchFullContract = async () => {
-      if (!currentWorker?.id) {
-        setFullContractData(null);
-        return;
-      }
-
-      try {
-        const fullContract = await contractService.getContract(currentWorker.id);
-        setFullContractData(fullContract);
-      } catch (error) {
-        setFullContractData(null);
-      }
-    };
-
-    fetchFullContract();
-  }, [currentWorker?.id]);
-
   const workerData = useMemo(() => {
-    if (!currentWorker || !fullContractData) {
+    if (!currentWorker) {
       return null;
     }
-
-    // fullContractData에 전체 계약 정보가 있음
-    const contract = fullContractData;
-
-    // workSchedules JSON 파싱
-    let weeklySchedule = {};
-    try {
-      if (contract.workSchedules) {
-        const schedules = typeof contract.workSchedules === 'string'
-          ? JSON.parse(contract.workSchedules)
-          : contract.workSchedules;
-
-        // dayOfWeek(1-7, 1=월요일, 7=일요일) -> 한글 요일로 변환
-        const dayMapping = {
-          1: '월',
-          2: '화',
-          3: '수',
-          4: '목',
-          5: '금',
-          6: '토',
-          7: '일'
-        };
-
-        schedules.forEach(schedule => {
-          const dayName = dayMapping[schedule.dayOfWeek];
-          if (dayName) {
-            weeklySchedule[dayName] = {
-              start: schedule.startTime,
-              end: schedule.endTime
-            };
-          }
-        });
-      }
-    } catch (error) {
-      // workSchedules 파싱 실패 무시
+    // 추가된 근무자 정보 우선 확인
+    const addedInfo = addedWorkerInfo[`${selectedWorkplace}-${currentWorker}`];
+    if (addedInfo) {
+      return addedInfo;
     }
-
-    // payrollDeductionType에서 보험/세금 정보 추출
-    const deductionType = contract.payrollDeductionType || 'PART_TIME_NONE';
-    const socialInsurance = deductionType.includes('INSURANCE');
-    const withholdingTax = deductionType.includes('TAX');
-
-    return {
-      basicInfo: {
-        name: contract.workerName,
-        birthDate: '정보 없음',  // 백엔드에서 제공하지 않음
-        phone: contract.workerPhone || '-',
-        email: '정보 없음',  // 백엔드에서 제공하지 않음
-      },
-      workInfo: {
-        workplace: selectedWorkplace,
-        weeklySchedule: weeklySchedule,
-        breakTime: 0,  // 백엔드에서 제공하지 않음
-        hourlyWage: Number(contract.hourlyWage) || 0,
-        payday: contract.paymentDay || 25,
-        socialInsurance: socialInsurance,
-        withholdingTax: withholdingTax,
-      }
-    };
-  }, [currentWorker, fullContractData, selectedWorkplace]);
+    // 기본 workerInfo 확인
+    if (!workerInfo[selectedWorkplace]) {
+      return null;
+    }
+    return workerInfo[selectedWorkplace][currentWorker] || null;
+  }, [currentWorker, selectedWorkplace, addedWorkerInfo]);
 
   // 수정 중인 근무 정보 관리 (저장된 정보 우선, 수정 중이면 수정 중 정보)
   const currentWorkInfo = useMemo(() => {
@@ -215,12 +95,12 @@ export default function WorkerManagePage() {
     if (
       isEditingWork &&
       editedWorkInfo &&
-      editedWorkInfo.workerId === currentWorker?.id
+      editedWorkInfo.workerName === currentWorker
     ) {
       return editedWorkInfo;
     }
     // 저장된 수정 정보가 있으면 그것을 사용
-    const savedInfo = updatedWorkInfo[`${selectedWorkplace}-${currentWorker?.id}`];
+    const savedInfo = updatedWorkInfo[`${selectedWorkplace}-${currentWorker}`];
     if (savedInfo) {
       return savedInfo;
     }
@@ -238,7 +118,7 @@ export default function WorkerManagePage() {
   // 수정 모드 시작
   const handleStartEdit = () => {
     const workInfoToUse = currentWorkInfo || workerData?.workInfo;
-    if (workInfoToUse && currentWorker) {
+    if (workInfoToUse) {
       // breakTime이 숫자면 요일별 객체로 변환
       const breakTime =
         typeof workInfoToUse.breakTime === "number"
@@ -255,8 +135,7 @@ export default function WorkerManagePage() {
       setEditedWorkInfo({
         ...workInfoToUse,
         breakTime,
-        workerId: currentWorker.id,
-        workerName: currentWorker.workerName,
+        workerName: currentWorker,
       });
       setIsEditingWork(true);
     }
@@ -269,81 +148,47 @@ export default function WorkerManagePage() {
   };
 
   // 수정 저장
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = () => {
     if (editedWorkInfo && currentWorker) {
       // 급여 지급일 검증
-      if (
-        editedWorkInfo.payday &&
-        (editedWorkInfo.payday < 1 || editedWorkInfo.payday > 31)
-      ) {
+      if (editedWorkInfo.payday && editedWorkInfo.payday > 31) {
         Swal.fire(
           "입력 오류",
-          "급여 지급일은 1일에서 31일 사이여야 합니다.",
+          "급여 지급일은 31일을 초과할 수 없습니다.",
           "error"
         );
         return;
       }
 
-      try {
-        // weeklySchedule을 백엔드 형식으로 변환 (1=월요일, 7=일요일)
-        const dayMapping = {
-          월: 1,
-          화: 2,
-          수: 3,
-          목: 4,
-          금: 5,
-          토: 6,
-          일: 7,
-        };
+      // 수정된 정보를 상태에 저장
+      const key = `${selectedWorkplace}-${currentWorker}`;
+      setUpdatedWorkInfo((prev) => ({
+        ...prev,
+        [key]: {
+          ...editedWorkInfo,
+          workerName: currentWorker,
+        },
+      }));
 
-        const workSchedules = Object.entries(editedWorkInfo.weeklySchedule || {})
-          .filter(([day, schedule]) => schedule && schedule.start && schedule.end)
-          .map(([day, schedule]) => ({
-            dayOfWeek: dayMapping[day],
-            startTime: schedule.start,
-            endTime: schedule.end,
-          }));
-
-        // payrollDeductionType 결정
-        let payrollDeductionType = "PART_TIME_NONE";
-        if (editedWorkInfo.socialInsurance && editedWorkInfo.withholdingTax) {
-          payrollDeductionType = "PART_TIME_TAX_AND_INSURANCE";
-        } else if (editedWorkInfo.socialInsurance) {
-          payrollDeductionType = "PART_TIME_TAX_AND_INSURANCE";
-        } else if (editedWorkInfo.withholdingTax) {
-          payrollDeductionType = "PART_TIME_TAX_ONLY";
-        }
-
-        // 백엔드 API 요청 데이터
-        const requestData = {
-          hourlyWage: editedWorkInfo.hourlyWage,
-          workSchedules: workSchedules,
-          paymentDay: editedWorkInfo.payday,
-          payrollDeductionType: payrollDeductionType,
-        };
-
-        // 백엔드 API 호출
-        await contractService.updateContract(currentWorker.id, requestData);
-
-        // 성공 시 근로자 목록 다시 조회
-        await fetchWorkers(selectedWorkplaceId);
-
-        // 전체 계약 정보도 다시 조회하여 UI에 즉시 반영
-        const updatedContract = await contractService.getContract(currentWorker.id);
-        setFullContractData(updatedContract);
-
-        Swal.fire("저장 완료", "근무 정보가 수정되었습니다.", "success");
-        setIsEditingWork(false);
-        setEditedWorkInfo(null);
-      } catch (error) {
-        Swal.fire("수정 실패", error.message || "근무 정보 수정 중 오류가 발생했습니다.", "error");
-      }
+      // TODO: 백엔드 API 호출
+      Swal.fire("저장 완료", "근무 정보가 수정되었습니다.", "success");
+      setIsEditingWork(false);
+      setEditedWorkInfo(null);
     }
   };
 
   const handleWorkplaceChange = (e) => {
     const value = e.target.value;
-
+    if (value === "add") {
+      // 근무지 추가 모드 활성화
+      setIsAddingWorkplace(true);
+      setNewWorkplaceName("");
+      setNewWorkplaceAddress("");
+      setNewWorkplaceBusinessNumber("");
+      setNewWorkplaceIsSmallBusiness(false);
+      // selectedWorkplaceId는 변경하지 않음 (select의 value는 isAddingWorkplace에 따라 "add"로 표시됨)
+      return;
+    }
     // 일반 근무지 선택 시 모든 모드 해제
     setIsAddingWorkplace(false);
     setIsManagingWorkplaces(false);
@@ -352,7 +197,6 @@ export default function WorkerManagePage() {
     const newWorkplaceId = Number(value);
     setSelectedWorkplaceId(newWorkplaceId);
     setSelectedWorker(null);
-    setHoveredBlockGroup(null);
     // 근무지 변경 시 수정 모드 해제
     setIsEditingWork(false);
     setEditedWorkInfo(null);
@@ -375,21 +219,30 @@ export default function WorkerManagePage() {
     setEditingWorkplace(null);
   };
 
-  const handleAddWorkplaceFromManage = () => {
-    setIsManagingWorkplaces(false);
-    setIsAddingWorkplace(true);
-    setSelectedWorkplaceForEdit(null);
-    setEditingWorkplace(null);
-    setNewWorkplaceName("");
-    setNewWorkplaceAddress("");
-    setNewWorkplaceBusinessNumber("");
-    setNewWorkplaceIsSmallBusiness(false);
-  };
-
-  const handleAddWorkplace = async () => {
-    // 근무지 이름 검증
+  const handleAddWorkplace = () => {
     if (!newWorkplaceName.trim()) {
       Swal.fire("입력 오류", "근무지 이름을 입력해주세요.", "error");
+      return;
+    }
+
+    if (!newWorkplaceAddress.trim()) {
+      Swal.fire("입력 오류", "주소를 입력해주세요.", "error");
+      return;
+    }
+
+    if (!newWorkplaceBusinessNumber.trim()) {
+      Swal.fire("입력 오류", "사업자 등록 번호를 입력해주세요.", "error");
+      return;
+    }
+
+    // 사업자 등록 번호 형식 검증 (예: 123-45-67890)
+    const businessNumberPattern = /^\d{3}-\d{2}-\d{5}$/;
+    if (!businessNumberPattern.test(newWorkplaceBusinessNumber.trim())) {
+      Swal.fire(
+        "입력 오류",
+        "사업자 등록 번호 형식이 올바르지 않습니다. (예: 123-45-67890)",
+        "error"
+      );
       return;
     }
 
@@ -399,41 +252,37 @@ export default function WorkerManagePage() {
       return;
     }
 
-    try {
-      // 백엔드에 근무지 생성 요청
-      const createdWorkplace = await workplaceService.createWorkplace({
-        companyName: newWorkplaceName.trim(),
-        address: newWorkplaceAddress.trim(),
-        businessNumber: newWorkplaceBusinessNumber.trim(),
-        isLessThanFiveEmployees: newWorkplaceIsSmallBusiness,
-      });
+    // 새 근무지 추가
+    const newId = Math.max(...workplaces.map((wp) => wp.id), 0) + 1;
+    const newWorkplace = {
+      id: newId,
+      name: newWorkplaceName.trim(),
+      address: newWorkplaceAddress.trim(),
+      businessNumber: newWorkplaceBusinessNumber.trim(),
+      isSmallBusiness: newWorkplaceIsSmallBusiness,
+    };
+    setWorkplaces((prev) => [...prev, newWorkplace]);
 
-      // UI 업데이트
-      setWorkplaces((prev) => [...prev, createdWorkplace]);
+    // 새 근무지의 직원 목록 초기화
+    setWorkersList((prev) => ({
+      ...prev,
+      [newId]: [],
+    }));
 
-      // 새 근무지의 직원 목록 초기화
-      setWorkersList((prev) => ({
-        ...prev,
-        [createdWorkplace.id]: [],
-      }));
+    // 새 근무지 선택
+    setSelectedWorkplaceId(newId);
+    setSelectedWorker(null);
+    setIsAddingWorkplace(false);
+    setNewWorkplaceName("");
+    setNewWorkplaceAddress("");
+    setNewWorkplaceBusinessNumber("");
+    setNewWorkplaceIsSmallBusiness(false);
 
-      // 새 근무지 선택
-      setSelectedWorkplaceId(createdWorkplace.id);
-      setSelectedWorker(null);
-      setIsAddingWorkplace(false);
-      setNewWorkplaceName("");
-      setNewWorkplaceAddress("");
-      setNewWorkplaceBusinessNumber("");
-      setNewWorkplaceIsSmallBusiness(false);
-
-      Swal.fire(
-        "추가 완료",
-        `${newWorkplaceName.trim()}이(가) 추가되었습니다.`,
-        "success"
-      );
-    } catch (error) {
-      Swal.fire("추가 실패", error.message || "근무지 추가 중 오류가 발생했습니다.", "error");
-    }
+    Swal.fire(
+      "추가 완료",
+      `${newWorkplaceName.trim()}이(가) 추가되었습니다.`,
+      "success"
+    );
   };
 
   const handleCancelAddWorkplace = () => {
@@ -461,75 +310,63 @@ export default function WorkerManagePage() {
       cancelButtonColor: "var(--color-main)",
       confirmButtonText: "삭제",
       cancelButtonText: "취소",
-    }).then(async (result) => {
+    }).then((result) => {
       if (result.isConfirmed) {
-        if (isAddingWorker) {
-          resetAddWorkerFlow();
-          setIsAddingWorker(false);
-          setHoveredBlockGroup(null);
-        }
-
-        // 삭제할 근무지가 없으면 종료
+        // 근무지 삭제
         const updatedWorkplaces = workplaces.filter(
           (wp) => wp.id !== selectedWorkplaceId
         );
+
+        // 삭제할 근무지가 없으면 종료
         if (updatedWorkplaces.length === 0) {
           Swal.fire("오류", "최소 하나의 근무지는 필요합니다.", "error");
           return;
         }
 
-        try {
-          // 백엔드에 삭제 요청
-          await workplaceService.deleteWorkplace(selectedWorkplaceId);
+        setWorkplaces(updatedWorkplaces);
 
-          // UI 업데이트
-          setWorkplaces(updatedWorkplaces);
+        // workersList에서 해당 근무지 제거
+        setWorkersList((prev) => {
+          const updated = { ...prev };
+          delete updated[selectedWorkplaceId];
+          return updated;
+        });
 
-          // workersList에서 해당 근무지 제거
-          setWorkersList((prev) => {
-            const updated = { ...prev };
-            delete updated[selectedWorkplaceId];
-            return updated;
+        // addedWorkerInfo에서 해당 근무지 관련 정보 제거
+        setAddedWorkerInfo((prev) => {
+          const updated = { ...prev };
+          Object.keys(updated).forEach((key) => {
+            if (key.startsWith(`${workplaceToDelete.name}-`)) {
+              delete updated[key];
+            }
           });
+          return updated;
+        });
 
-          // addedWorkerInfo에서 해당 근무지 관련 정보 제거
-          setAddedWorkerInfo((prev) => {
-            const updated = { ...prev };
-            Object.keys(updated).forEach((key) => {
-              if (key.startsWith(`${workplaceToDelete.name}::`)) {
-                delete updated[key];
-              }
-            });
-            return updated;
+        // updatedWorkInfo에서 해당 근무지 관련 정보 제거
+        setUpdatedWorkInfo((prev) => {
+          const updated = { ...prev };
+          Object.keys(updated).forEach((key) => {
+            if (key.startsWith(`${workplaceToDelete.name}-`)) {
+              delete updated[key];
+            }
           });
+          return updated;
+        });
 
-          // updatedWorkInfo에서 해당 근무지 관련 정보 제거
-          setUpdatedWorkInfo((prev) => {
-            const updated = { ...prev };
-            Object.keys(updated).forEach((key) => {
-              if (key.startsWith(`${workplaceToDelete.name}-`)) {
-                delete updated[key];
-              }
-            });
-            return updated;
-          });
+        // 삭제된 근무지가 선택되어 있으면 첫 번째 근무지 선택
+        const newSelectedWorkplaceId = updatedWorkplaces[0].id;
+        setSelectedWorkplaceId(newSelectedWorkplaceId);
+        setSelectedWorker(null);
+        setIsAddingWorkplace(false);
+        setIsEditingWork(false);
+        setEditedWorkInfo(null);
 
-          // 삭제된 근무지가 선택되어 있으면 첫 번째 근무지 선택
-          const newSelectedWorkplaceId = updatedWorkplaces[0].id;
-          setSelectedWorkplaceId(newSelectedWorkplaceId);
-          setSelectedWorker(null);
-          setIsAddingWorkplace(false);
-          setIsEditingWork(false);
-          setEditedWorkInfo(null);
-
-          Swal.fire(
-            "삭제 완료",
-            `${workplaceToDelete.name}이(가) 삭제되었습니다.`,
-            "success"
-          );
-        } catch (error) {
-          Swal.fire("삭제 실패", error.message || "근무지 삭제 중 오류가 발생했습니다.", "error");
-        }
+        Swal.fire(
+          "삭제 완료",
+          `${workplaceToDelete.name}이(가) 삭제되었습니다.`,
+          "success"
+        );
       }
     });
   };
@@ -545,12 +382,32 @@ export default function WorkerManagePage() {
     setSelectedWorkplaceForEdit(workplace.id);
   };
 
-  const handleSaveWorkplaceEdit = async () => {
+  const handleSaveWorkplaceEdit = () => {
     if (!editingWorkplace) return;
 
-    // 근무지 이름 검증
     if (!editingWorkplace.name.trim()) {
       Swal.fire("입력 오류", "근무지 이름을 입력해주세요.", "error");
+      return;
+    }
+
+    if (!editingWorkplace.address.trim()) {
+      Swal.fire("입력 오류", "주소를 입력해주세요.", "error");
+      return;
+    }
+
+    if (!editingWorkplace.businessNumber.trim()) {
+      Swal.fire("입력 오류", "사업자 등록 번호를 입력해주세요.", "error");
+      return;
+    }
+
+    // 사업자 등록 번호 형식 검증
+    const businessNumberPattern = /^\d{3}-\d{2}-\d{5}$/;
+    if (!businessNumberPattern.test(editingWorkplace.businessNumber.trim())) {
+      Swal.fire(
+        "입력 오류",
+        "사업자 등록 번호 형식이 올바르지 않습니다. (예: 123-45-67890)",
+        "error"
+      );
       return;
     }
 
@@ -565,75 +422,63 @@ export default function WorkerManagePage() {
       return;
     }
 
-    try {
-      // 백엔드에 수정 요청
-      await workplaceService.updateWorkplace(editingWorkplace.id, {
-        companyName: editingWorkplace.name.trim(),
-        address: editingWorkplace.address.trim(),
-        businessNumber: editingWorkplace.businessNumber.trim(),
-        isLessThanFiveEmployees: editingWorkplace.isSmallBusiness,
+    // 근무지 정보 업데이트
+    setWorkplaces((prev) =>
+      prev.map((wp) =>
+        wp.id === editingWorkplace.id
+          ? {
+              ...wp,
+              name: editingWorkplace.name.trim(),
+              address: editingWorkplace.address.trim(),
+              businessNumber: editingWorkplace.businessNumber.trim(),
+              isSmallBusiness: editingWorkplace.isSmallBusiness,
+            }
+          : wp
+      )
+    );
+
+    // 이름이 변경된 경우 workersList, addedWorkerInfo, updatedWorkInfo의 키도 업데이트
+    const oldWorkplace = workplaces.find((wp) => wp.id === editingWorkplace.id);
+    if (oldWorkplace && oldWorkplace.name !== editingWorkplace.name.trim()) {
+      // workersList는 ID 기반이므로 변경 불필요
+      // addedWorkerInfo와 updatedWorkInfo는 이름 기반 키를 사용하므로 업데이트 필요
+      setAddedWorkerInfo((prev) => {
+        const updated = {};
+        Object.keys(prev).forEach((key) => {
+          if (key.startsWith(`${oldWorkplace.name}-`)) {
+            const newKey = key.replace(
+              `${oldWorkplace.name}-`,
+              `${editingWorkplace.name.trim()}-`
+            );
+            updated[newKey] = prev[key];
+          } else {
+            updated[key] = prev[key];
+          }
+        });
+        return updated;
       });
 
-      // UI 업데이트
-      setWorkplaces((prev) =>
-        prev.map((wp) =>
-          wp.id === editingWorkplace.id
-            ? {
-                ...wp,
-                name: editingWorkplace.name.trim(),
-                address: editingWorkplace.address.trim(),
-                businessNumber: editingWorkplace.businessNumber.trim(),
-                isSmallBusiness: editingWorkplace.isSmallBusiness,
-              }
-            : wp
-        )
-      );
-
-      // 이름이 변경된 경우 workersList, addedWorkerInfo, updatedWorkInfo의 키도 업데이트
-      const oldWorkplace = workplaces.find((wp) => wp.id === editingWorkplace.id);
-      if (oldWorkplace && oldWorkplace.name !== editingWorkplace.name.trim()) {
-        // workersList는 ID 기반이므로 변경 불필요
-        // addedWorkerInfo와 updatedWorkInfo는 이름 기반 키를 사용하므로 업데이트 필요
-        setAddedWorkerInfo((prev) => {
-          const updated = {};
-          Object.keys(prev).forEach((key) => {
-            if (key.startsWith(`${oldWorkplace.name}::`)) {
-              const newKey = key.replace(
-                `${oldWorkplace.name}::`,
-                `${editingWorkplace.name.trim()}::`
-              );
-              updated[newKey] = prev[key];
-            } else {
-              updated[key] = prev[key];
-            }
-          });
-          return updated;
+      setUpdatedWorkInfo((prev) => {
+        const updated = {};
+        Object.keys(prev).forEach((key) => {
+          if (key.startsWith(`${oldWorkplace.name}-`)) {
+            const newKey = key.replace(
+              `${oldWorkplace.name}-`,
+              `${editingWorkplace.name.trim()}-`
+            );
+            updated[newKey] = prev[key];
+          } else {
+            updated[key] = prev[key];
+          }
         });
-
-        setUpdatedWorkInfo((prev) => {
-          const updated = {};
-          Object.keys(prev).forEach((key) => {
-            if (key.startsWith(`${oldWorkplace.name}-`)) {
-              const newKey = key.replace(
-                `${oldWorkplace.name}-`,
-                `${editingWorkplace.name.trim()}-`
-              );
-              updated[newKey] = prev[key];
-            } else {
-              updated[key] = prev[key];
-            }
-          });
-          return updated;
-        });
-      }
-
-      setEditingWorkplace(null);
-      setSelectedWorkplaceForEdit(null);
-
-      Swal.fire("수정 완료", "근무지 정보가 수정되었습니다.", "success");
-    } catch (error) {
-      Swal.fire("수정 실패", error.message || "근무지 수정 중 오류가 발생했습니다.", "error");
+        return updated;
+      });
     }
+
+    setEditingWorkplace(null);
+    setSelectedWorkplaceForEdit(null);
+
+    Swal.fire("수정 완료", "근무지 정보가 수정되었습니다.", "success");
   };
 
   const handleCancelWorkplaceEdit = () => {
@@ -641,9 +486,9 @@ export default function WorkerManagePage() {
     setSelectedWorkplaceForEdit(null);
   };
 
-  const handleWorkerClick = (worker) => {
+  const handleWorkerClick = (workerName) => {
     // 직원이 변경되면 수정 모드 해제
-    if (editedWorkInfo?.workerId !== worker.id) {
+    if (editedWorkInfo?.workerName !== workerName) {
       setIsEditingWork(false);
       setEditedWorkInfo(null);
     }
@@ -651,14 +496,12 @@ export default function WorkerManagePage() {
       resetAddWorkerFlow();
       setIsAddingWorker(false);
     }
-    setSelectedWorker(worker);
-    setHoveredBlockGroup(null);
+    setSelectedWorker(workerName);
   };
 
   const handleCancelAddWorker = () => {
     resetAddWorkerFlow();
     setIsAddingWorker(false);
-    setHoveredBlockGroup(null);
   };
 
   const handleDismissWorker = async () => {
@@ -666,7 +509,7 @@ export default function WorkerManagePage() {
 
     const result = await Swal.fire({
       icon: "warning",
-      title: `${currentWorker.workerName}님을 퇴사 처리하시겠습니까?`,
+      title: `${currentWorker}님을 퇴사 처리하시겠습니까?`,
       text: "퇴사 처리된 직원은 목록에서 제거됩니다.",
       showCancelButton: true,
       confirmButtonText: "퇴사 처리",
@@ -675,68 +518,44 @@ export default function WorkerManagePage() {
     });
 
     if (result.isConfirmed) {
-      try {
-        // 백엔드 API 호출로 계약 종료
-        await contractService.deleteContract(currentWorker.id);
-
-        // UI 업데이트
-        setWorkersList((prev) => {
-          const updated = { ...prev };
-          const workplaceWorkersList = [...(updated[selectedWorkplaceId] || [])];
-          const filtered = workplaceWorkersList.filter(
-            (worker) => worker.id !== currentWorker.id
-          );
-          updated[selectedWorkplaceId] = filtered;
-          return updated;
-        });
-
-        // 퇴사 처리된 직원이 선택되어 있으면 선택 해제
-        if (selectedWorker?.id === currentWorker.id) {
-          setSelectedWorker(null);
-        }
-
-        Swal.fire(
-          "퇴사 처리 완료",
-          `${currentWorker.workerName}님이 퇴사 처리되었습니다.`,
-          "success"
+      setWorkersList((prev) => {
+        const updated = { ...prev };
+        const workplaceWorkersList = [...(updated[selectedWorkplaceId] || [])];
+        const filtered = workplaceWorkersList.filter(
+          (worker) => worker !== currentWorker
         );
-      } catch (error) {
-        Swal.fire("퇴사 처리 실패", error.message || "퇴사 처리 중 오류가 발생했습니다.", "error");
+        updated[selectedWorkplaceId] = filtered;
+        return updated;
+      });
+
+      // 퇴사 처리된 직원이 선택되어 있으면 선택 해제
+      if (selectedWorker === currentWorker) {
+        setSelectedWorker(null);
       }
+
+      Swal.fire(
+        "퇴사 처리 완료",
+        `${currentWorker}님이 퇴사 처리되었습니다.`,
+        "success"
+      );
     }
   };
 
-  // 근무자 코드로 검색
+  // 근무자 코드로 검색 (더미 데이터)
   const searchWorkerByCode = async (code) => {
+    // TODO: 실제 API 호출로 변경
     setIsSearching(true);
 
-    try {
-      const response = await workerService.getWorkerByCode(code);
-      setIsSearching(false);
+    // 시뮬레이션: API 호출 지연
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (response && response.id) {
-        // 백엔드 응답을 프론트엔드 형식으로 변환
-        const worker = {
-          id: response.id,
-          name: response.name,
-          phone: response.phone,
-          workerCode: response.workerCode,
-          bankName: response.bankName || "",
-          accountNumber: response.accountNumber || "",
-          kakaoPayLink: response.kakaoPayLink || "",
-        };
-        setSearchedWorker(worker);
-      } else {
-        Swal.fire("검색 실패", "해당 근무자 코드를 찾을 수 없습니다.", "error");
-        setSearchedWorker(null);
-      }
-    } catch (error) {
-      setIsSearching(false);
-      Swal.fire(
-        "검색 실패",
-        error.error?.message || "해당 근무자 코드를 찾을 수 없습니다.",
-        "error"
-      );
+    const worker = workerCodeMap[code];
+    setIsSearching(false);
+
+    if (worker) {
+      setSearchedWorker(worker);
+    } else {
+      Swal.fire("검색 실패", "해당 근무자 코드를 찾을 수 없습니다.", "error");
       setSearchedWorker(null);
     }
   };
@@ -745,11 +564,9 @@ export default function WorkerManagePage() {
     resetAddWorkerFlow();
     setIsAddingWorker(true);
     setSelectedWorker(null);
-    setHoveredBlockGroup(null);
   };
 
   const handleSearchWorker = () => {
-    if (isSearching) return;
     if (!workerCode.trim()) {
       Swal.fire("입력 오류", "근무자 코드를 입력해주세요.", "warning");
       return;
@@ -761,7 +578,11 @@ export default function WorkerManagePage() {
     if (!searchedWorker) return;
 
     // 근무자 정보 확인 완료 (검색된 정보 그대로 사용)
-    setConfirmedWorker(searchedWorker);
+    setConfirmedWorker({
+      ...searchedWorker,
+      name: searchedWorker.name,
+      birthDate: searchedWorker.birthDate,
+    });
 
     // 기본 근무 정보 초기화
     setNewWorkerWorkInfo({
@@ -775,111 +596,65 @@ export default function WorkerManagePage() {
     });
   };
 
-  const handleSaveNewWorker = async () => {
+  const handleSaveNewWorker = () => {
     if (!confirmedWorker || !newWorkerWorkInfo) return;
 
     // 급여 지급일 검증
-    if (
-      newWorkerWorkInfo.payday &&
-      (newWorkerWorkInfo.payday < 1 || newWorkerWorkInfo.payday > 31)
-    ) {
+    if (newWorkerWorkInfo.payday && newWorkerWorkInfo.payday > 31) {
       Swal.fire(
         "입력 오류",
-        "급여 지급일은 1일에서 31일 사이여야 합니다.",
+        "급여 지급일은 31일을 초과할 수 없습니다.",
         "error"
       );
       return;
     }
 
-    // 근무자 코드 확인
-    if (!confirmedWorker.workerCode) {
-      Swal.fire("오류", "근무자 코드가 없습니다.", "error");
-      return;
-    }
-
-    try {
-      // weeklySchedule을 백엔드 형식으로 변환 (1=월요일, 7=일요일)
-      const dayMapping = {
-        월: 1,
-        화: 2,
-        수: 3,
-        목: 4,
-        금: 5,
-        토: 6,
-        일: 7,
-      };
-
-      const workSchedules = Object.entries(newWorkerWorkInfo.weeklySchedule || {})
-        .filter(([day, schedule]) => schedule && schedule.start && schedule.end)
-        .map(([day, schedule]) => ({
-          dayOfWeek: dayMapping[day],
-          startTime: schedule.start,
-          endTime: schedule.end,
-        }));
-
-      // 근무 스케줄 검증
-      if (workSchedules.length === 0) {
-        Swal.fire(
-          "입력 오류",
-          "최소 1개 이상의 근무 스케줄을 등록해야 합니다.",
-          "error"
-        );
-        return;
+    // 근무자 목록에 추가
+    setWorkersList((prev) => {
+      const updated = { ...prev };
+      const workplaceWorkersList = [...(updated[selectedWorkplaceId] || [])];
+      if (!workplaceWorkersList.includes(confirmedWorker.name)) {
+        workplaceWorkersList.push(confirmedWorker.name);
+        updated[selectedWorkplaceId] = workplaceWorkersList;
       }
+      return updated;
+    });
 
-      // payrollDeductionType 결정 (백엔드 Enum에 맞게 변환)
-      let payrollDeductionType = "PART_TIME_NONE";
-      if (newWorkerWorkInfo.socialInsurance && newWorkerWorkInfo.withholdingTax) {
-        payrollDeductionType = "PART_TIME_TAX_AND_INSURANCE";
-      } else if (newWorkerWorkInfo.socialInsurance) {
-        // 4대보험만 적용하는 경우는 백엔드 Enum에 없으므로 세금도 함께 적용
-        payrollDeductionType = "PART_TIME_TAX_AND_INSURANCE";
-      } else if (newWorkerWorkInfo.withholdingTax) {
-        payrollDeductionType = "PART_TIME_TAX_ONLY";
-      }
+    // 추가된 근무자 정보 저장
+    const workerInfoKey = `${selectedWorkplace}-${confirmedWorker.name}`;
+    setAddedWorkerInfo((prev) => ({
+      ...prev,
+      [workerInfoKey]: {
+        basicInfo: {
+          name: confirmedWorker.name,
+          birthDate: confirmedWorker.birthDate,
+          phone: confirmedWorker.phone || "",
+          email: confirmedWorker.email || "",
+        },
+        workInfo: {
+          ...newWorkerWorkInfo,
+          // null 값을 적절히 처리
+          hourlyWage: newWorkerWorkInfo.hourlyWage ?? 0,
+          payday: newWorkerWorkInfo.payday ?? 1,
+        },
+      },
+    }));
 
-      // 계약 시작일 (오늘 날짜)
-      const today = new Date();
-      const contractStartDate = today.toISOString().split("T")[0];
+    // TODO: 백엔드 API 호출로 workerInfo에 추가
+    // 현재는 더미 데이터이므로 실제 저장은 백엔드 연동 시 구현
 
-      // 백엔드 API 요청 데이터
-      const requestData = {
-        workerCode: confirmedWorker.workerCode,
-        hourlyWage: newWorkerWorkInfo.hourlyWage || 10030,
-        workSchedules: workSchedules,
-        contractStartDate: contractStartDate,
-        contractEndDate: null,
-        paymentDay: newWorkerWorkInfo.payday || 25,
-        payrollDeductionType: payrollDeductionType,
-      };
+    Swal.fire(
+      "추가 완료",
+      `${confirmedWorker.name}님이 추가되었습니다.`,
+      "success"
+    );
 
-      // 백엔드 API 호출
-      const response = await contractService.createContract(
-        selectedWorkplaceId,
-        requestData
-      );
+    const newWorkerName = confirmedWorker.name;
+    resetAddWorkerFlow();
+    setIsAddingWorker(false);
 
-      // 성공 시 백엔드에서 최신 근로자 목록 다시 조회
-      await fetchWorkers(selectedWorkplaceId);
-
-      Swal.fire(
-        "추가 완료",
-        `${confirmedWorker.name}님이 추가되었습니다.`,
-        "success"
-      );
-
-      resetAddWorkerFlow();
-      setIsAddingWorker(false);
-
-      // 추가된 근무자 선택 (response는 생성된 계약 객체)
-      setSelectedWorker(response);
-    } catch (error) {
-      Swal.fire(
-        "추가 실패",
-        error.error?.message || "근무자 추가 중 오류가 발생했습니다.",
-        "error"
-      );
-    }
+    // 추가된 근무자 선택
+    setSelectedWorker(newWorkerName);
   };
 
   // 주간 스케줄 그리드 데이터 생성 (수정된 정보 반영)
@@ -980,16 +755,32 @@ export default function WorkerManagePage() {
       {!isManagingWorkplaces && (
         <div className="worker-manage-left-panel">
           <div className="worker-manage-workplace-select">
-            <select
-              value={selectedWorkplaceId}
-              onChange={handleWorkplaceChange}
-            >
-              {workplaces.map((wp) => (
-                <option key={wp.id} value={wp.id}>
-                  {wp.name}
-                </option>
-              ))}
-            </select>
+            <div className="workplace-select-wrapper">
+              <select
+                value={isAddingWorkplace ? "add" : selectedWorkplaceId}
+                onChange={handleWorkplaceChange}
+                className="workplace-select"
+              >
+                {workplaces.map((wp) => (
+                  <option key={wp.id} value={wp.id}>
+                    {wp.name}
+                  </option>
+                ))}
+              </select>
+              {!isAddingWorkplace &&
+                !isManagingWorkplaces &&
+                selectedWorkplaceId &&
+                workplaces.length > 1 && (
+                  <button
+                    type="button"
+                    className="delete-workplace-button"
+                    onClick={handleDeleteWorkplace}
+                    title="근무지 삭제"
+                  >
+                    <FaTimes />
+                  </button>
+                )}
+            </div>
           </div>
 
           {!isAddingWorkplace && !isManagingWorkplaces && (
@@ -997,13 +788,13 @@ export default function WorkerManagePage() {
               <div className="worker-manage-worker-list">
                 {workers.map((worker) => (
                   <div
-                    key={worker.id}
+                    key={worker}
                     className={`worker-item ${
-                      currentWorker?.id === worker.id ? "selected" : ""
+                      currentWorker === worker ? "selected" : ""
                     }`}
                     onClick={() => handleWorkerClick(worker)}
                   >
-                    {worker.workerName}
+                    {worker}
                   </div>
                 ))}
               </div>
@@ -1041,22 +832,13 @@ export default function WorkerManagePage() {
             <div className="info-card">
               <div className="info-card-header">
                 <h3 className="info-card-title">근무지 목록</h3>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <button
-                    type="button"
-                    className="add-button-large"
-                    onClick={handleAddWorkplaceFromManage}
-                  >
-                    근무지 추가
-                  </button>
-                  <button
-                    type="button"
-                    className="cancel-button"
-                    onClick={handleCancelManageWorkplaces}
-                  >
-                    닫기
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  className="cancel-button"
+                  onClick={handleCancelManageWorkplaces}
+                >
+                  닫기
+                </button>
               </div>
               <div className="info-card-content">
                 <div className="workplace-list">
@@ -1106,38 +888,199 @@ export default function WorkerManagePage() {
             </div>
 
             {editingWorkplace && (
-              <WorkplaceForm
-                title="근무지 수정"
-                formData={editingWorkplace}
-                onFormDataChange={setEditingWorkplace}
-                onCancel={handleCancelWorkplaceEdit}
-                onSave={handleSaveWorkplaceEdit}
-                cancelButtonText="취소"
-                saveButtonText="저장"
-              />
+              <div className="info-card">
+                <div className="info-card-header">
+                  <h3 className="info-card-title">근무지 수정</h3>
+                </div>
+                <div className="info-card-content">
+                  <div className="info-field">
+                    <label className="info-label">근무지 이름</label>
+                    <input
+                      type="text"
+                      className="info-input"
+                      placeholder="근무지 이름을 입력하세요"
+                      value={editingWorkplace.name}
+                      onChange={(e) =>
+                        setEditingWorkplace({
+                          ...editingWorkplace,
+                          name: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="info-field">
+                    <label className="info-label">주소</label>
+                    <input
+                      type="text"
+                      className="info-input"
+                      placeholder="주소를 입력하세요"
+                      value={editingWorkplace.address}
+                      onChange={(e) =>
+                        setEditingWorkplace({
+                          ...editingWorkplace,
+                          address: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="info-field">
+                    <label className="info-label">사업자 등록 번호</label>
+                    <input
+                      type="text"
+                      className="info-input"
+                      placeholder="123-45-67890"
+                      value={editingWorkplace.businessNumber}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9-]/g, "");
+                        let formatted = value.replace(/-/g, "");
+                        if (formatted.length > 3) {
+                          formatted =
+                            formatted.slice(0, 3) + "-" + formatted.slice(3);
+                        }
+                        if (formatted.length > 6) {
+                          formatted =
+                            formatted.slice(0, 6) +
+                            "-" +
+                            formatted.slice(6, 11);
+                        }
+                        setEditingWorkplace({
+                          ...editingWorkplace,
+                          businessNumber: formatted,
+                        });
+                      }}
+                      maxLength={12}
+                    />
+                  </div>
+
+                  <div className="toggle-row">
+                    <div className="toggle-item">
+                      <label className="toggle-label">5인 미만 사업장</label>
+                      <label className="toggle-switch">
+                        <input
+                          type="checkbox"
+                          checked={editingWorkplace.isSmallBusiness}
+                          onChange={(e) =>
+                            setEditingWorkplace({
+                              ...editingWorkplace,
+                              isSmallBusiness: e.target.checked,
+                            })
+                          }
+                        />
+                        <span className="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="add-worker-button-container">
+                    <button
+                      type="button"
+                      className="cancel-button"
+                      onClick={handleCancelWorkplaceEdit}
+                    >
+                      취소
+                    </button>
+                    <button
+                      type="button"
+                      className="add-button-large"
+                      onClick={handleSaveWorkplaceEdit}
+                    >
+                      저장
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         ) : isAddingWorkplace ? (
-          <WorkplaceForm
-            title="근무지 추가"
-            formData={{
-              name: newWorkplaceName,
-              address: newWorkplaceAddress,
-              businessNumber: newWorkplaceBusinessNumber,
-              isSmallBusiness: newWorkplaceIsSmallBusiness,
-            }}
-            onFormDataChange={(data) => {
-              setNewWorkplaceName(data.name || "");
-              setNewWorkplaceAddress(data.address || "");
-              setNewWorkplaceBusinessNumber(data.businessNumber || "");
-              setNewWorkplaceIsSmallBusiness(data.isSmallBusiness || false);
-            }}
-            onCancel={handleCancelAddWorkplace}
-            onSave={handleAddWorkplace}
-            cancelButtonText="뒤로 가기"
-            saveButtonText="추가"
-            autoFocus={true}
-          />
+          <div className="info-card">
+            <div className="info-card-header">
+              <h3 className="info-card-title">근무지 추가</h3>
+            </div>
+            <div className="info-card-content">
+              <div className="info-field">
+                <label className="info-label">근무지 이름</label>
+                <input
+                  type="text"
+                  className="info-input"
+                  placeholder="근무지 이름을 입력하세요"
+                  value={newWorkplaceName}
+                  onChange={(e) => setNewWorkplaceName(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              <div className="info-field">
+                <label className="info-label">주소</label>
+                <input
+                  type="text"
+                  className="info-input"
+                  placeholder="주소를 입력하세요"
+                  value={newWorkplaceAddress}
+                  onChange={(e) => setNewWorkplaceAddress(e.target.value)}
+                />
+              </div>
+
+              <div className="info-field">
+                <label className="info-label">사업자 등록 번호</label>
+                <input
+                  type="text"
+                  className="info-input"
+                  placeholder="123-45-67890"
+                  value={newWorkplaceBusinessNumber}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9-]/g, "");
+                    // 자동으로 하이픈 추가 (123-45-67890 형식)
+                    let formatted = value.replace(/-/g, "");
+                    if (formatted.length > 3) {
+                      formatted =
+                        formatted.slice(0, 3) + "-" + formatted.slice(3);
+                    }
+                    if (formatted.length > 6) {
+                      formatted =
+                        formatted.slice(0, 6) + "-" + formatted.slice(6, 11);
+                    }
+                    setNewWorkplaceBusinessNumber(formatted);
+                  }}
+                  maxLength={12}
+                />
+              </div>
+
+              <div className="toggle-row">
+                <div className="toggle-item">
+                  <label className="toggle-label">5인 미만 사업장</label>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={newWorkplaceIsSmallBusiness}
+                      onChange={(e) =>
+                        setNewWorkplaceIsSmallBusiness(e.target.checked)
+                      }
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="add-worker-button-container">
+                <button
+                  type="button"
+                  className="cancel-button"
+                  onClick={handleCancelAddWorkplace}
+                >
+                  뒤로 가기
+                </button>
+                <button
+                  type="button"
+                  className="add-button-large"
+                  onClick={handleAddWorkplace}
+                >
+                  추가
+                </button>
+              </div>
+            </div>
+          </div>
         ) : isAddingWorker ? (
           <>
             {/* 근무자 코드 검색 카드 */}
@@ -1154,7 +1097,7 @@ export default function WorkerManagePage() {
                       className="worker-code-input"
                       value={workerCode}
                       onChange={(e) => setWorkerCode(e.target.value)}
-                      onKeyDown={(e) => {
+                      onKeyPress={(e) => {
                         if (e.key === "Enter") {
                           handleSearchWorker();
                         }
@@ -1191,15 +1134,9 @@ export default function WorkerManagePage() {
                         <div className="info-value">{searchedWorker.name}</div>
                       </div>
                       <div className="info-field">
-                        <label className="info-label">전화번호</label>
+                        <label className="info-label">생년월일</label>
                         <div className="info-value">
-                          {searchedWorker.phone || "-"}
-                        </div>
-                      </div>
-                      <div className="info-field">
-                        <label className="info-label">근무자 코드</label>
-                        <div className="info-value">
-                          {searchedWorker.workerCode}
+                          {searchedWorker.birthDate}
                         </div>
                       </div>
                     </div>
@@ -1471,7 +1408,7 @@ export default function WorkerManagePage() {
                   </div>
 
                   {/* 4대보험 및 소득세 */}
-                  <div className="toggle-row">
+                  {/* <div className="toggle-row">
                     <div className="toggle-item">
                       <label className="toggle-label">4대 보험</label>
                       <label className="toggle-switch">
@@ -1504,7 +1441,7 @@ export default function WorkerManagePage() {
                         <span className="toggle-slider"></span>
                       </label>
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="add-worker-button-container">
                     <button
@@ -1614,12 +1551,11 @@ export default function WorkerManagePage() {
                   <label className="info-label">근무 시간</label>
                   <div className="weekly-schedule-inputs">
                     {daysOfWeek.map((day) => {
-                      // currentWorkInfo가 있으면 항상 우선 사용
-                      // 삭제된 요일은 undefined이므로, currentWorkInfo.weeklySchedule이 존재하면 그 안에서 찾고, 없으면 원본 사용
                       const schedule =
-                        currentWorkInfo?.weeklySchedule !== undefined
-                          ? currentWorkInfo.weeklySchedule[day]
-                          : workerData.workInfo.weeklySchedule[day];
+                        isEditingWork && currentWorkInfo
+                          ? currentWorkInfo.weeklySchedule?.[day]
+                          : currentWorkInfo?.weeklySchedule?.[day] ||
+                            workerData.workInfo.weeklySchedule[day];
                       return (
                         <div key={day} className="day-schedule-row">
                           <span className="day-label-small">{day}요일</span>
@@ -1686,8 +1622,7 @@ export default function WorkerManagePage() {
                                     className="remove-schedule-button-x"
                                     onClick={() => {
                                       const updatedSchedule = {
-                                        ...(currentWorkInfo.weeklySchedule ||
-                                          {}),
+                                        ...currentWorkInfo.weeklySchedule,
                                       };
                                       delete updatedSchedule[day];
                                       setEditedWorkInfo({
@@ -1844,7 +1779,7 @@ export default function WorkerManagePage() {
                           // 요일별로 다른 경우
                           // 근무 시간이 있는 요일의 휴게시간만 고려
                           const scheduleToUse =
-                            currentWorkInfo?.weeklySchedule ??
+                            currentWorkInfo?.weeklySchedule ||
                             workerData.workInfo.weeklySchedule;
                           const breakTimeValues = daysOfWeek
                             .filter((day) => scheduleToUse[day])
@@ -1865,7 +1800,7 @@ export default function WorkerManagePage() {
                               {daysOfWeek.map((day) => {
                                 const value = breakTime[day] || 0;
                                 const hasSchedule =
-                                  currentWorkInfo?.weeklySchedule?.[day] ??
+                                  currentWorkInfo?.weeklySchedule?.[day] ||
                                   workerData.workInfo.weeklySchedule[day];
                                 if (!hasSchedule) return null;
                                 return (
@@ -1949,7 +1884,7 @@ export default function WorkerManagePage() {
                   </div>
                 </div>
 
-                <div className="toggle-row">
+                {/* <div className="toggle-row">
                   <div className="toggle-item">
                     <label className="toggle-label">4대 보험</label>
                     <label className="toggle-switch">
@@ -1992,7 +1927,7 @@ export default function WorkerManagePage() {
                       <span className="toggle-slider"></span>
                     </label>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </>
@@ -2003,15 +1938,193 @@ export default function WorkerManagePage() {
 
       {/* 오른쪽 스케줄 그리드 */}
       {!isAddingWorkplace && !isManagingWorkplaces && (
-        <ScheduleGrid
-          weeklyScheduleGrid={weeklyScheduleGrid}
-          hoveredBlockGroup={hoveredBlockGroup}
-          onHoverBlock={setHoveredBlockGroup}
-          currentWorkInfo={currentWorkInfo}
-          workerData={workerData}
-          isAddingWorker={isAddingWorker}
-          newWorkerWorkInfo={newWorkerWorkInfo}
-        />
+        <div className="worker-manage-right-panel">
+          <div className="schedule-grid-container">
+            <div className="schedule-grid-header">
+              <div className="schedule-time-column"></div>
+              {daysOfWeek.map((day) => (
+                <div key={day} className="schedule-day-header">
+                  {day}
+                </div>
+              ))}
+            </div>
+            <div className="schedule-grid-body">
+              <div className="schedule-time-column">
+                {hours.map((hour) => (
+                  <div key={hour} className="schedule-hour-cell">
+                    {hour}
+                  </div>
+                ))}
+              </div>
+              {daysOfWeek.map((day) => {
+                const blocks = weeklyScheduleGrid[day] || [];
+
+                // hover된 블록 찾기
+                const hoveredBlock = blocks.find(
+                  (block) => hoveredBlockGroup === block.groupId
+                );
+
+                // 툴팁 표시 여부 결정
+                // 익일 근무의 두 번째 부분이 hover되면 원래 요일에서만 툴팁 표시
+                let shouldShowTooltip = false;
+                let tooltipBlock = null;
+
+                if (hoveredBlock) {
+                  if (hoveredBlock.isSecondPart && hoveredBlock.originalDay) {
+                    // 익일 근무의 두 번째 부분이 hover된 경우
+                    // 원래 요일(originalDay)에서만 툴팁 표시
+                    if (day === hoveredBlock.originalDay) {
+                      const originalDayBlocks =
+                        weeklyScheduleGrid[hoveredBlock.originalDay] || [];
+                      tooltipBlock = originalDayBlocks.find(
+                        (b) => b.isFirstPart
+                      );
+                      shouldShowTooltip = tooltipBlock !== undefined;
+                    }
+                  } else {
+                    // 첫 번째 부분이거나 일반 근무인 경우, 현재 요일에서 툴팁 표시
+                    tooltipBlock = hoveredBlock;
+                    shouldShowTooltip = true;
+                  }
+                }
+
+                // 시작 시간대 찾기 (툴팁 위치 계산용)
+                const startHour = tooltipBlock ? tooltipBlock.startHour : null;
+                const startMin = tooltipBlock ? tooltipBlock.startMin : 0;
+                const startBlockTop =
+                  startHour !== null
+                    ? startHour * 40 + startHour * 1 + (startMin / 60) * 40
+                    : 0;
+
+                // 익일 근무인 경우 전체 시간 표시
+                let displayStartTime = tooltipBlock?.startTime || "";
+                let displayEndTime = tooltipBlock?.endTime || "";
+                if (
+                  tooltipBlock?.crossesMidnight &&
+                  tooltipBlock?.isFirstPart
+                ) {
+                  // 익일 근무의 첫 번째 부분이면 다음 날의 endTime을 찾아서 표시
+                  const nextDayIndex = (daysOfWeek.indexOf(day) + 1) % 7;
+                  const nextDay = daysOfWeek[nextDayIndex];
+                  const nextDayBlocks = weeklyScheduleGrid[nextDay] || [];
+                  const secondPart = nextDayBlocks.find(
+                    (b) => b.groupId === tooltipBlock.groupId && b.isSecondPart
+                  );
+                  if (secondPart) {
+                    displayEndTime = secondPart.endTime;
+                  }
+                } else if (
+                  tooltipBlock?.isSecondPart &&
+                  tooltipBlock?.originalDay
+                ) {
+                  // 익일 근무의 두 번째 부분이면 원래 요일의 startTime 사용
+                  const originalDayBlocks =
+                    weeklyScheduleGrid[tooltipBlock.originalDay] || [];
+                  const firstPart = originalDayBlocks.find(
+                    (b) => b.isFirstPart
+                  );
+                  if (firstPart) {
+                    displayStartTime = firstPart.startTime;
+                  }
+                }
+
+                return (
+                  <div key={day} className="schedule-day-column">
+                    {/* 툴팁을 컬럼 레벨로 이동 - 익일 근무는 원래 요일에서만 표시 */}
+                    {shouldShowTooltip &&
+                      tooltipBlock &&
+                      startHour !== null && (
+                        <div
+                          className="schedule-block-tooltip"
+                          style={{
+                            top: `${startBlockTop}px`,
+                          }}
+                        >
+                          <div className="tooltip-content">
+                            <div className="tooltip-label">근무 시간</div>
+                            <div className="tooltip-time">
+                              {displayStartTime} - {displayEndTime}
+                              {tooltipBlock?.crossesMidnight && " (익일)"}
+                            </div>
+                            <div className="tooltip-label">휴게 시간</div>
+                            <div className="tooltip-break">
+                              {(() => {
+                                const breakTime =
+                                  currentWorkInfo?.breakTime ||
+                                  workerData?.workInfo?.breakTime ||
+                                  0;
+                                if (typeof breakTime === "object") {
+                                  // 익일 근무인 경우 원래 요일의 휴게 시간 사용
+                                  const dayToUse =
+                                    tooltipBlock?.originalDay || day;
+                                  return breakTime[dayToUse] || 0;
+                                }
+                                return breakTime;
+                              })()}{" "}
+                              분
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                    {hours.map((hour) => {
+                      // 해당 시간대에 여러 블록이 있을 수 있으므로 모두 찾기
+                      const hourBlocks = blocks.filter((block) => {
+                        const blockStartHour = Math.floor(block.start);
+                        const blockEndHour = Math.ceil(block.end);
+                        return hour >= blockStartHour && hour < blockEndHour;
+                      });
+
+                      return (
+                        <div key={hour} className="schedule-cell">
+                          {hourBlocks.map((block, blockIndex) => {
+                            // 블록이 시작하는 시간인지 확인
+                            const isBlockStart = block.startHour === hour;
+                            // 블록이 끝나는 시간인지 확인
+                            const isBlockEnd = block.endHour === hour;
+
+                            // 블록의 시작 위치 계산 (분 단위)
+                            let blockTop = 0;
+                            let blockHeight = 100;
+
+                            if (isBlockStart) {
+                              blockTop = (block.startMin / 60) * 100;
+                            }
+                            if (isBlockEnd) {
+                              blockHeight = (block.endMin / 60) * 100;
+                            } else if (isBlockStart) {
+                              blockHeight = 100 - blockTop;
+                            }
+
+                            const isHovered =
+                              hoveredBlockGroup === block.groupId;
+
+                            return (
+                              <div
+                                key={`${block.groupId}-${blockIndex}`}
+                                className={`schedule-block ${
+                                  isHovered ? "hovered" : ""
+                                }`}
+                                style={{
+                                  top: `${blockTop}%`,
+                                  height: `${blockHeight}%`,
+                                }}
+                                onMouseEnter={() =>
+                                  setHoveredBlockGroup(block.groupId)
+                                }
+                                onMouseLeave={() => setHoveredBlockGroup(null)}
+                              />
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

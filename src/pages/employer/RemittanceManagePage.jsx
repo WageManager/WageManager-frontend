@@ -46,7 +46,9 @@ export default function RemittanceManagePage() {
 
     const fetchWorkers = async () => {
       try {
-        const workers = await contractService.getContractsByWorkplace(selectedWorkplaceId);
+        const workers = await contractService.getContractsByWorkplace(
+          selectedWorkplaceId
+        );
         setWorkersList((prev) => ({
           ...prev,
           [selectedWorkplaceId]: workers,
@@ -108,8 +110,8 @@ export default function RemittanceManagePage() {
   const formatTime = (time) => {
     if (Array.isArray(time)) {
       const [h, m] = time;
-      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    } else if (typeof time === 'string') {
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    } else if (typeof time === "string") {
       return time.substring(0, 5);
     }
     return time;
@@ -117,29 +119,29 @@ export default function RemittanceManagePage() {
 
   // 근무 기록을 표시용 데이터로 변환
   const workerData = useMemo(() => {
-
     if (!currentSelectedWorker || !workRecords.length) {
       return [];
     }
 
     // 선택된 근로자의 근무 기록만 필터링
-    const filtered = workRecords.filter(record => {
+    const filtered = workRecords.filter((record) => {
       return record.workerName === currentSelectedWorker.workerName;
     });
 
     return filtered
-      .map(record => {
+      .map((record) => {
         const date = new Date(record.workDate);
-        const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+        const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
 
         // 근무 시간 계산 (시급 * 근무시간)
         const startTime = formatTime(record.startTime);
         const endTime = formatTime(record.endTime);
-        const [startH, startM] = startTime.split(':').map(Number);
-        const [endH, endM] = endTime.split(':').map(Number);
+        const [startH, startM] = startTime.split(":").map(Number);
+        const [endH, endM] = endTime.split(":").map(Number);
         const startDecimal = startH + startM / 60;
         const endDecimal = endH + endM / 60;
-        const workHours = endDecimal - startDecimal - (record.breakMinutes || 0) / 60;
+        const workHours =
+          endDecimal - startDecimal - (record.breakMinutes || 0) / 60;
         const wage = Math.floor(workHours * (record.hourlyWage || 0));
 
         return {
@@ -366,7 +368,7 @@ export default function RemittanceManagePage() {
                       })}
                     </ul>
                   </div>
-                  <div className="detail-status-row">
+                  {/* <div className="detail-status-row">
                     <span
                       className={`status-pill ${
                         record.socialInsurance ? "on" : "off"
@@ -381,7 +383,7 @@ export default function RemittanceManagePage() {
                     >
                       소득세 {record.withholdingTax ? "적용" : "미적용"}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             ))
@@ -407,5 +409,3 @@ export default function RemittanceManagePage() {
     </div>
   );
 }
-
-

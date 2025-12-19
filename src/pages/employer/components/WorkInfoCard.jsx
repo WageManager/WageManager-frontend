@@ -351,7 +351,7 @@ export default function WorkInfoCard({
           </div>
         </div>
 
-        <div className="toggle-row">
+        {/* <div className="toggle-row">
           <div className="toggle-item">
             <label className="toggle-label">4대 보험</label>
             <label className="toggle-switch">
@@ -392,7 +392,7 @@ export default function WorkInfoCard({
               <span className="toggle-slider"></span>
             </label>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
