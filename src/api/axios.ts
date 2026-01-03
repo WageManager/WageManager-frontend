@@ -17,21 +17,21 @@ export const wageManagerApi = axios.create({
 
 // 요청 인터셉터 (accessToken이 있으면 추가)
 wageManagerApi.interceptors.request.use((config) => {
-  const accessToken = localStorage.getItem('accessToken');
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
 // accessToken 저장
 const saveNewAccessToken = (newAccessToken: string) => {
-  localStorage.setItem('accessToken', newAccessToken);
+  localStorage.setItem('token', newAccessToken);
 };
 
 // 로그아웃 처리
 const handleAuthFailure = () => {
-  localStorage.removeItem('accessToken');
+  localStorage.removeItem('token');
   localStorage.removeItem('userId');
   localStorage.removeItem('name');
   localStorage.removeItem('userType');
