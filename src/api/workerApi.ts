@@ -59,6 +59,7 @@ export const getWorkRecords = async (startDate: string, endDate: string) => {
 };
 
 // 근무 기록 생성 요청
+// TODO: 백엔드 엔드포인트 삭제됨 - 이 함수 제거 필요
 export const createWorkRecord = async (payload: any) => {
   const { data } = await wageManagerApi.post('/api/worker/work-records', payload);
   return data;
