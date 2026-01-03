@@ -34,7 +34,8 @@ export default function EmployerMyPage() {
         Swal.fire("탈퇴 완료", "회원 탈퇴가 완료되었습니다.", "success");
 
         // 로그아웃 처리
-        logout();
+        await logout();
+        localStorage.removeItem('token');
         navigate("/");
       } catch (error) {
         Swal.fire("탈퇴 실패", error.message || "회원 탈퇴 중 오류가 발생했습니다.", "error");
