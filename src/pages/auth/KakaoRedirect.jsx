@@ -97,7 +97,7 @@ export default function KakaoRedirect() {
         navigate('/');
       });
     }
-  }, [navigate, dispatch]);
+  }, [navigate]);
 
   useEffect(() => {
     const code = searchParams.get('code');
