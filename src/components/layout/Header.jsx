@@ -65,7 +65,7 @@ export default function Header() {
       navigate('/');
     } catch (error) {
       if (error.response?.status !== 401 && error.response?.status < 500) {
-        toast.error(error.response.data.message);
+        toast.error(error.response?.data?.message || '로그아웃 처리 중 오류가 발생했습니다.');
       }
       localStorage.removeItem('token');
       setUserInfo(null);
