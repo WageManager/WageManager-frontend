@@ -1,3 +1,4 @@
+import axios from "axios";
 import { refreshAccessToken } from './authApi';
 import { store } from '../app/store';
 import { setAuthToken, clearAuth } from '../features/auth/authSlice';
@@ -15,7 +16,7 @@ const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
   const headers = {
     'Content-Type': 'application/json',
-    'Accept': 'application/json', // JSON 응답을 명시적으로 요청
+    'Accept': 'application/json',
   };
   if (token) {
     headers.Authorization = `Bearer ${token}`;
