@@ -15,3 +15,8 @@ wageManagerApi.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// 토큰 저장
+const saveNewAccessToken = (newAccessToken: string) => {
+  localStorage.setItem('token', newAccessToken);
+};
