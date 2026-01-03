@@ -1,45 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { setAuthToken } from "./features/auth/authSlice";
 import LoginPage from "./pages/auth/LoginPage.jsx";
-import WorkerLayout from "./layouts/WorkerLayout.jsx";
-import EmployerLayout from "./layouts/EmployerLayout.jsx";
-import NotificationLayout from "./layouts/NotificationLayout.jsx";
-import WorkerMonthlyCalendarPage from "./pages/workers/WorkerMonthlyCalendarPage.jsx";
-import WorkerWeeklyCalendarPage from "./pages/workers/WorkerWeeklyCalendarPage.jsx";
-import WorkerRemittancePage from "./pages/workers/WorkerRemittancePage.jsx";
-import WorkerMyPage from "./pages/workers/WorkerMyPage.jsx";
-import DailyCalendarPage from "./pages/employer/DailyCalendarPage.jsx";
-import RemittanceManagePage from "./pages/employer/RemittanceManagePage.jsx";
-import WorkerManagePage from "./pages/employer/WorkerManagePage.jsx";
-import AddWorkplacePage from "./pages/employer/AddWorkplacePage.jsx";
-import EmployerMyPage from "./pages/employer/EmployerMyPage.jsx";
-import EmployerMyPageReceive from "./pages/employer/EmployerMyPageReceive.jsx";
-import NotificationPage from "./pages/NotificationPage.jsx";
-import KakaoRedirect from "./pages/auth/KakaoRedirect.jsx";
-import SignupPage from "./pages/auth/SignupPage.jsx";
 
 function App() {
-  const dispatch = useDispatch();
-
-  // 새로고침 시 localStorage의 정보를 Redux에 복원
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    const name = localStorage.getItem('name');
-    const userType = localStorage.getItem('userType');
-
-    if (token && userId && name && userType) {
-      dispatch(setAuthToken({
-        accessToken: token,
-        userId: Number(userId),
-        name: name,
-        userType: userType,
-      }));
-    }
-  }, [dispatch]);
-
   return (
     <>
       <Routes>

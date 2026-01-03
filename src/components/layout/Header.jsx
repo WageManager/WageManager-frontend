@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { MdNotificationsNone } from "react-icons/md";
 import NotificationDropdown from "./NotificationDropdown.jsx";
 import { logout } from "../../api/authApi";
-import { clearAuth } from "../../features/auth/authSlice";
+import { getUserInfo, clearAuthInfo } from "../../utils/auth";
 import "../../styles/header.css";
 import logoImage from "../../image/logo.png";
 
@@ -14,14 +13,12 @@ export default function Header() {
   const [unreadCount, setUnreadCount] = useState(0);
   const notificationButtonRef = useRef(null);
   const dropdownRef = useRef(null);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Redux에서 사용자 정보 가져오기
-  const authState = useSelector((state) => state.auth);
-  const userName = authState.name;
-  const userType = authState.userType || localStorage.getItem('userType');
-  const accessToken = authState.accessToken || localStorage.getItem('token');
+  // 사용자 정보 가져오기
+  const userInfo = getUserInfo();
+  const userName = userInfo?.name;
+  const userType = userInfo?.userType;
 
   const toggleNotification = () => {
     setIsNotificationOpen((prev) => !prev);
@@ -45,56 +42,28 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
-      // 이미 정의된 accessToken 사용
-      const response = await logout(accessToken);
+      // wageManagerApi를 사용하므로 토큰을 인자로 넘길 필요 없음 (인터셉터 처리)
+      await logout();
 
-      // 200 응답인 경우
-      if (response.success && response.data) {
-        // Redux 상태 초기화
-        dispatch(clearAuth());
+      // 성공 시 처리
+      clearAuthInfo();
 
-        // LocalStorage 초기화
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('name');
-        localStorage.removeItem('userType');
-
-        // 성공 메시지 표시
-        toast.success('로그아웃이 완료되었습니다.');
-
-        // 로그인 페이지로 이동
-        navigate('/');
-      } else {
-        // success가 false인 경우에도 로컬 상태는 초기화
-        dispatch(clearAuth());
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('name');
-        localStorage.removeItem('userType');
-
-        const errorMessage = response.error?.message || '로그아웃 처리 중 오류가 발생했습니다.';
-        const errorCode = response.error?.code || 'UNKNOWN';
-        toast.error(`[${errorCode}] ${errorMessage}`);
-        navigate('/');
-      }
+      toast.success('로그아웃이 완료되었습니다.');
+      navigate('/');
     } catch (error) {
-      // 400, 404, 500 등 에러 응답인 경우
-      // 에러 메시지 표시 (에러 번호 포함)
-      const errorMessage = error.error?.message || error.message || '로그아웃 처리 중 오류가 발생했습니다.';
-      const errorCode = error.error?.code || error.errorCode || 'UNKNOWN';
-      const statusCode = error.status || error.response?.status || '';
-      const statusText = statusCode ? `[${statusCode}]` : '';
+      // 5xx 에러는 axios.ts에서 이미 처리됨
+      // 4xx 에러 또는 기타 에러에 대해서만 처리
 
-      toast.error(`${statusText} [${errorCode}] ${errorMessage}`);
+      // 에러 발생시에도 사용자 경험을 위해 로컬 로그아웃 처리는 진행
+      clearAuthInfo();
 
-      // 에러가 발생해도 로컬 상태는 초기화 (보안상 안전)
-      dispatch(clearAuth());
-      localStorage.removeItem('token');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('name');
-      localStorage.removeItem('userType');
+      // 4xx 에러인 경우 메시지 표시 (5xx는 axios.ts가 처리했으므로 중복 방지)
+      if (error.response && error.response.status < 500) {
+        const errorMessage = error.response?.data?.error?.message || '로그아웃 처리 중 오류가 발생했습니다.';
+        const errorCode = error.response?.data?.error?.code || 'UNKNOWN';
+        toast.error(`[${errorCode}] ${errorMessage}`);
+      }
 
-      // 로그인 페이지로 이동
       navigate('/');
     }
   };

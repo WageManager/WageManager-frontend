@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import kakaoLoginIcon from "../../assets/kakao_login_medium_wide.png";
 import { devLogin } from '../../api/authApi';
-import { setAuthToken } from '../../features/auth/authSlice';
+import { setAuthInfo } from '../../utils/auth';
 import Swal from 'sweetalert2';
 
 const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
@@ -27,7 +26,6 @@ const buildKakaoAuthUrl = () => {
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const handleKakaoLogin = () => {
     const kakaoAuthUrl = buildKakaoAuthUrl();
@@ -43,19 +41,15 @@ export default function LoginPage() {
       const response = await devLogin(userId, userName, userType);
 
       if (response.success && response.data?.accessToken) {
-        // localStorage에 모든 데이터 저장
-        localStorage.setItem('token', response.data.accessToken);
-        localStorage.setItem('userId', String(response.data.userId));
-        localStorage.setItem('name', response.data.name || '');
-        localStorage.setItem('userType', response.data.userType || '');
-
-        // Redux에 모든 데이터 저장
-        dispatch(setAuthToken({
+        const authInfo = {
           accessToken: response.data.accessToken,
-          userId: response.data.userId,
-          name: response.data.name,
-          userType: response.data.userType,
-        }));
+          userId: Number(response.data.userId),
+          name: response.data.name || '',
+          userType: response.data.userType || '',
+        };
+
+        // localStorage에 모든 데이터 저장 (auth utils 사용)
+        setAuthInfo(authInfo);
 
         // userType에 따라 리다이렉트
         if (response.data.userType === 'EMPLOYER') {
@@ -116,8 +110,8 @@ export default function LoginPage() {
           opacity: '0.3',
           transition: 'opacity 0.2s',
         }}
-        onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-        onMouseLeave={(e) => e.currentTarget.style.opacity = '0.3'}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.3'}
         >
           {testUsers.map((user) => (
             <button
