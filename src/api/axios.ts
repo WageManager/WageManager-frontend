@@ -49,7 +49,6 @@ wageManagerApi.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve) => {
@@ -59,21 +58,17 @@ wageManagerApi.interceptors.response.use(
           });
         });
       }
-
       originalRequest._retry = true;
       isRefreshing = true;
-
       try {
         const response = await axios.post(
-          `${import.meta.env.VITE_WAGEMANAGER}/api/auth/refresh`,
+          `${import.meta.env.VITE_WAGEMANAGER}{import.meta.env.VITE_WAGEMANAGER_REFRESH_TOKEN}`,
           {},
           { withCredentials: true }
         );
-
         const newAccessToken = response.data.accessToken;
         saveNewAccessToken(newAccessToken);
         onRefreshed(newAccessToken);
-
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return wageManagerApi(originalRequest);
       } catch (refreshError) {
@@ -83,7 +78,6 @@ wageManagerApi.interceptors.response.use(
         isRefreshing = false;
       }
     }
-
     return Promise.reject(error);
   }
 );
