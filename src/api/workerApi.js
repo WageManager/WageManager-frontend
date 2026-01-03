@@ -1,4 +1,4 @@
-import httpClient from './httpClient';
+import wageManagerApi from './axios';
 
 // 사용자 프로필 조회
 export const getUserProfile = async () => {
