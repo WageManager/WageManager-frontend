@@ -39,7 +39,7 @@ export const getContractDetail = async (contractId: number) => {
 // 정정 요청 목록 조회
 type CorrectionStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
-export const getCorrectionRequests = async (status: CorrectionStatus) => {
+export const getCorrectionRequests = async (status?: CorrectionStatus) => {
   const { data } = await wageManagerApi.get(`/api/worker/correction-requests`, {
     params: { status }
   });
@@ -65,8 +65,8 @@ export const createWorkRecord = async (payload: any) => {
 };
 
 // 근로자 급여 기록 목록 조회
-export const getSalaries = async (salaryId: number) => {
-  const { data } = await wageManagerApi.get(`/api/worker/salaries/${salaryId}`);
+export const getSalaries = async () => {
+  const { data } = await wageManagerApi.get(`/api/worker/salaries`);
   return data;
 };
 

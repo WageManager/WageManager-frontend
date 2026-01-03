@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { kakaoLoginWithToken } from '../../api/authApi';
-import { setAuthToken } from '../../utils/auth';
 import Swal from 'sweetalert2';
 
 const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
@@ -43,8 +42,6 @@ export default function KakaoRedirect() {
 
         // 3-1. 기존 회원인 경우 (200 응답)
         if (loginResponse.success && loginResponse.data.accessToken) {
-          // 토큰 저장
-          setAuthToken(loginResponse.data.accessToken);
 
           // userType에 따라 리다이렉트
           if (loginResponse.data.userType === 'EMPLOYER') {

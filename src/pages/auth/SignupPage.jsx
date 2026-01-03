@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { kakaoRegister } from '../../api/authApi';
-import { setAuthToken } from '../../utils/auth';
 import Swal from 'sweetalert2';
 import { FaUser, FaTimes } from 'react-icons/fa';
 import './SignupPage.css';
@@ -41,10 +40,6 @@ export default function SignupPage() {
     if (!registerResponse.success || !registerResponse.data?.accessToken) {
       throw new Error(registerResponse.error?.message || '회원가입 실패');
     }
-
-    // 토큰 저장
-    setAuthToken(registerResponse.data.accessToken);
-
     Swal.fire({
       icon: 'success',
       title: '회원가입 완료!',

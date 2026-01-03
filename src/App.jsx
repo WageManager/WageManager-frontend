@@ -1,5 +1,31 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "./pages/auth/LoginPage.jsx";
+
+// Auth Components
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
+import KakaoRedirect from "./pages/auth/KakaoRedirect";
+
+// Notification Components
+import NotificationPage from "./pages/NotificationPage";
+
+// Worker Components
+import WorkerMonthlyCalendarPage from "./pages/workers/WorkerMonthlyCalendarPage";
+import WorkerWeeklyCalendarPage from "./pages/workers/WorkerWeeklyCalendarPage";
+import WorkerRemittancePage from "./pages/workers/WorkerRemittancePage";
+import WorkerMyPage from "./pages/workers/WorkerMyPage";
+
+// Employer Components
+import DailyCalendarPage from "./pages/employer/DailyCalendarPage";
+import RemittanceManagePage from "./pages/employer/RemittanceManagePage";
+import WorkerManagePage from "./pages/employer/WorkerManagePage";
+import AddWorkplacePage from "./pages/employer/AddWorkplacePage";
+import EmployerMyPage from "./pages/employer/EmployerMyPage";
+import EmployerMyPageReceive from "./pages/employer/EmployerMyPageReceive";
+
+// Layouts
+import NotificationLayout from "./layouts/NotificationLayout";
+import WorkerLayout from "./layouts/WorkerLayout";
+import EmployerLayout from "./layouts/EmployerLayout";
 
 function App() {
   return (

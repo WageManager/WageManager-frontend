@@ -19,9 +19,13 @@ export const kakaoLoginWithToken = async (kakaoAccessToken: string) => {
 };
 
 // 카카오 액세스 토큰으로 회원가입
-export const kakaoRegister = async ({
-  kakaoAccessToken, userType, phone, kakaoPayLink, profileImageUrl = '',
-}: KakaoRegisterParams) => {
+export const kakaoRegister = async (
+  kakaoAccessToken: string,
+  userType: string,
+  phone: string,
+  kakaoPayLink: string,
+  profileImageUrl: string = ''
+) => {
   const { data } = await axios.post(
     `${import.meta.env.VITE_WAGEMANAGER}/api/auth/kakao/register`,
     { kakaoAccessToken, userType, phone, kakaoPayLink, profileImageUrl }
@@ -30,19 +34,17 @@ export const kakaoRegister = async ({
 };
 
 // 개발자용 임시 로그인
-export const devLogin = async ({
-  userId, name, userType
-}: {
-  userId: number;
-  name: string;
-  userType: string;
-}) => {
+export const devLogin = async (
+  userId: number,
+  name: string,
+  userType: string
+) => {
   const { data } = await axios.post(
     `${import.meta.env.VITE_WAGEMANAGER}/api/auth/dev/login`,
     { userId, name, userType }
   );
   return data;
-}
+};
 
 // 로그아웃
 export const logout = async () => {

@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import kakaoLoginIcon from "../../assets/kakao_login_medium_wide.png";
 import { devLogin } from '../../api/authApi';
-import { setAuthToken } from '../../utils/auth';
 import Swal from 'sweetalert2';
 
 const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
@@ -43,10 +42,7 @@ export default function LoginPage() {
       const response = await devLogin(userId, userName, userType);
 
       if (response.success && response.data?.accessToken) {
-        // 2. 토큰 저장
-        setAuthToken(response.data.accessToken);
-
-        // 3. userType에 따라 리다이렉트 (API 응답 사용)
+        // 2. userType에 따라 리다이렉트 (API 응답 사용)
         if (response.data.userType === 'EMPLOYER') {
           navigate('/employer');
         } else {
