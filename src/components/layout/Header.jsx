@@ -5,7 +5,6 @@ import { MdNotificationsNone } from "react-icons/md";
 import NotificationDropdown from "./NotificationDropdown.jsx";
 import { getUserProfile } from "../../api/workerApi";
 import { logout } from "../../api/authApi";
-
 import "../../styles/header.css";
 import logoImage from "../../image/logo.png";
 
@@ -26,12 +25,12 @@ export default function Header() {
     const token = localStorage.getItem('token');
     if (token) {
       getUserProfile()
-        .then((response) => {
-          setUserInfo(response.data);
+        .then((data) => {
+          setUserInfo(data);
         })
         .catch((error) => {
           if (error.response?.status !== 401 && error.response?.status < 500) {
-            toast.error(error.response.data.message);
+            toast.error(error.response?.data?.message || '오류가 발생했습니다.');
           }
         });
     }

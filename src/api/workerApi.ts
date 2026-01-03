@@ -60,7 +60,7 @@ export const getWorkRecords = async (startDate: string, endDate: string) => {
 
 // 근무 기록 생성 요청
 export const createWorkRecord = async (payload: any) => {
-  const { data } = await wageManagerApi.post('/api/worker/correction-requests', payload);
+  const { data } = await wageManagerApi.post('/api/worker/work-records', payload);
   return data;
 };
 
