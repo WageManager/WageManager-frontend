@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { kakaoRegister } from '../../api/authApi';
-import { setAuthInfo } from '../../utils/auth';
+import { setAuthToken } from '../../utils/auth';
 import Swal from 'sweetalert2';
 import { FaUser, FaTimes } from 'react-icons/fa';
 import './SignupPage.css';
@@ -41,13 +42,8 @@ export default function SignupPage() {
       throw new Error(registerResponse.error?.message || '회원가입 실패');
     }
 
-    // auth utils 사용하여 저장
-    setAuthInfo({
-      accessToken: registerResponse.data.accessToken,
-      userId: Number(registerResponse.data.userId),
-      name: registerResponse.data.name || kakaoName || '',
-      userType: registerResponse.data.userType || '',
-    });
+    // 토큰 저장
+    setAuthToken(registerResponse.data.accessToken);
 
     Swal.fire({
       icon: 'success',

@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { MdNotificationsNone } from "react-icons/md";
 import NotificationDropdown from "./NotificationDropdown.jsx";
+import { getUserProfile } from "../../api/workerApi";
 import { logout } from "../../api/authApi";
-import { getUserInfo, clearAuthInfo } from "../../utils/auth";
+
 import "../../styles/header.css";
 import logoImage from "../../image/logo.png";
 
@@ -15,10 +16,26 @@ export default function Header() {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-  // 사용자 정보 가져오기
-  const userInfo = getUserInfo();
+  // 사용자 정보 State
+  const [userInfo, setUserInfo] = useState(null);
   const userName = userInfo?.name;
   const userType = userInfo?.userType;
+
+  // 컴포넌트 마운트 시 사용자 정보 호출
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      getUserProfile()
+        .then((data) => {
+          setUserInfo(data);
+        })
+        .catch((error) => {
+          if (error.response?.status !== 401 && error.response?.status < 500) {
+            toast.error(error.response.data.message);
+          }
+        });
+    }
+  }, []);
 
   const toggleNotification = () => {
     setIsNotificationOpen((prev) => !prev);
@@ -42,28 +59,17 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
-      // wageManagerApi를 사용하므로 토큰을 인자로 넘길 필요 없음 (인터셉터 처리)
       await logout();
-
-      // 성공 시 처리
-      clearAuthInfo();
-
+      localStorage.removeItem('token');
+      setUserInfo(null);
       toast.success('로그아웃이 완료되었습니다.');
       navigate('/');
     } catch (error) {
-      // 5xx 에러는 axios.ts에서 이미 처리됨
-      // 4xx 에러 또는 기타 에러에 대해서만 처리
-
-      // 에러 발생시에도 사용자 경험을 위해 로컬 로그아웃 처리는 진행
-      clearAuthInfo();
-
-      // 4xx 에러인 경우 메시지 표시 (5xx는 axios.ts가 처리했으므로 중복 방지)
-      if (error.response && error.response.status < 500) {
-        const errorMessage = error.response?.data?.error?.message || '로그아웃 처리 중 오류가 발생했습니다.';
-        const errorCode = error.response?.data?.error?.code || 'UNKNOWN';
-        toast.error(`[${errorCode}] ${errorMessage}`);
+      if (error.response?.status !== 401 && error.response?.status < 500) {
+        toast.error(error.response.data.message);
       }
-
+      localStorage.removeItem('token');
+      setUserInfo(null);
       navigate('/');
     }
   };

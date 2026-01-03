@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { kakaoLoginWithToken } from '../../api/authApi';
-import { setAuthInfo } from '../../utils/auth';
+import { setAuthToken } from '../../utils/auth';
 import Swal from 'sweetalert2';
 
 const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
@@ -11,6 +11,7 @@ const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
 export default function KakaoRedirect() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  // const { login } = useAuth(); // Removed
   const [status, setStatus] = useState('처리 중...');
 
   const handleKakaoAuth = useCallback(async (code) => {
@@ -42,13 +43,8 @@ export default function KakaoRedirect() {
 
         // 3-1. 기존 회원인 경우 (200 응답)
         if (loginResponse.success && loginResponse.data.accessToken) {
-          // auth utils 사용하여 저장
-          setAuthInfo({
-            accessToken: loginResponse.data.accessToken,
-            userId: Number(loginResponse.data.userId),
-            name: loginResponse.data.name || '',
-            userType: loginResponse.data.userType || '',
-          });
+          // 토큰 저장
+          setAuthToken(loginResponse.data.accessToken);
 
           // userType에 따라 리다이렉트
           if (loginResponse.data.userType === 'EMPLOYER') {

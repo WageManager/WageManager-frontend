@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { clearAuthInfo } from "../../utils/auth";
+// import { useAuth } from "../../contexts/AuthContext"; // Removed
+import { clearAuthInfo } from "../../utils/auth"; // Imported
 import { FaCamera, FaUser } from "react-icons/fa";
 import "../../styles/employerMyPage.css";
 import Swal from "sweetalert2";
@@ -15,6 +16,7 @@ export default function EmployerMyPage() {
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  // const { logout } = useAuth(); // Removed
 
   // 초기 데이터 로드 (useEffect...)
 
@@ -40,6 +42,7 @@ export default function EmployerMyPage() {
         // 로그아웃 처리
         clearAuthInfo();
         navigate("/");
+        // await logout(); // Removed
       } catch (error) {
         Swal.fire("탈퇴 실패", error.message || "회원 탈퇴 중 오류가 발생했습니다.", "error");
       }

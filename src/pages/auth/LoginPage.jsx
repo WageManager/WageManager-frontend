@@ -1,13 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import kakaoLoginIcon from "../../assets/kakao_login_medium_wide.png";
 import { devLogin } from '../../api/authApi';
-import { setAuthInfo } from '../../utils/auth';
+import { setAuthToken } from '../../utils/auth';
 import Swal from 'sweetalert2';
 
 const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
 const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
 
 const buildKakaoAuthUrl = () => {
+  // ... (unchanged)
   if (!REST_API_KEY) {
     return null;
   }
@@ -38,20 +39,14 @@ export default function LoginPage() {
 
   const handleDevLogin = async (userId, userName, userType) => {
     try {
+      // 1. 개발자 로그인 API 호출
       const response = await devLogin(userId, userName, userType);
 
       if (response.success && response.data?.accessToken) {
-        const authInfo = {
-          accessToken: response.data.accessToken,
-          userId: Number(response.data.userId),
-          name: response.data.name || '',
-          userType: response.data.userType || '',
-        };
+        // 2. 토큰 저장
+        setAuthToken(response.data.accessToken);
 
-        // localStorage에 모든 데이터 저장 (auth utils 사용)
-        setAuthInfo(authInfo);
-
-        // userType에 따라 리다이렉트
+        // 3. userType에 따라 리다이렉트 (API 응답 사용)
         if (response.data.userType === 'EMPLOYER') {
           navigate('/employer');
         } else {
@@ -61,14 +56,16 @@ export default function LoginPage() {
         throw new Error(response.error?.message || '개발자 로그인 실패');
       }
     } catch (error) {
+      // ... (unchanged)
       Swal.fire({
         icon: 'error',
         title: '로그인 실패',
-        text: error.error?.message || error.message || '개발자 로그인 중 오류가 발생했습니다.',
+        text: error.message,
         confirmButtonColor: '#769fcd',
       });
     }
   };
+
 
   const testUsers = [
     { userId: '1', name: '박지성', userType: 'EMPLOYER' },
