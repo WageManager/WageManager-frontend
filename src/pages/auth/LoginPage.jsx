@@ -42,7 +42,10 @@ export default function LoginPage() {
       const response = await devLogin(userId, userName, userType);
 
       if (response.success && response.data?.accessToken) {
-        // 2. userType에 따라 리다이렉트 (API 응답 사용)
+        // 2. localStorage에 토큰 저장
+        localStorage.setItem('token', response.data.accessToken);
+
+        // 3. userType에 따라 리다이렉트 (API 응답 사용)
         if (response.data.userType === 'EMPLOYER') {
           navigate('/employer');
         } else {

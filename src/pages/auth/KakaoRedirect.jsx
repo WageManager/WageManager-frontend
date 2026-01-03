@@ -42,6 +42,8 @@ export default function KakaoRedirect() {
 
         // 3-1. 기존 회원인 경우 (200 응답)
         if (loginResponse.success && loginResponse.data.accessToken) {
+          // localStorage에 토큰 저장
+          localStorage.setItem('token', loginResponse.data.accessToken);
 
           // userType에 따라 리다이렉트
           if (loginResponse.data.userType === 'EMPLOYER') {
