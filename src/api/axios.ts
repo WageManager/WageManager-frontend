@@ -62,7 +62,7 @@ wageManagerApi.interceptors.response.use(
       isRefreshing = true;
       try {
         const response = await axios.post(
-          `${import.meta.env.VITE_WAGEMANAGER}{import.meta.env.VITE_WAGEMANAGER_REFRESH_TOKEN}`,
+          `${import.meta.env.VITE_WAGEMANAGER}${import.meta.env.VITE_WAGEMANAGER_REFRESH_TOKEN}`,
           {},
           { withCredentials: true }
         );
