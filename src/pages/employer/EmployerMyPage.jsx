@@ -4,6 +4,7 @@ import { FaCamera, FaUser } from "react-icons/fa";
 import "../../styles/employerMyPage.css";
 import Swal from "sweetalert2";
 import userService from "../../services/userService";
+import { logout } from "../../api/authApi";
 
 export default function EmployerMyPage() {
   const [user, setUser] = useState(null);
@@ -33,7 +34,7 @@ export default function EmployerMyPage() {
         Swal.fire("탈퇴 완료", "회원 탈퇴가 완료되었습니다.", "success");
 
         // 로그아웃 처리
-        clearAuthInfo();
+        logout();
         navigate("/");
       } catch (error) {
         Swal.fire("탈퇴 실패", error.message || "회원 탈퇴 중 오류가 발생했습니다.", "error");
