@@ -19,7 +19,7 @@ export const updateUserProfile = async (userData: any) => {
 };
 
 // 계좌 정보 수정 (카카오페이 링크)
-export const updateAccountInfo = async (accountData: string) => {
+export const updateAccountInfo = async (accountData: { kakaoPayLink: string }) => {
   const { data } = await wageManagerApi.put('/api/users/me/account', accountData);
   return data;
 };
