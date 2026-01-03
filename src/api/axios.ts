@@ -20,3 +20,12 @@ wageManagerApi.interceptors.request.use((config) => {
 const saveNewAccessToken = (newAccessToken: string) => {
   localStorage.setItem('token', newAccessToken);
 };
+
+// 로그아웃 처리
+const handleAuthFailure = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('userId');
+  localStorage.removeItem('name');
+  localStorage.removeItem('userType');
+  window.location.href = '/';
+};
