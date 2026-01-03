@@ -1,5 +1,5 @@
 import axios from 'axios';
-import wageManagerApi from './axios.js';
+import wageManagerApi from './axios';
 
 interface KakaoRegisterParams {
   kakaoAccessToken: string;
