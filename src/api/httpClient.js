@@ -1,4 +1,4 @@
-import axios from "axios";
+import wageManagerApi from './axios';
 import { refreshAccessToken } from './authApi';
 import { store } from '../app/store';
 import { setAuthToken, clearAuth } from '../features/auth/authSlice';
