@@ -26,8 +26,8 @@ export default function Header() {
     const token = localStorage.getItem('token');
     if (token) {
       getUserProfile()
-        .then((data) => {
-          setUserInfo(data);
+        .then((response) => {
+          setUserInfo(response.data);
         })
         .catch((error) => {
           if (error.response?.status !== 401 && error.response?.status < 500) {
