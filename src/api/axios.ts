@@ -99,6 +99,10 @@ wageManagerApi.interceptors.response.use(
           { withCredentials: true }
         );
         const newAccessToken = response.data.accessToken;
+        if (!newAccessToken) { // 토큰이 없으면 로그아웃
+          handleAuthFailure();
+          return Promise.reject(error);
+        }
         saveNewAccessToken(newAccessToken);
         onRefreshed(newAccessToken);
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
