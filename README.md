@@ -82,12 +82,11 @@ src/
 ├── index.css                # 전역 스타일
 │
 ├── api/                     # API 통신 모듈
-│   ├── authApi.js           # 인증 관련 API
-│   ├── employerApi.js       # 고용주 API
-│   ├── workerApi.js         # 근로자 API
-│   ├── payrollApi.js        # 급여 API
-│   ├── notificationApi.js   # 알림 API
-│   └── httpClient.js        # HTTP 클라이언트 설정
+│   ├── authApi.ts           # 인증 관련 API
+│   ├── employerApi.ts       # 고용주 API
+│   ├── workerApi.ts         # 근로자 API
+│   ├── notificationApi.ts   # 알림 API
+│   └── axios.ts             # HTTP 클라이언트 설정
 │
 ├── components/              # 재사용 가능한 UI 컴포넌트
 │   ├── common/              # 공통 컴포넌트 (Button, Card, Modal 등)
@@ -110,7 +109,6 @@ src/
 │   ├── auth/                # 인증 상태
 │   ├── employer/            # 고용주 상태
 │   ├── worker/              # 근로자 상태
-│   ├── payroll/             # 급여 상태
 │   └── notification/        # 알림 상태
 │
 ├── services/                # 비즈니스 로직 서비스

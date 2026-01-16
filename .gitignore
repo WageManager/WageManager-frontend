@@ -27,3 +27,7 @@ Thumbs.db
 # ── 기타 캐시 ─────────────────────────
 *.swp
 *.swo
+
+# ── Claude Code ─────────────────────────
+CLAUDE.md
+.claude/
