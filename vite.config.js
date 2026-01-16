@@ -5,6 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173, // 원하는 포트 번호를 입력하세요
+    port: 5173, // 백엔드에서 5173만 허용중
   },
 })
