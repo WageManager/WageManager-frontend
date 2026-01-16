@@ -36,6 +36,7 @@ const localStorageMock = (() => {
 
 // window.location 모킹
 const originalLocation = window.location;
+const originalLocalStorage = window.localStorage;
 
 beforeEach(() => {
   // Mock 어댑터 초기화
@@ -46,12 +47,14 @@ beforeEach(() => {
   Object.defineProperty(window, 'localStorage', {
     value: localStorageMock,
     writable: true,
+    configurable: true,
   });
 
   // window.location 모킹
   Object.defineProperty(window, 'location', {
     value: { href: '' },
     writable: true,
+    configurable: true,
   });
 
   // 각 테스트 전 초기화
@@ -64,6 +67,10 @@ afterEach(() => {
   mockAxios.restore();
   Object.defineProperty(window, 'location', {
     value: originalLocation,
+    writable: true,
+  });
+  Object.defineProperty(window, 'localStorage', {
+    value: originalLocalStorage,
     writable: true,
   });
 });
