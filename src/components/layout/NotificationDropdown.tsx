@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
+import type { FC } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { MdNotificationsNone } from "react-icons/md";
@@ -6,12 +7,53 @@ import { getNotifications, markNotificationAsRead } from "../../api/notification
 import { formatDateTime } from "../../utils/dateUtils";
 import "../../styles/notificationDropdown.css";
 
+interface Notification {
+  id: number;
+  type: string;
+  title: string;
+  createdAt: string;
+  isRead: boolean;
+}
 
-export default function NotificationDropdown({ isOpen, onClose, onUnreadCountChange }) {
+interface FormattedNotification {
+  id: number;
+  type: string;
+  title: string;
+  time: string;
+  icon: typeof MdNotificationsNone;
+  isRead: boolean;
+}
+
+interface NotificationResponse {
+  success: boolean;
+  data?: {
+    notifications: Notification[];
+    unreadCount: number;
+  };
+}
+
+interface NotificationDropdownProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onUnreadCountChange?: (count: number) => void;
+}
+
+interface AxiosError {
+  error?: {
+    message?: string;
+  };
+  message?: string;
+}
+
+const NotificationDropdown: FC<NotificationDropdownProps> = ({
+  isOpen,
+  onClose,
+  onUnreadCountChange,
+}) => {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState<FormattedNotification[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
 
   // 알림 데이터 가져오기
   useEffect(() => {
@@ -21,24 +63,31 @@ export default function NotificationDropdown({ isOpen, onClose, onUnreadCountCha
   }, [isOpen]);
 
   // 읽지 않은 알림들을 읽음 처리 (병렬 실행)
-  const markNotificationsAsRead = async (notificationsList) => {
+  const markNotificationsAsRead = async (
+    notificationsList: Notification[]
+  ): Promise<void> => {
     const unreadNotifications = notificationsList.filter((n) => !n.isRead);
 
     if (unreadNotifications.length === 0) return;
 
     // 모든 읽음 처리 요청을 병렬로 실행
     const results = await Promise.allSettled(
-      unreadNotifications.map((notification) => markNotificationAsRead(notification.id))
+      unreadNotifications.map((notification) =>
+        markNotificationAsRead(notification.id)
+      )
     );
 
     // 성공/실패 개수 계산
     let successCount = 0;
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
+    results.forEach((result) => {
+      if (result.status === "fulfilled") {
         successCount++;
       } else {
         // 실패한 경우 에러 토스트 표시
-        const errorMessage = result.reason?.error?.message || result.reason?.message || "알림 읽음 처리에 실패했습니다.";
+        const errorMessage =
+          (result.reason as AxiosError)?.error?.message ||
+          (result.reason as AxiosError)?.message ||
+          "알림 읽음 처리에 실패했습니다.";
         toast.error(errorMessage);
       }
     });
@@ -51,23 +100,28 @@ export default function NotificationDropdown({ isOpen, onClose, onUnreadCountCha
     }
   };
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const response = await getNotifications({ size: 4, page: 1 });
+      const response = (await getNotifications({
+        size: 4,
+        page: 1,
+      })) as NotificationResponse;
 
       if (response.success && response.data) {
-        const { notifications: apiNotifications, unreadCount: apiUnreadCount } = response.data;
+        const { notifications: apiNotifications, unreadCount: apiUnreadCount } =
+          response.data;
 
         // API 응답을 컴포넌트 형식으로 변환
-        const formattedNotifications = apiNotifications.map((notification) => ({
-          id: notification.id,
-          type: notification.type,
-          title: notification.title,
-          time: formatDateTime(notification.createdAt),
-          icon: MdNotificationsNone,
-          isRead: notification.isRead,
-        }));
+        const formattedNotifications: FormattedNotification[] =
+          apiNotifications.map((notification) => ({
+            id: notification.id,
+            type: notification.type,
+            title: notification.title,
+            time: formatDateTime(notification.createdAt),
+            icon: MdNotificationsNone,
+            isRead: notification.isRead,
+          }));
 
         setNotifications(formattedNotifications);
         setUnreadCount(apiUnreadCount);
@@ -82,7 +136,10 @@ export default function NotificationDropdown({ isOpen, onClose, onUnreadCountCha
       }
     } catch (error) {
       // 에러 메시지 표시
-      const errorMessage = error.error?.message || error.message || "알림을 불러오는데 실패했습니다.";
+      const errorMessage =
+        (error as AxiosError)?.error?.message ||
+        (error as AxiosError)?.message ||
+        "알림을 불러오는데 실패했습니다.";
       toast.error(errorMessage);
       setNotifications([]);
     } finally {
@@ -90,7 +147,7 @@ export default function NotificationDropdown({ isOpen, onClose, onUnreadCountCha
     }
   };
 
-  const handleViewAll = () => {
+  const handleViewAll = (): void => {
     onClose();
     navigate("/notifications");
   };
@@ -126,7 +183,9 @@ export default function NotificationDropdown({ isOpen, onClose, onUnreadCountCha
                     <Icon className="notification-icon" />
                   </div>
                   <div className="notification-content">
-                    <div className="notification-title">{notification.title}</div>
+                    <div className="notification-title">
+                      {notification.title}
+                    </div>
                     <div className="notification-time">{notification.time}</div>
                   </div>
                 </div>
@@ -145,5 +204,6 @@ export default function NotificationDropdown({ isOpen, onClose, onUnreadCountCha
       </div>
     </>
   );
-}
+};
 
+export default NotificationDropdown;
