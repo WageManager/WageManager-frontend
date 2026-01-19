@@ -1,5 +1,24 @@
 import wageManagerApi from './axios';
 
+// ============ 타입 정의 ============
+
+/** 사용자 프로필 수정 요청 */
+interface UpdateUserProfileRequest {
+  name?: string;
+  phone?: string;
+}
+
+/** 근무 기록 정정 요청 생성 payload */
+interface CreateCorrectionRequestPayload {
+  workRecordId: number;
+  reason: string;
+  requestedWorkDate: string;
+  requestedStartTime: string;
+  requestedEndTime: string;
+}
+
+// ============ API 함수 ============
+
 // 사용자 프로필 조회
 export const getUserProfile = async () => {
   const { data } = await wageManagerApi.get('/api/users/me');
@@ -13,7 +32,7 @@ export const getWorkerInfo = async (userId: number) => {
 };
 
 // 사용자 프로필 수정
-export const updateUserProfile = async (userData: any) => {
+export const updateUserProfile = async (userData: UpdateUserProfileRequest) => {
   const { data } = await wageManagerApi.put('/api/users/me', userData);
   return data;
 };
@@ -47,7 +66,7 @@ export const getCorrectionRequests = async (status?: CorrectionStatus) => {
 };
 
 // 근무 기록 정정 요청 생성
-export const createCorrectionRequest = async (payload: any) => {
+export const createCorrectionRequest = async (payload: CreateCorrectionRequestPayload) => {
   const { data } = await wageManagerApi.post('/api/worker/correction-requests', payload);
   return data;
 };
