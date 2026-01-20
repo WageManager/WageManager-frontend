@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import Header from "../components/layout/Header.jsx";
+import Header from "../components/layout/Header.tsx";
 import WorkerNav from "../components/layout/WorkerNav.jsx";
 
 export default function WorkerLayout() {

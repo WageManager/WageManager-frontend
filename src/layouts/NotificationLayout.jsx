@@ -1,4 +1,4 @@
-import Header from "../components/layout/Header.jsx";
+import Header from "../components/layout/Header.tsx";
 
 export default function NotificationLayout({ children }) {
   return (
