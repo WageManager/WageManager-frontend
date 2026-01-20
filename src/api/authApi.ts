@@ -5,8 +5,9 @@ interface KakaoRegisterParams {
   kakaoAccessToken: string;
   userType: string;
   phone: string;
-  kakaoPayLink: string;
-  profileImageUrl?: string;
+  bankName: string;
+  accountNumber: string;
+  profileImageUrl: string;
 }
 
 // 카카오 액세스 토큰으로 로그인
@@ -19,16 +20,10 @@ export const kakaoLoginWithToken = async (kakaoAccessToken: string) => {
 };
 
 // 카카오 액세스 토큰으로 회원가입
-export const kakaoRegister = async (
-  kakaoAccessToken: string,
-  userType: string,
-  phone: string,
-  kakaoPayLink: string,
-  profileImageUrl: string = ''
-) => {
+export const kakaoRegister = async (params: KakaoRegisterParams) => {
   const { data } = await axios.post(
     `${import.meta.env.VITE_WAGEMANAGER}/api/auth/kakao/register`,
-    { kakaoAccessToken, userType, phone, kakaoPayLink, profileImageUrl }
+    params
   );
   return data;
 };

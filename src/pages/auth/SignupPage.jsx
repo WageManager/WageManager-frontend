@@ -14,8 +14,6 @@ export default function SignupPage() {
   const [userType, setUserType] = useState('');
   const [phone, setPhone] = useState('');
   const [name, setName] = useState(''); // 이름 입력 필드 추가
-  const [kakaoPayLink, setKakaoPayLink] = useState('');
-  const [kakaoPayTouched, setKakaoPayTouched] = useState(false);
   const [kakaoId, setKakaoId] = useState(null);
   const [kakaoName, setKakaoName] = useState(null);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
@@ -24,13 +22,14 @@ export default function SignupPage() {
   const handleSignup = async () => {
     try {
       // 카카오 회원가입 API 호출 (회원가입 + 로그인 동시 처리)
-      const registerResponse = await kakaoRegister(
+      const registerResponse = await kakaoRegister({
         kakaoAccessToken,
         userType,
         phone,
-        kakaoPayLink,
-        profileImageUrl || ''
-      );
+        bankName: '',      // 은행명 (현재 미사용)
+        accountNumber: '', // 계좌번호 (현재 미사용)
+        profileImageUrl: ''
+      });
 
       if (!registerResponse.success || !registerResponse.data?.accessToken) {
         throw new Error(registerResponse.error?.message || '회원가입 실패');
@@ -136,36 +135,6 @@ export default function SignupPage() {
             {phone && !isValidPhone && (
               <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '0.25rem' }}>
                 전화번호는 010-1234-5678 형식으로 입력해주세요.
-              </p>
-            )}
-          </div>
-          {/* 카카오페이 링크 입력 */}
-          <div className="form-group">
-            <label className="form-label">
-              카카오페이 링크 <span className="required-star">*</span>
-            </label>
-            <input
-              type="url"
-              value={kakaoPayLink}
-              onChange={(e) => {
-                setKakaoPayLink(e.target.value);
-                setKakaoPayTouched(true);
-              }}
-              onBlur={() => setKakaoPayTouched(true)}
-              placeholder="https://qr.kakaopay.com/..."
-              className="form-input"
-            />
-            <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-              💡 카카오페이 앱에서 "송금" → "QR코드 보기" → 링크 복사
-            </p>
-            {kakaoPayTouched && kakaoPayLink && !isValidKakaoPayLink && (
-              <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-                카카오페이 링크는 https://qr.kakaopay.com/로 시작해야 합니다.
-              </p>
-            )}
-            {kakaoPayTouched && !kakaoPayLink && (
-              <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-                카카오페이 링크를 입력해주세요.
               </p>
             )}
           </div>
