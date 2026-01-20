@@ -19,6 +19,9 @@ export default function SignupPage() {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // 유효성 검사
+  const isValidName = name.trim().length >= 2;
+
   const handlePhoneChange = (e) => {
     const numbersOnly = e.target.value.replace(/[^0-9]/g, '');
     let formatted = numbersOnly;
