@@ -14,10 +14,7 @@ export default function SignupPage() {
   const [userType, setUserType] = useState('');
   const [phone, setPhone] = useState('');
   const [name, setName] = useState(''); // 이름 입력 필드 추가
-  const [kakaoId, setKakaoId] = useState(null);
-  const [kakaoName, setKakaoName] = useState(null);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   // 유효성 검사
   const isValidName = name.trim().length >= 2;
