@@ -21,6 +21,7 @@ export default function SignupPage() {
 
   // 유효성 검사
   const isValidName = name.trim().length >= 2;
+  const isValidPhone = /^010-\d{4}-\d{4}$/.test(phone);
 
   const handlePhoneChange = (e) => {
     const numbersOnly = e.target.value.replace(/[^0-9]/g, '');
