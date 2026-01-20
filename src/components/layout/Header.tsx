@@ -3,7 +3,7 @@ import type { FC } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { MdNotificationsNone } from "react-icons/md";
-import NotificationDropdown from "./NotificationDropdown.tsx";
+import NotificationDropdown from "./NotificationDropdown";
 import { getUserProfile } from "../../api/workerApi";
 import { logout } from "../../api/authApi";
 import "../../styles/header.css";
@@ -11,7 +11,6 @@ import logoImage from "../../image/logo.png";
 
 interface UserInfo {
   name?: string;
-  userName?: string;
   userType?: "EMPLOYER" | "WORKER";
 }
 
@@ -33,7 +32,7 @@ const Header: FC = () => {
 
   // 사용자 정보 State
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const userName = userInfo?.name || userInfo?.userName;
+  const userName = userInfo?.name;
   const userType = userInfo?.userType;
 
   // 컴포넌트 마운트 시 사용자 정보 호출
