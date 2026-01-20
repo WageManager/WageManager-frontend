@@ -19,6 +19,17 @@ export default function SignupPage() {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handlePhoneChange = (e) => {
+    const numbersOnly = e.target.value.replace(/[^0-9]/g, '');
+    let formatted = numbersOnly;
+    if (numbersOnly.length > 3 && numbersOnly.length <= 7) {
+      formatted = `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3)}`;
+    } else if (numbersOnly.length > 7) {
+      formatted = `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3, 7)}-${numbersOnly.slice(7, 11)}`;
+    }
+    setPhone(formatted);
+  };
+
   const handleSignup = async () => {
     try {
       // 카카오 회원가입 API 호출 (회원가입 + 로그인 동시 처리)
@@ -28,7 +39,7 @@ export default function SignupPage() {
         phone,
         bankName: '',      // 은행명 (현재 미사용)
         accountNumber: '', // 계좌번호 (현재 미사용)
-        profileImageUrl: ''
+        profileImageUrl: '' // 이것도 귀찮아서 그냥 미구현(카카오 oauth를 한번 더 해야함)
       });
 
       if (!registerResponse.success || !registerResponse.data?.accessToken) {
