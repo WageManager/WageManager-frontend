@@ -5,6 +5,7 @@ import AddWorkModal from "../../components/worker/MonthlyCalendarPage/AddWorkMod
 import CalendarCard from "../../components/worker/MonthlyCalendarPage/CalendarCard";
 import MonthNav from "../../components/worker/MonthlyCalendarPage/MonthNav";
 import WorkListItem from "../../components/worker/MonthlyCalendarPage/WorkListItem";
+import MemoCard from "../../components/worker/MonthlyCalendarPage/MemoCard";
 import { toast } from "react-toastify";
 import { getContracts, getContractDetail, getWorkRecords, createCorrectionRequest, createWorkRecord, getSalaries } from "../../api/workerApi";
 import { formatTime, pad2 } from "../../utils/dateUtils";
@@ -627,15 +628,11 @@ function WorkerMonthlyCalendarPage() {
             + 근무 추가하기
           </button>
 
-          <div className="memo-card">
-            <div className="memo-header">메모 {selectedDateTitle}</div>
-            <textarea
-              className="memo-textarea"
-              placeholder="텍스트를 입력하세요."
-              value={memoForSelected}
-              onChange={handleMemoChange}
-            />
-          </div>
+          <MemoCard
+            title={selectedDateTitle}
+            value={memoForSelected}
+            onChange={handleMemoChange}
+          />
 
           <div className="summary-row">
             <div className="summary-card">
