@@ -6,6 +6,7 @@ import CalendarCard from "../../components/worker/MonthlyCalendarPage/CalendarCa
 import MonthNav from "../../components/worker/MonthlyCalendarPage/MonthNav";
 import WorkListItem from "../../components/worker/MonthlyCalendarPage/WorkListItem";
 import MemoCard from "../../components/worker/MonthlyCalendarPage/MemoCard";
+import SummaryRow from "../../components/worker/MonthlyCalendarPage/SummaryRow";
 import { toast } from "react-toastify";
 import { getContracts, getContractDetail, getWorkRecords, createCorrectionRequest, createWorkRecord, getSalaries } from "../../api/workerApi";
 import { formatTime, pad2 } from "../../utils/dateUtils";
@@ -634,18 +635,7 @@ function WorkerMonthlyCalendarPage() {
             onChange={handleMemoChange}
           />
 
-          <div className="summary-row">
-            <div className="summary-card">
-              <div className="summary-label">월간 근무시간</div>
-              <div className="summary-value">{totalHoursText}</div>
-            </div>
-            <div className="summary-card">
-              <div className="summary-label">월 급여</div>
-              <div className="summary-value">
-                {totalWage.toLocaleString()}원
-              </div>
-            </div>
-          </div>
+          <SummaryRow totalHoursText={totalHoursText} totalWage={totalWage} />
         </div>
       </div>
       {isAddModalOpen && (
