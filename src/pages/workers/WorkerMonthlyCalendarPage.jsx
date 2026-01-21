@@ -576,7 +576,6 @@ function WorkerMonthlyCalendarPage() {
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
       />
-
       <div className="monthly-calendar-layout">
         <CalendarCard
           currentYear={currentYear}
@@ -589,7 +588,6 @@ function WorkerMonthlyCalendarPage() {
           contractColorMap={contractColorMap}
           todayKey={todayKey}
         />
-
         {/* 우측 패널 */}
         <div className="right-panel">
           <div className="work-list">
@@ -618,7 +616,6 @@ function WorkerMonthlyCalendarPage() {
               ))
             )}
           </div>
-
           <button
             type="button"
             className="add-work-button"
