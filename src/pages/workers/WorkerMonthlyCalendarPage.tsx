@@ -313,22 +313,6 @@ export default function WorkerMonthlyCalendarPage() {
     loadWorkRecords();
   }, [fetchWorkRecords]);
 
-  const handlePrevMonth = () => {
-    setCurrentMonth((prev) => {
-      const date = new Date(currentYear, prev - 1, 1);
-      setCurrentYear(date.getFullYear());
-      return date.getMonth();
-    });
-  };
-
-  const handleNextMonth = () => {
-    setCurrentMonth((prev) => {
-      const date = new Date(currentYear, prev + 1, 1);
-      setCurrentYear(date.getFullYear());
-      return date.getMonth();
-    });
-  };
-
   const calendarCells = useMemo(() => {
     const firstDay = new Date(currentYear, currentMonth, 1);
     const firstDayOfWeek = firstDay.getDay();
@@ -409,8 +393,6 @@ export default function WorkerMonthlyCalendarPage() {
     return `${m}/${d}(${dayLabel})`;
   }, [selectedDateObj]);
 
-  const displayYear = currentYear;
-  const displayMonth = currentMonth + 1;
   const todayKey = makeDateKey(today.getFullYear(), today.getMonth(), today.getDate());
 
   const handleDateClick = (day: number | null) => {
@@ -662,10 +644,22 @@ export default function WorkerMonthlyCalendarPage() {
     <div className="monthly-calendar-page">
       {/* 상단 월 네비게이션 */}
       <MonthNav
-        year={displayYear}
-        month={displayMonth}
-        onPrevMonth={handlePrevMonth}
-        onNextMonth={handleNextMonth}
+        year={currentYear}
+        month={currentMonth + 1}
+        onPrevMonth={() => {
+          setCurrentMonth((prev) => {
+            const date = new Date(currentYear, prev - 1, 1);
+            setCurrentYear(date.getFullYear());
+            return date.getMonth();
+          });
+        }}
+        onNextMonth={() => {
+          setCurrentMonth((prev) => {
+            const date = new Date(currentYear, prev + 1, 1);
+            setCurrentYear(date.getFullYear());
+            return date.getMonth();
+          });
+        }}
       />
       <div className="monthly-calendar-layout">
         <CalendarCard
