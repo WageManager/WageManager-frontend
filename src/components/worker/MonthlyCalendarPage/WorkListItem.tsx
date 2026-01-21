@@ -41,7 +41,6 @@ export default function WorkListItem({
             {getKoreanDayLabel(selectedDate.getDay())}
           </div>
         </div>
-
         <div className="work-list-main">
           <div className="work-list-time">
             {record.start} ~ {record.end}
@@ -50,7 +49,6 @@ export default function WorkListItem({
           <div className="work-list-wage">{record.wage.toLocaleString()}원</div> 
           <div className="work-list-place">{record.place}</div>
         </div>
-
         <button
           className="work-list-edit-btn"
           type="button"
@@ -59,7 +57,6 @@ export default function WorkListItem({
           근무 기록 정정 요청
         </button>
       </div>
-
       {children}
     </>
   );

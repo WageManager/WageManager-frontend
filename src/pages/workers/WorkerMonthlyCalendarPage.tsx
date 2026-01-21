@@ -291,19 +291,22 @@ export default function WorkerMonthlyCalendarPage() {
     return { totalMinutes: minutes, totalWage: wage };
   }, [currentYear, currentMonth, workRecords, salaries]);
 
-  const totalHoursText = useMemo(() => {
+  const totalHoursText = useMemo(() => { // xx시간 xx분으로 변환
     const hours = Math.floor(totalMinutes / 60);
     const mins = totalMinutes % 60;
     return `${hours}시간 ${mins}분`;
   }, [totalMinutes]);
 
-  const selectedDateTitle = useMemo(() => {
-    const date = new Date(currentYear, currentMonth, currentDay);
-    const m = currentMonth + 1;
-    const d = currentDay;
-    const dayLabel = getKoreanDayLabel(date.getDay());
-    return `${m}/${d}(${dayLabel})`;
+  const selectedDateObj = useMemo(() => { 
+    return new Date(currentYear, currentMonth, currentDay);
   }, [currentYear, currentMonth, currentDay]);
+
+  const selectedDateTitle = useMemo(() => {
+    const m = selectedDateObj.getMonth() + 1;
+    const d = selectedDateObj.getDate();
+    const dayLabel = getKoreanDayLabel(selectedDateObj.getDay());
+    return `${m}/${d}(${dayLabel})`;
+  }, [selectedDateObj]);
 
   const todayKey = makeDateKey(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -396,18 +399,8 @@ export default function WorkerMonthlyCalendarPage() {
         workRecordId: workRecordId,
         contractId: form.contractId,
         requestedWorkDate: form.date,
-        requestedStartTime: {
-          hour: Number(form.startHour),
-          minute: Number(form.startMinute),
-          second: 0,
-          nano: 0,
-        },
-        requestedEndTime: {
-          hour: Number(form.endHour),
-          minute: Number(form.endMinute),
-          second: 0,
-          nano: 0,
-        },
+        requestedStartTime: `${pad2(Number(form.startHour))}:${pad2(Number(form.startMinute))}:00`,
+        requestedEndTime: `${pad2(Number(form.endHour))}:${pad2(Number(form.endMinute))}:00`,
         requestedBreakMinutes: form.breakMinutes,
       };
 
@@ -600,7 +593,7 @@ export default function WorkerMonthlyCalendarPage() {
                 <WorkListItem
                   key={record.id}
                   record={record}
-                  selectedDate={new Date(currentYear, currentMonth, currentDay)}
+                  selectedDate={selectedDateObj}
                   onEditClick={() => handleOpenEdit(record, selectedDateKey)}
                 >
                   {editForm && editForm.recordId === record.id && (

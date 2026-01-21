@@ -1,13 +1,3 @@
-// ============ 공통 타입 ============
-
-/** 시간 객체 (백엔드 LocalTime 형식) */
-export interface TimeObject {
-  hour: number;
-  minute: number;
-  second: number;
-  nano: number;
-}
-
 // ============ 계약 관련 타입 ============
 
 export interface Contract {
@@ -45,8 +35,10 @@ export interface CreateCorrectionRequestPayload {
   workRecordId: number;
   contractId: number;
   requestedWorkDate: string;
-  requestedStartTime: TimeObject;
-  requestedEndTime: TimeObject;
+  /** 시작 시간 (HH:mm:ss 형식) */
+  requestedStartTime: string;
+  /** 종료 시간 (HH:mm:ss 형식) */
+  requestedEndTime: string;
   requestedBreakMinutes?: number;
   requestedMemo?: string;
 }
