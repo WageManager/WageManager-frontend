@@ -4,6 +4,7 @@ import WorkEditRequestBox from "../../components/worker/MonthlyCalendarPage/Work
 import AddWorkModal from "../../components/worker/MonthlyCalendarPage/AddWorkModal";
 import CalendarCard from "../../components/worker/MonthlyCalendarPage/CalendarCard";
 import MonthNav from "../../components/worker/MonthlyCalendarPage/MonthNav";
+import WorkListItem from "../../components/worker/MonthlyCalendarPage/WorkListItem";
 import { toast } from "react-toastify";
 import { getContracts, getContractDetail, getWorkRecords, createCorrectionRequest, createWorkRecord, getSalaries } from "../../api/workerApi";
 import { formatTime, pad2 } from "../../utils/dateUtils";
@@ -598,38 +599,12 @@ function WorkerMonthlyCalendarPage() {
               </div>
             ) : (
               recordsForSelectedDay.map((record) => (
-                <React.Fragment key={record.id}>
-                  <div className="work-list-item">
-                    <div className="work-list-date">
-                      <div className="work-list-date-day">
-                        {selectedDateObj.getDate()}
-                      </div>
-                      <div className="work-list-date-weekday">
-                        {getKoreanDayLabel(selectedDateObj.getDay())}
-                      </div>
-                    </div>
-
-                    <div className="work-list-main">
-                      <div className="work-list-time">
-                        {record.start} ~ {record.end}
-                      </div>
-                      <div className="work-list-wage">
-                        {record.wage.toLocaleString()}원
-                      </div>
-                      <div className="work-list-place">{record.place}</div>
-                    </div>
-
-                    <button
-                      className="work-list-edit-btn"
-                      type="button"
-                      onClick={() =>
-                        handleOpenEdit(record, selectedDateKey)
-                      }
-                    >
-                      근무 기록 정정 요청
-                    </button>
-                  </div>
-
+                <WorkListItem
+                  key={record.id}
+                  record={record}
+                  selectedDate={selectedDateObj}
+                  onEditClick={() => handleOpenEdit(record, selectedDateKey)}
+                >
                   {editForm && editForm.recordId === record.id && (
                     <WorkEditRequestBox
                       form={editForm}
@@ -639,7 +614,7 @@ function WorkerMonthlyCalendarPage() {
                       onCancel={handleCloseEdit}
                     />
                   )}
-                </React.Fragment>
+                </WorkListItem>
               ))
             )}
           </div>
