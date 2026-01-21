@@ -13,7 +13,7 @@ export interface ApiResponse<T> {
   };
 }
 
-// 로그인 성공 시 응답 데이터
+// 로그인 성공 시 응답 데이터 - 필요..한가 -> 나중에 다시 보자
 export interface AuthSuccessData {
   accessToken: string;
   userType: UserType;
@@ -24,7 +24,7 @@ export interface KakaoRegisterParams {
   kakaoAccessToken: string;
   userType: UserType;
   phone: string;
-  bankName?: string;
-  accountNumber?: string;
-  profileImageUrl?: string;
+  bankName: string;
+  accountNumber: string;
+  profileImageUrl: string;
 }

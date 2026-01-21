@@ -2,7 +2,6 @@
 
 export const AUTH_CONSTANTS = {
   MIN_NAME_LENGTH: 2,
-  MAX_NAME_LENGTH: 20,
   PHONE_MAX_LENGTH: 13,
   KAKAO: {
     AUTHORIZE_URL: "https://kauth.kakao.com/oauth/authorize",

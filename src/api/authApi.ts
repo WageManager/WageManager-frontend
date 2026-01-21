@@ -1,14 +1,6 @@
 import axios from 'axios';
 import wageManagerApi from './axios';
-
-interface KakaoRegisterParams {
-  kakaoAccessToken: string;
-  userType: string;
-  phone: string;
-  bankName: string;
-  accountNumber: string;
-  profileImageUrl: string;
-}
+import type { KakaoRegisterParams } from '../types/auth';
 
 // 카카오 액세스 토큰으로 로그인
 export const kakaoLoginWithToken = async (kakaoAccessToken: string) => {
