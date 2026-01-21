@@ -4,31 +4,23 @@ import type {
   ContractColorMap,
 } from '../../../types/worker/monthlyCalendar.types';
 import { COLOR_CLASSES, DEFAULT_COLOR_INDEX } from '../../../constants/calendar';
-import { pad2 } from '../../../utils/dateUtils';
+import { makeDateKey } from '../../../utils/dateUtils';
 
 const DAY_NAMES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as const;
 
 interface CalendarCardProps {
   currentYear: number;
-  currentMonth: number; // 0-11 (JavaScript Date 기준)
+  currentMonth: number; // 0-11 (JavaScript Date 기준)                                                                                                                                                                              
   calendarCells: (number | null)[];
-  selectedDateKey: string;
+  selectedDay: number | null;
   workRecords: WorkRecordsByDate;
   onSelectDay: (day: number) => void;
   contractColorMap: ContractColorMap;
   todayKey: string;
 }
 
-// ============ 헬퍼 함수 ============
-
-/**
- * 연, 월, 일을 "YYYY-MM-DD" 형식의 문자열로 변환
- */
-const makeDateKey = (year: number, month: number, day: number): string =>
-  `${year}-${pad2(month + 1)}-${pad2(day)}`;
-
-/**
- * contractId와 상태에 따른 라벨 색상 클래스명 반환
+/**                                                                                                                                                                                                                                 
+ * contractId와 상태에 따른 라벨 색상 클래스명 반환                                                                                                                                                                                 
  */
 const getWorkLabelColor = (
   contractId: number,
@@ -38,13 +30,13 @@ const getWorkLabelColor = (
   return COLOR_CLASSES[colorIndex] || 'brown';
 };
 
-// ============ 컴포넌트 ============
+// ============ 컴포넌트 ============                                                                                                                                                                                               
 
 export default function CalendarCard({
   currentYear,
   currentMonth,
   calendarCells,
-  selectedDateKey,
+  selectedDay,
   workRecords,
   onSelectDay,
   contractColorMap,
@@ -69,12 +61,12 @@ export default function CalendarCard({
           const key = makeDateKey(currentYear, currentMonth, day);
           const dayRecords = workRecords[key] || [];
 
-          // PENDING_APPROVAL 상태가 아닌 근무만 표시
+          // PENDING_APPROVAL 상태가 아닌 근무만 표시                                                                                                                                                                               
           const visibleRecords = dayRecords.filter(
             (record: WorkRecord) => record.status !== 'PENDING_APPROVAL'
           );
 
-          const isSelected = selectedDateKey === key;
+          const isSelected = selectedDay === day;
           const isToday = todayKey === key;
 
           const cellClasses = [
@@ -112,4 +104,4 @@ export default function CalendarCard({
       </div>
     </div>
   );
-}
+}                            

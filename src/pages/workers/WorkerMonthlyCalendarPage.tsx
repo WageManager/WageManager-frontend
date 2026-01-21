@@ -16,7 +16,7 @@ import {
   createWorkRecord,
   getSalaries,
 } from '../../api/workerApi';
-import { formatTime, pad2 } from '../../utils/dateUtils';
+import { formatTime, pad2, makeDateKey } from '../../utils/dateUtils';
 import { useMonthlyCalendar } from '../../hooks/worker/useMonthlyCalendar';
 import type {
   WorkRecord,
@@ -78,9 +78,6 @@ interface CreateWorkRecordPayload {
 }
 
 // ============ 유틸리티 함수 ============
-const makeDateKey = (y: number, m: number, d: number): string =>
-  `${y}-${pad2(m + 1)}-${pad2(d)}`;
-
 /**
  * contractId를 안전하게 id로 변환
  * API 응답이 객체일 수도 있고 숫자일 수도 있어서 정규화 필요
@@ -156,9 +153,10 @@ export default function WorkerMonthlyCalendarPage() {
   const [workRecords, setWorkRecords] = useState<WorkRecordsByDate>({});
   const [memos, setMemos] = useState<MemosByDate>({});
 
-  const [selectedDateKey, setSelectedDateKey] = useState(() =>
-    makeDateKey(today.getFullYear(), today.getMonth(), today.getDate())
-  );
+  const [currentDay, setCurrentDay] = useState(() => today.getDate());
+  const selectedDateKey = useMemo(() =>
+    makeDateKey(currentYear, currentMonth, currentDay)
+  , [currentYear, currentMonth, currentDay]);
 
   const [editForm, setEditForm] = useState<EditForm | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -370,12 +368,8 @@ export default function WorkerMonthlyCalendarPage() {
   }, [totalMinutes]);
 
   const selectedDateObj = useMemo(() => {
-    const parts = selectedDateKey.split('-').map(Number);
-    const y = parts[0] ?? 0;
-    const m = parts[1] ?? 1;
-    const d = parts[2] ?? 1;
-    return new Date(y, m - 1, d);
-  }, [selectedDateKey]);
+    return new Date(currentYear, currentMonth, currentDay);
+  }, [currentYear, currentMonth, currentDay]);
 
   const selectedDateTitle = useMemo(() => {
     const m = selectedDateObj.getMonth() + 1;
@@ -388,8 +382,7 @@ export default function WorkerMonthlyCalendarPage() {
 
   const handleDateClick = (day: number | null) => {
     if (!day) return;
-    const key = makeDateKey(currentYear, currentMonth, day);
-    setSelectedDateKey(key);
+    setCurrentDay(day);
     setEditForm(null);
   };
 
@@ -657,7 +650,7 @@ export default function WorkerMonthlyCalendarPage() {
           currentYear={currentYear}
           currentMonth={currentMonth}
           calendarCells={calendarCells}
-          selectedDateKey={selectedDateKey}
+          selectedDay={currentDay}
           workRecords={workRecords}
           onSelectDay={handleDateClick}
           contractColorMap={contractColorMap}
