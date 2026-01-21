@@ -57,25 +57,19 @@ export default function CalendarCard({
           if (!day) {
             return <div key={`empty-${index}`} className="calendar-cell empty" />;
           }
-
           const key = makeDateKey(currentYear, currentMonth, day);
           const dayRecords = workRecords[key] || [];
-
           // PENDING_APPROVAL 상태가 아닌 근무만 표시                                                                                                                                                                               
           const visibleRecords = dayRecords.filter(
             (record: WorkRecord) => record.status !== 'PENDING_APPROVAL'
           );
-
-          const isSelected = selectedDay === day;
-          const isToday = todayKey === key;
-
+          const isSelected:boolean = selectedDay === day;
+          const isToday:boolean = todayKey === key;
           const cellClasses = [
             'calendar-cell',
             isSelected ? 'selected' : '',
             !isSelected && isToday ? 'today' : '',
-          ]
-            .filter(Boolean)
-            .join(' ');
+          ].filter(Boolean).join(' ');
 
           return (
             <button

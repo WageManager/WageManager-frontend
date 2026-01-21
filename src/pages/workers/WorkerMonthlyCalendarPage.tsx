@@ -14,6 +14,7 @@ import {
   createCorrectionRequest,
   createWorkRecord,
   getSalaries,
+  type CreateCorrectionRequestPayload,
 } from '../../api/workerApi';
 import { formatTime, pad2, makeDateKey } from '../../utils/dateUtils';
 import { useMonthlyCalendar } from '../../hooks/worker/useMonthlyCalendar';
@@ -55,16 +56,6 @@ interface ApiWorkRecord {
   isModified: boolean;
   workplaceName: string;
   memo?: string;
-}
-
-/** 정정 요청 payload */
-interface CorrectionRequestPayload {
-  type: 'UPDATE';
-  workRecordId: number;
-  reason: string;
-  requestedWorkDate: string;
-  requestedStartTime: string;
-  requestedEndTime: string;
 }
 
 /** 근무 추가 payload */
@@ -319,7 +310,7 @@ export default function WorkerMonthlyCalendarPage() {
 
   const todayKey = makeDateKey(today.getFullYear(), today.getMonth(), today.getDate());
 
-  const handleDateClick = useCallback((day: number | null) => {
+  const handleDateClick = useCallback((day: number | null) => { // 달력에서 날짜 선택버튼
     if (!day) return;
     setCurrentDay(day);
     setEditForm(null);
@@ -361,7 +352,6 @@ export default function WorkerMonthlyCalendarPage() {
         breakMinutes: record.breakMinutes ?? 60,
       },
     };
-
     setEditForm(formData);
   };
 
@@ -404,19 +394,27 @@ export default function WorkerMonthlyCalendarPage() {
       }
 
       // 2. 정정 요청 보내기
-      const startTimeStr = `${pad2(Number(form.startHour))}:${pad2(Number(form.startMinute))}:00`;
-      const endTimeStr = `${pad2(Number(form.endHour))}:${pad2(Number(form.endMinute))}:00`;
-
-      const payload: CorrectionRequestPayload = {
+      const payload: CreateCorrectionRequestPayload = {
         type: 'UPDATE',
         workRecordId: workRecordId,
-        reason: '근무 시간 정정 요청',
+        contractId: form.contractId,
         requestedWorkDate: form.date,
-        requestedStartTime: startTimeStr,
-        requestedEndTime: endTimeStr,
+        requestedStartTime: {
+          hour: Number(form.startHour),
+          minute: Number(form.startMinute),
+          second: 0,
+          nano: 0,
+        },
+        requestedEndTime: {
+          hour: Number(form.endHour),
+          minute: Number(form.endMinute),
+          second: 0,
+          nano: 0,
+        },
+        requestedBreakMinutes: form.breakMinutes,
       };
 
-      const response = await createCorrectionRequest(payload as Parameters<typeof createCorrectionRequest>[0]);
+      const response = await createCorrectionRequest(payload);
 
       if (response?.success) {
         toast.success('근무 기록 정정 요청이 접수되었습니다.', {

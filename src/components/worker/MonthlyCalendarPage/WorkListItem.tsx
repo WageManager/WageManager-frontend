@@ -15,7 +15,7 @@ interface WorkListItemProps {
   record: WorkRecord;
   selectedDate: Date;
   onEditClick: () => void;
-  children?: ReactNode; // WorkEditRequestBox를 children으로 받음
+  children?: ReactNode; // WorkEditRequestBox
 }
 
 // ============ 헬퍼 함수 ============
