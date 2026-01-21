@@ -355,10 +355,6 @@ export default function WorkerMonthlyCalendarPage() {
     setEditForm(formData);
   };
 
-  const handleCloseEdit = () => {
-    setEditForm(null);
-  };
-
   const handleConfirmEdit = async (form: EditForm) => {
     try {
       // 1. 해당 workRecordId가 현재 로그인한 근로자의 근무 기록인지 확인
@@ -602,7 +598,10 @@ export default function WorkerMonthlyCalendarPage() {
                       setForm={setEditForm}
                       onConfirm={handleConfirmEdit}
                       onDelete={handleDeleteRequest}
-                      onCancel={handleCloseEdit}
+                      onCancel={() => {
+                        setEditForm(null);
+                      }
+                      }
                     />
                   )}
                 </WorkListItem>
