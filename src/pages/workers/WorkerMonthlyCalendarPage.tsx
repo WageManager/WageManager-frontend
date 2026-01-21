@@ -297,16 +297,13 @@ export default function WorkerMonthlyCalendarPage() {
     return `${hours}시간 ${mins}분`;
   }, [totalMinutes]);
 
-  const selectedDateObj = useMemo(() => {
-    return new Date(currentYear, currentMonth, currentDay);
-  }, [currentYear, currentMonth, currentDay]);
-
   const selectedDateTitle = useMemo(() => {
-    const m = selectedDateObj.getMonth() + 1;
-    const d = selectedDateObj.getDate();
-    const dayLabel = getKoreanDayLabel(selectedDateObj.getDay());
+    const date = new Date(currentYear, currentMonth, currentDay);
+    const m = currentMonth + 1;
+    const d = currentDay;
+    const dayLabel = getKoreanDayLabel(date.getDay());
     return `${m}/${d}(${dayLabel})`;
-  }, [selectedDateObj]);
+  }, [currentYear, currentMonth, currentDay]);
 
   const todayKey = makeDateKey(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -603,7 +600,7 @@ export default function WorkerMonthlyCalendarPage() {
                 <WorkListItem
                   key={record.id}
                   record={record}
-                  selectedDate={selectedDateObj}
+                  selectedDate={new Date(currentYear, currentMonth, currentDay)}
                   onEditClick={() => handleOpenEdit(record, selectedDateKey)}
                 >
                   {editForm && editForm.recordId === record.id && (
