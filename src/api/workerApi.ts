@@ -1,12 +1,22 @@
 import wageManagerApi from './axios';
 import type {
   UpdateUserProfileRequest,
-  CorrectionStatus,
   CreateCorrectionRequestPayload,
-} from './workerApi.type';
+} from './workerApiRequest.type';
+import type { CorrectionStatus } from './workerApiResponse.type';
 
 // 타입 re-export (다른 파일에서 import할 수 있도록)
-export type { CreateCorrectionRequestPayload } from './workerApi.type';
+export type {
+  UpdateUserProfileRequest,
+  CorrectionRequestType,
+  CreateCorrectionRequestPayload,
+} from './workerApiRequest.type';
+
+export type {
+  Contract,
+  CorrectionStatus,
+  WorkRecordsResponse
+} from './workerApiResponse.type';
 
 // ============ API 함수 ============
 

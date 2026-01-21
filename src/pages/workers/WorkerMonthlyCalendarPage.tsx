@@ -15,6 +15,8 @@ import {
   createWorkRecord,
   getSalaries,
   type CreateCorrectionRequestPayload,
+  type Contract,
+  type WorkRecordsResponse
 } from '../../api/workerApi';
 import { formatTime, pad2, makeDateKey } from '../../utils/dateUtils';
 import { useMonthlyCalendar } from '../../hooks/worker/useMonthlyCalendar';
@@ -25,7 +27,7 @@ import type {
   AddWorkForm,
   WorkplaceOption,
 } from '../../types/worker/monthlyCalendar.types';
-import type { Contract } from '../../api/workerApi.type';
+
 
 // ============ 로컬 타입 ============
 
@@ -41,21 +43,6 @@ interface Salary {
 
 interface HourlyWageMap {
   [contractId: number]: number;
-}
-
-/** API 응답에서 오는 근무 기록 (서버 형식) */
-interface ApiWorkRecord {
-  id: number;
-  contractId: number;
-  workDate: string;
-  startTime: string;
-  endTime: string;
-  breakMinutes: number;
-  totalWorkMinutes: number;
-  status: string;
-  isModified: boolean;
-  workplaceName: string;
-  memo?: string;
 }
 
 /** 근무 추가 payload */
@@ -79,7 +66,7 @@ const getKoreanDayLabel = (dayIndex: number): string => {
  * API 응답 데이터를 클라이언트 형식으로 매핑
  */
 const mapWorkRecords = (
-  apiData: ApiWorkRecord[],
+  apiData: WorkRecordsResponse[],
   hourlyWageMap: HourlyWageMap
 ): { recordsByDate: WorkRecordsByDate; memosByDate: MemosByDate } => {
   const recordsByDate: WorkRecordsByDate = {};
@@ -208,7 +195,7 @@ export default function WorkerMonthlyCalendarPage() {
       const endDate = `${currentYear}-${pad2(currentMonth + 1)}-${pad2(lastDay.getDate())}`;
       // 4. 근무 기록 가져오기
       const workRecordsResponse = await getWorkRecords(startDate, endDate);
-      const workRecordsData: ApiWorkRecord[] = workRecordsResponse.data || [];
+      const workRecordsData: WorkRecordsResponse[] = workRecordsResponse.data || [];
       // 5. 데이터 매핑
       const { recordsByDate, memosByDate } = mapWorkRecords(workRecordsData, hourlyWageMap);
       setWorkRecords(recordsByDate);
@@ -373,7 +360,7 @@ export default function WorkerMonthlyCalendarPage() {
 
       // 해당 월의 근무 기록 가져오기
       const workRecordsResponse = await getWorkRecords(startDate, endDate);
-      const workRecordsData: ApiWorkRecord[] = workRecordsResponse.data || [];
+      const workRecordsData: WorkRecordsResponse[] = workRecordsResponse.data || [];
 
       // workRecordId가 현재 근로자의 근무 기록 목록에 있는지 확인
       const workRecordId = Number(form.recordId);
@@ -437,7 +424,7 @@ export default function WorkerMonthlyCalendarPage() {
       });
     }
   };
-  
+
   const handleOpenAddModal = () => {
     const defaultContractId = workplaceOptions[0]?.id ?? null;
     setAddForm({
