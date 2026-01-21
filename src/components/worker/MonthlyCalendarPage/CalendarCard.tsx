@@ -1,19 +1,12 @@
-/**
- * CalendarCard - 월간 캘린더 그리드 컴포넌트
- * 날짜별 근무 기록을 시각적으로 표시
- */
 import type {
   WorkRecord,
   WorkRecordsByDate,
   ContractColorMap,
 } from '../../../types/worker/monthlyCalendar.types';
 import { COLOR_CLASSES, DEFAULT_COLOR_INDEX } from '../../../constants/calendar';
-
-// ============ 로컬 상수 (이 컴포넌트에서만 사용) ============
+import { pad2 } from '../../../utils/dateUtils';
 
 const DAY_NAMES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as const;
-
-// ============ 로컬 타입 (이 컴포넌트에서만 사용) ============
 
 interface CalendarCardProps {
   currentYear: number;
@@ -22,12 +15,17 @@ interface CalendarCardProps {
   selectedDateKey: string;
   workRecords: WorkRecordsByDate;
   onSelectDay: (day: number) => void;
-  makeDateKey: (year: number, month: number, day: number) => string;
   contractColorMap: ContractColorMap;
   todayKey: string;
 }
 
 // ============ 헬퍼 함수 ============
+
+/**
+ * 연, 월, 일을 "YYYY-MM-DD" 형식의 문자열로 변환
+ */
+const makeDateKey = (year: number, month: number, day: number): string =>
+  `${year}-${pad2(month + 1)}-${pad2(day)}`;
 
 /**
  * contractId와 상태에 따른 라벨 색상 클래스명 반환
@@ -49,7 +47,6 @@ export default function CalendarCard({
   selectedDateKey,
   workRecords,
   onSelectDay,
-  makeDateKey,
   contractColorMap,
   todayKey,
 }: CalendarCardProps) {

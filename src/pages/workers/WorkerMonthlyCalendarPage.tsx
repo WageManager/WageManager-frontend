@@ -17,6 +17,7 @@ import {
   getSalaries,
 } from '../../api/workerApi';
 import { formatTime, pad2 } from '../../utils/dateUtils';
+import { useMonthlyCalendar } from '../../hooks/worker/useMonthlyCalendar';
 import type {
   WorkRecord,
   WorkRecordsByDate,
@@ -150,7 +151,6 @@ const mapWorkRecords = (
 
 export default function WorkerMonthlyCalendarPage() {
   const today = new Date();
-
   const [currentYear, setCurrentYear] = useState(() => today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(() => today.getMonth());
   const [workRecords, setWorkRecords] = useState<WorkRecordsByDate>({});
@@ -313,16 +313,7 @@ export default function WorkerMonthlyCalendarPage() {
     loadWorkRecords();
   }, [fetchWorkRecords]);
 
-  const calendarCells = useMemo(() => {
-    const firstDay = new Date(currentYear, currentMonth, 1);
-    const firstDayOfWeek = firstDay.getDay();
-    const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-    const cells: (number | null)[] = [];
-    for (let i = 0; i < firstDayOfWeek; i += 1) cells.push(null);
-    for (let d = 1; d <= lastDate; d += 1) cells.push(d);
-    return cells;
-  }, [currentYear, currentMonth]);
+  const calendarCells = useMonthlyCalendar(currentYear, currentMonth);
 
   const recordsForSelectedDay = (workRecords[selectedDateKey] || []).filter(
     (record) => record.status !== 'PENDING_APPROVAL'
@@ -669,7 +660,6 @@ export default function WorkerMonthlyCalendarPage() {
           selectedDateKey={selectedDateKey}
           workRecords={workRecords}
           onSelectDay={handleDateClick}
-          makeDateKey={makeDateKey}
           contractColorMap={contractColorMap}
           todayKey={todayKey}
         />
