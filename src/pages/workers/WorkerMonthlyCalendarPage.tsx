@@ -319,11 +319,11 @@ export default function WorkerMonthlyCalendarPage() {
 
   const todayKey = makeDateKey(today.getFullYear(), today.getMonth(), today.getDate());
 
-  const handleDateClick = (day: number | null) => {
+  const handleDateClick = useCallback((day: number | null) => {
     if (!day) return;
     setCurrentDay(day);
     setEditForm(null);
-  };
+  }, []);
 
   const handleOpenEdit = (record: WorkRecord, dateKey: string) => {
     const dateParts = dateKey.split('-');
