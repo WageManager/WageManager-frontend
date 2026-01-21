@@ -17,7 +17,6 @@ interface WorkEditRequestBoxProps {
   form: EditForm | null;
   setForm: Dispatch<SetStateAction<EditForm | null>>;
   onConfirm: (form: EditForm) => void;
-  onDelete: (form: EditForm) => void;
   onCancel: () => void;
   variant?: Variant;
 }
@@ -28,7 +27,6 @@ export default function WorkEditRequestBox({
   form,
   setForm,
   onConfirm,
-  onDelete,
   onCancel,
   variant,
 }: WorkEditRequestBoxProps) {

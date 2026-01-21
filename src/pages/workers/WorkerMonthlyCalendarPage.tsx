@@ -437,12 +437,7 @@ export default function WorkerMonthlyCalendarPage() {
       });
     }
   };
-
-  const handleDeleteRequest = () => {
-    // TODO: 백엔드로 삭제 요청 보내기
-    setEditForm(null);
-  };
-
+  
   const handleOpenAddModal = () => {
     const defaultContractId = workplaceOptions[0]?.id ?? null;
     setAddForm({
@@ -597,7 +592,6 @@ export default function WorkerMonthlyCalendarPage() {
                       form={editForm}
                       setForm={setEditForm}
                       onConfirm={handleConfirmEdit}
-                      onDelete={handleDeleteRequest}
                       onCancel={() => {
                         setEditForm(null);
                       }
