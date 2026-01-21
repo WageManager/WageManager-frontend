@@ -25,6 +25,7 @@ import type {
   AddWorkForm,
   WorkplaceOption,
 } from '../../types/worker/monthlyCalendar.types';
+import type { Contract } from '../../api/workerApi.type';
 
 // ============ 로컬 타입 ============
 
@@ -78,17 +79,6 @@ interface CreateWorkRecordPayload {
 }
 
 // ============ 유틸리티 함수 ============
-/**
- * contractId를 안전하게 id로 변환
- * API 응답이 객체일 수도 있고 숫자일 수도 있어서 정규화 필요
- */
-const getId = (contractId: unknown): number | null => {
-  if (contractId === null || contractId === undefined) return null;
-  if (typeof contractId === 'object' && contractId !== null && 'id' in contractId) {
-    return (contractId as { id: number }).id;
-  }
-  return contractId as number;
-};
 
 const getKoreanDayLabel = (dayIndex: number): string => {
   const map = ['일', '월', '화', '수', '목', '금', '토'];
@@ -161,89 +151,94 @@ export default function WorkerMonthlyCalendarPage() {
   const [editForm, setEditForm] = useState<EditForm | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addForm, setAddForm] = useState<AddWorkForm | null>(null);
-    const [workplaceOptions, setWorkplaceOptions] = useState<WorkplaceOption[]>([]);
-    const [contractColorMap, setContractColorMap] = useState<ContractColorMap>({});
-    const [salaries, setSalaries] = useState<Salary[]>([]);
-    const [contracts, setContracts] = useState<any[]>([]);
-  
-    // 1. 초기 데이터 로드 (계약 목록, 근무지 옵션, 색상 맵) - 한 번만 실행
-    useEffect(() => {
-      const fetchInitialData = async () => {
-        try {
-          const contractsResponse = await getContracts();
-          
-          let fetchedContracts: any[] = [];
-          if (Array.isArray(contractsResponse.data)) {
-            fetchedContracts = contractsResponse.data;
-          } else if (contractsResponse.data) {
-            fetchedContracts = [contractsResponse.data];
-          }
-          // 상태 저장
-          setContracts(fetchedContracts);
-          // 근무지 옵션 설정 (상세 조회 없이 목록 데이터 사용)
-          const workplaces = fetchedContracts.map((contract) => {
-            const id = getId(contract);
-            return {
-              id: id || 0,
-              workerName: contract.workerName || '',
-              workplaceName: contract.workplaceName || '', // 목록에 없으면 빈 문자열
-            };
-          });
-          setWorkplaceOptions(workplaces);
-          // contractId -> 색상 인덱스 맵 생성 (순서대로 0, 1, 2, 3, 3, 3...)
-          const colorMap: ContractColorMap = {};
-          workplaces.forEach((workplace, index) => {
-            colorMap[workplace.id] = Math.min(index, 3);
-          });
-          setContractColorMap(colorMap);
-        } catch (error) {
-          console.error('[WorkerMonthlyCalendarPage] 초기 데이터 조회 실패:', error);
-          setContracts([]);
-          setWorkplaceOptions([]);
-          setContractColorMap({});
-        }
-      };
-      fetchInitialData();
-    }, []);
-  
-    // 근무 기록 가져오기 함수
-    const fetchWorkRecords = useCallback(async () => {
-      // 계약 정보가 아직 로드되지 않았으면 중단
-      if (contracts.length === 0) {
-        setWorkRecords({});
-        setMemos({});
-        return;
-      }
-  
+  const [workplaceOptions, setWorkplaceOptions] = useState<WorkplaceOption[]>([]);
+  const [contractColorMap, setContractColorMap] = useState<ContractColorMap>({});
+  const [salaries, setSalaries] = useState<Salary[]>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
+
+  // 1. 초기 데이터 로드 (계약 목록, 근무지 옵션, 색상 맵) - 한 번만 실행
+  useEffect(() => {
+    const fetchInitialData = async () => {
       try {
-        // 각 계약의 시급 정보 가져오기 (이미 로드된 contracts 상태 사용)
-        const hourlyWageMap: HourlyWageMap = {};
-        contracts.forEach((contract) => {
-          const id = getId(contract);
-          if (id && contract.hourlyWage !== undefined) {
-            hourlyWageMap[id] = contract.hourlyWage;
-          }
+        const contractsResponse = await getContracts();
+        
+        let fetchedContracts: Contract[] = [];
+        if (Array.isArray(contractsResponse.data)) {
+          fetchedContracts = contractsResponse.data;
+        } else if (contractsResponse.data) {
+          // 단일 객체인 경우 배열로 래핑
+          fetchedContracts = [contractsResponse.data] as unknown as Contract[];
+        }
+
+        // 상태 저장
+        setContracts(fetchedContracts);
+
+        // 근무지 옵션 설정 (상세 조회 없이 목록 데이터 사용)
+        const workplaces = fetchedContracts.map((contract) => {
+          return {
+            id: contract.id,
+            workerName: contract.workerName || '',
+            workplaceName: contract.workplaceName || '', // 목록에 없으면 빈 문자열
+          };
         });
-  
-        // 3. 현재 월의 시작일과 종료일 계산
-        const lastDay = new Date(currentYear, currentMonth + 1, 0);
-        const startDate = `${currentYear}-${pad2(currentMonth + 1)}-${pad2(1)}`;
-        const endDate = `${currentYear}-${pad2(currentMonth + 1)}-${pad2(lastDay.getDate())}`;
-  
-        // 4. 근무 기록 가져오기
-        const workRecordsResponse = await getWorkRecords(startDate, endDate);
-        const workRecordsData: ApiWorkRecord[] = workRecordsResponse.data || [];
-  
-        // 5. 데이터 매핑
-        const { recordsByDate, memosByDate } = mapWorkRecords(workRecordsData, hourlyWageMap);
-        setWorkRecords(recordsByDate);
-        setMemos((prev) => ({ ...prev, ...memosByDate }));
+        setWorkplaceOptions(workplaces);
+
+        // contractId -> 색상 인덱스 맵 생성 (순서대로 0, 1, 2, 3, 3, 3...)
+        const colorMap: ContractColorMap = {};
+        workplaces.forEach((workplace, index) => {
+          colorMap[workplace.id] = Math.min(index, 3);
+        });
+        setContractColorMap(colorMap);
+
       } catch (error) {
-        console.error('[WorkerMonthlyCalendarPage] 근무 기록 조회 실패:', error);
-        setWorkRecords({});
-        setMemos({});
+        console.error('[WorkerMonthlyCalendarPage] 초기 데이터 조회 실패:', error);
+        setContracts([]);
+        setWorkplaceOptions([]);
+        setContractColorMap({});
       }
-    }, [currentYear, currentMonth, contracts]);
+    };
+
+    fetchInitialData();
+  }, []);
+
+  // 근무 기록 가져오기 함수
+  const fetchWorkRecords = useCallback(async () => {
+    // 계약 정보가 아직 로드되지 않았으면 중단
+    if (contracts.length === 0) {
+      setWorkRecords({});
+      setMemos({});
+      return;
+    }
+
+    try {
+      // 각 계약의 시급 정보 가져오기 (이미 로드된 contracts 상태 사용)
+      const hourlyWageMap: HourlyWageMap = {};
+      contracts.forEach((contract) => {
+        if (contract.hourlyWage !== undefined) {
+          hourlyWageMap[contract.id] = contract.hourlyWage;
+        }
+      });
+
+      // 3. 현재 월의 시작일과 종료일 계산
+      const lastDay = new Date(currentYear, currentMonth + 1, 0);
+      const startDate = `${currentYear}-${pad2(currentMonth + 1)}-${pad2(1)}`;
+      const endDate = `${currentYear}-${pad2(currentMonth + 1)}-${pad2(lastDay.getDate())}`;
+
+      // 4. 근무 기록 가져오기
+      const workRecordsResponse = await getWorkRecords(startDate, endDate);
+      const workRecordsData: ApiWorkRecord[] = workRecordsResponse.data || [];
+
+      // 5. 데이터 매핑
+      const { recordsByDate, memosByDate } = mapWorkRecords(workRecordsData, hourlyWageMap);
+      setWorkRecords(recordsByDate);
+      setMemos((prev) => ({ ...prev, ...memosByDate }));
+    } catch (error) {
+      console.error('[WorkerMonthlyCalendarPage] 근무 기록 조회 실패:', error);
+      setWorkRecords({});
+      setMemos({});
+    }
+  }, [currentYear, currentMonth, contracts]);
+
   
     // 급여 목록 가져오기
     useEffect(() => {
