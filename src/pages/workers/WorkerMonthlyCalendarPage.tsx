@@ -1,36 +1,114 @@
-import React, { useMemo, useState, useEffect, useCallback } from "react";
-import "./WorkerMonthlyCalendarPage.css";
-import WorkEditRequestBox from "../../components/worker/MonthlyCalendarPage/WorkEditRequestBox";
-import AddWorkModal from "../../components/worker/MonthlyCalendarPage/AddWorkModal";
-import CalendarCard from "../../components/worker/MonthlyCalendarPage/CalendarCard";
-import MonthNav from "../../components/worker/MonthlyCalendarPage/MonthNav";
-import WorkListItem from "../../components/worker/MonthlyCalendarPage/WorkListItem";
-import MemoCard from "../../components/worker/MonthlyCalendarPage/MemoCard";
-import SummaryRow from "../../components/worker/MonthlyCalendarPage/SummaryRow";
-import { toast } from "react-toastify";
-import { getContracts, getContractDetail, getWorkRecords, createCorrectionRequest, createWorkRecord, getSalaries } from "../../api/workerApi";
-import { formatTime, pad2 } from "../../utils/dateUtils";
+/**
+ * WorkerMonthlyCalendarPage - 근로자 월간 캘린더 페이지
+ */
+import { useMemo, useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-toastify';
+import './WorkerMonthlyCalendarPage.css';
+import WorkEditRequestBox from '../../components/worker/MonthlyCalendarPage/WorkEditRequestBox';
+import AddWorkModal from '../../components/worker/MonthlyCalendarPage/AddWorkModal';
+import CalendarCard from '../../components/worker/MonthlyCalendarPage/CalendarCard';
+import MonthNav from '../../components/worker/MonthlyCalendarPage/MonthNav';
+import WorkListItem from '../../components/worker/MonthlyCalendarPage/WorkListItem';
+import MemoCard from '../../components/worker/MonthlyCalendarPage/MemoCard';
+import SummaryRow from '../../components/worker/MonthlyCalendarPage/SummaryRow';
+import {
+  getContracts,
+  getContractDetail,
+  getWorkRecords,
+  createCorrectionRequest,
+  createWorkRecord,
+  getSalaries,
+} from '../../api/workerApi';
+import { formatTime, pad2 } from '../../utils/dateUtils';
+import type {
+  WorkRecord,
+  WorkRecordsByDate,
+  EditForm,
+  AddWorkForm,
+  WorkplaceOption,
+} from '../../types/worker/monthlyCalendar.types';
 
-const makeDateKey = (y, m, d) => `${y}-${pad2(m + 1)}-${pad2(d)}`;
+// ============ 로컬 타입 ============
 
-// contractId를 안전하게 id로 변환하는 함수
-const getId = (contractId) => {
+type MemosByDate = Record<string, string>;
+
+type ContractColorMap = Record<number, number>;
+
+interface Salary {
+  year: number;
+  month: number;
+  netPay: number;
+}
+
+interface HourlyWageMap {
+  [contractId: number]: number;
+}
+
+/** API 응답에서 오는 근무 기록 (서버 형식) */
+interface ApiWorkRecord {
+  id: number;
+  contractId: number;
+  workDate: string;
+  startTime: string;
+  endTime: string;
+  breakMinutes: number;
+  totalWorkMinutes: number;
+  status: string;
+  isModified: boolean;
+  workplaceName: string;
+  memo?: string;
+}
+
+/** 정정 요청 payload */
+interface CorrectionRequestPayload {
+  type: 'UPDATE';
+  workRecordId: number;
+  requestedWorkDate: string;
+  requestedStartTime: string;
+  requestedEndTime: string;
+}
+
+/** 근무 추가 payload */
+interface CreateWorkRecordPayload {
+  contractId: number;
+  workDate: string;
+  startTime: string;
+  endTime: string;
+  breakMinutes: number;
+  memo: string;
+}
+
+// ============ 유틸리티 함수 ============
+
+const makeDateKey = (y: number, m: number, d: number): string =>
+  `${y}-${pad2(m + 1)}-${pad2(d)}`;
+
+/**
+ * contractId를 안전하게 id로 변환
+ * API 응답이 객체일 수도 있고 숫자일 수도 있어서 정규화 필요
+ */
+const getId = (contractId: unknown): number | null => {
   if (contractId === null || contractId === undefined) return null;
-  if (typeof contractId === 'object' && 'id' in contractId) {
-    return contractId.id;
+  if (typeof contractId === 'object' && contractId !== null && 'id' in contractId) {
+    return (contractId as { id: number }).id;
   }
-  return contractId;
+  return contractId as number;
 };
 
-const getKoreanDayLabel = (dayIndex) => { 
-  const map = ["일", "월", "화", "수", "목", "금", "토"];
-  return map[dayIndex] || "";
+const getKoreanDayLabel = (dayIndex: number): string => {
+  const map = ['일', '월', '화', '수', '목', '금', '토'];
+  return map[dayIndex] || '';
 };
 
-// API 응답 데이터를 더미데이터 형식으로 매핑
-const mapWorkRecords = (apiData, hourlyWageMap) => {
-  const recordsByDate = {};
-  const memosByDate = {};
+/**
+ * API 응답 데이터를 클라이언트 형식으로 매핑
+ */
+const mapWorkRecords = (
+  apiData: ApiWorkRecord[],
+  hourlyWageMap: HourlyWageMap
+): { recordsByDate: WorkRecordsByDate; memosByDate: MemosByDate } => {
+  const recordsByDate: WorkRecordsByDate = {};
+  const memosByDate: MemosByDate = {};
 
   if (!apiData || !Array.isArray(apiData)) {
     return { recordsByDate, memosByDate };
@@ -44,16 +122,16 @@ const mapWorkRecords = (apiData, hourlyWageMap) => {
     // totalWorkMinutes를 사용하여 급여 계산 (분 단위를 시간으로 변환)
     const wage = Math.round((hourlyWage * record.totalWorkMinutes) / 60);
 
-    const mappedRecord = {
+    const mappedRecord: WorkRecord = {
       id: record.id,
       contractId: record.contractId,
-      start: formatTime(record.startTime) || "00:00",
-      end: formatTime(record.endTime) || "00:00",
+      start: formatTime(record.startTime) || '00:00',
+      end: formatTime(record.endTime) || '00:00',
       wage: wage,
       place: record.workplaceName,
       breakMinutes: record.breakMinutes || 0,
       totalWorkMinutes: record.totalWorkMinutes || 0,
-      status: record.status,
+      status: record.status as WorkRecord['status'],
       isModified: record.isModified,
     };
 
@@ -64,47 +142,48 @@ const mapWorkRecords = (apiData, hourlyWageMap) => {
 
     // memo 저장 (빈 문자열이어도 저장)
     if (record.memo !== undefined) {
-      memosByDate[dateKey] = record.memo || "";
+      memosByDate[dateKey] = record.memo || '';
     }
   });
 
   return { recordsByDate, memosByDate };
 };
 
-function WorkerMonthlyCalendarPage() {
+// ============ 컴포넌트 ============
+
+export default function WorkerMonthlyCalendarPage() {
   const today = new Date();
 
   const [currentYear, setCurrentYear] = useState(() => today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(() => today.getMonth());
-  const [workRecords, setWorkRecords] = useState({});
-  const [memos, setMemos] = useState({});
+  const [workRecords, setWorkRecords] = useState<WorkRecordsByDate>({});
+  const [memos, setMemos] = useState<MemosByDate>({});
 
   const [selectedDateKey, setSelectedDateKey] = useState(() =>
     makeDateKey(today.getFullYear(), today.getMonth(), today.getDate())
   );
 
-  const [editForm, setEditForm] = useState(null); // 수정 요청 폼 상태
+  const [editForm, setEditForm] = useState<EditForm | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [addForm, setAddForm] = useState(null);
-  const [workplaceOptions, setWorkplaceOptions] = useState([]); // 근무지 목록
-  const [contractColorMap, setContractColorMap] = useState({}); // contractId -> 색상 인덱스 맵
-  const [salaries, setSalaries] = useState([]); // 급여 목록
+  const [addForm, setAddForm] = useState<AddWorkForm | null>(null);
+  const [workplaceOptions, setWorkplaceOptions] = useState<WorkplaceOption[]>([]);
+  const [contractColorMap, setContractColorMap] = useState<ContractColorMap>({});
+  const [salaries, setSalaries] = useState<Salary[]>([]);
 
   // 근무 기록 가져오기 함수 (재사용 가능하도록 분리)
   const fetchWorkRecords = useCallback(async () => {
     try {
       // 1. 계약 목록 가져오기
       const contractsResponse = await getContracts();
-      
+
       // 응답이 배열인지 확인
-      let contractIds = [];
+      let contractIds: unknown[] = [];
       if (Array.isArray(contractsResponse.data)) {
         contractIds = contractsResponse.data;
       } else if (contractsResponse.data) {
-        // 배열이 아닌 경우, 객체의 값들을 배열로 변환하거나 직접 사용
         contractIds = [contractsResponse.data];
       }
-      
+
       if (contractIds.length === 0) {
         setWorkRecords({});
         setMemos({});
@@ -112,7 +191,7 @@ function WorkerMonthlyCalendarPage() {
       }
 
       // 2. 각 계약의 시급 정보 가져오기
-      const hourlyWageMap = {};
+      const hourlyWageMap: HourlyWageMap = {};
       await Promise.all(
         contractIds.map(async (contractId) => {
           try {
@@ -140,14 +219,14 @@ function WorkerMonthlyCalendarPage() {
 
       // 4. 근무 기록 가져오기
       const workRecordsResponse = await getWorkRecords(startDate, endDate);
-      const workRecordsData = workRecordsResponse.data || [];
+      const workRecordsData: ApiWorkRecord[] = workRecordsResponse.data || [];
 
       // 5. 데이터 매핑
       const { recordsByDate, memosByDate } = mapWorkRecords(workRecordsData, hourlyWageMap);
       setWorkRecords(recordsByDate);
       setMemos((prev) => ({ ...prev, ...memosByDate }));
     } catch (error) {
-      console.error("[WorkerMonthlyCalendarPage] 근무 기록 조회 실패:", error);
+      console.error('[WorkerMonthlyCalendarPage] 근무 기록 조회 실패:', error);
       setWorkRecords({});
       setMemos({});
     }
@@ -159,54 +238,59 @@ function WorkerMonthlyCalendarPage() {
       try {
         // 1. 계약 목록 가져오기
         const contractsResponse = await getContracts();
-        
+
         // 응답이 배열인지 확인
-        let contracts = [];
+        let contracts: unknown[] = [];
         if (Array.isArray(contractsResponse.data)) {
           contracts = contractsResponse.data;
         } else if (contractsResponse.data) {
           contracts = [contractsResponse.data];
         }
-        
+
         // 2. 각 계약의 상세 정보를 가져와서 workplaceName 포함
         const workplaces = await Promise.all(
           contracts.map(async (contract) => {
-            const contractId = typeof contract === 'object' ? contract.id : contract;
-            
+            const contractId =
+              typeof contract === 'object' && contract !== null && 'id' in contract
+                ? (contract as { id: number }).id
+                : (contract as number);
+
             try {
               const contractDetail = await getContractDetail(contractId);
+              const contractObj = contract as { workerName?: string };
               return {
                 id: contractId,
-                workerName: contractDetail.data?.workerName || contract.workerName || '',
+                workerName: contractDetail.data?.workerName || contractObj.workerName || '',
                 workplaceName: contractDetail.data?.workplaceName || '',
               };
             } catch (error) {
               console.error(`[WorkerMonthlyCalendarPage] 계약 ${contractId} 상세 정보 조회 실패:`, error);
+              const contractObj = contract as { workerName?: string };
               return {
                 id: contractId,
-                workerName: contract.workerName || '',
+                workerName: contractObj.workerName || '',
                 workplaceName: '',
               };
             }
           })
         );
-        
+
         setWorkplaceOptions(workplaces);
-        
+
         // contractId -> 색상 인덱스 맵 생성 (순서대로 0, 1, 2, 3, 3, 3...)
-        const colorMap = {};
+        const colorMap: ContractColorMap = {};
         workplaces.forEach((workplace, index) => {
           // 0: red, 1: yellow, 2: mint, 3: brown (4번째부터는 모두 brown)
           colorMap[workplace.id] = Math.min(index, 3);
         });
         setContractColorMap(colorMap);
       } catch (error) {
-        console.error("[WorkerMonthlyCalendarPage] 근무지 목록 조회 실패:", error);
+        console.error('[WorkerMonthlyCalendarPage] 근무지 목록 조회 실패:', error);
         setWorkplaceOptions([]);
         setContractColorMap({});
       }
     };
-    
+
     fetchWorkplaces();
   }, []);
 
@@ -232,7 +316,7 @@ function WorkerMonthlyCalendarPage() {
     loadWorkRecords();
   }, [fetchWorkRecords]);
 
-  const handlePrevMonth = () => { // 이전 달로 이동
+  const handlePrevMonth = () => {
     setCurrentMonth((prev) => {
       const date = new Date(currentYear, prev - 1, 1);
       setCurrentYear(date.getFullYear());
@@ -240,7 +324,7 @@ function WorkerMonthlyCalendarPage() {
     });
   };
 
-  const handleNextMonth = () => { // 다음 달로 이동
+  const handleNextMonth = () => {
     setCurrentMonth((prev) => {
       const date = new Date(currentYear, prev + 1, 1);
       setCurrentYear(date.getFullYear());
@@ -248,22 +332,22 @@ function WorkerMonthlyCalendarPage() {
     });
   };
 
-  const calendarCells = useMemo(() => { // 달력 셀 계산
+  const calendarCells = useMemo(() => {
     const firstDay = new Date(currentYear, currentMonth, 1);
     const firstDayOfWeek = firstDay.getDay();
     const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-    const cells = [];
+    const cells: (number | null)[] = [];
     for (let i = 0; i < firstDayOfWeek; i += 1) cells.push(null);
     for (let d = 1; d <= lastDate; d += 1) cells.push(d);
     return cells;
   }, [currentYear, currentMonth]);
 
   const recordsForSelectedDay = (workRecords[selectedDateKey] || []).filter(
-    (record) => record.status !== "PENDING_APPROVAL"
+    (record) => record.status !== 'PENDING_APPROVAL'
   );
 
-  const handleMemoChange = (e) => { 
+  const handleMemoChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setMemos((prev) => ({
       ...prev,
@@ -271,19 +355,19 @@ function WorkerMonthlyCalendarPage() {
     }));
   };
 
-  const memoForSelected = memos[selectedDateKey] || "";
+  const memoForSelected = memos[selectedDateKey] || '';
 
-  const { totalMinutes, totalWage } = useMemo(() => { // 월간 총 근무 시간 및 급여 계산
+  const { totalMinutes, totalWage } = useMemo(() => {
     let minutes = 0;
     let calculatedWage = 0;
 
     // 월간 근무시간 및 임시 급여 계산: 근무 기록에서 집계
     Object.entries(workRecords).forEach(([key, list]) => {
-      const [y, m] = key.split("-").map(Number);
+      const [y, m] = key.split('-').map(Number);
       if (y === currentYear && m === currentMonth + 1) {
         list.forEach((record) => {
           // PENDING_APPROVAL, DELETED 상태인 근무 기록은 계산에서 제외
-          if (record.status === "PENDING_APPROVAL" || record.status === "DELETED") {
+          if (record.status === 'PENDING_APPROVAL' || record.status === 'DELETED') {
             return;
           }
           // totalWorkMinutes 사용 (API에서 제공)
@@ -307,18 +391,18 @@ function WorkerMonthlyCalendarPage() {
     return { totalMinutes: minutes, totalWage: wage };
   }, [currentYear, currentMonth, workRecords, salaries]);
 
-  const totalHoursText = useMemo(() => { // 총 근무 시간 텍스트 변환
+  const totalHoursText = useMemo(() => {
     const hours = Math.floor(totalMinutes / 60);
     const mins = totalMinutes % 60;
     return `${hours}시간 ${mins}분`;
   }, [totalMinutes]);
 
-  const selectedDateObj = useMemo(() => { // 선택된 날짜 객체 생성
-    const [y, m, d] = selectedDateKey.split("-").map(Number);
+  const selectedDateObj = useMemo(() => {
+    const [y, m, d] = selectedDateKey.split('-').map(Number);
     return new Date(y, m - 1, d);
   }, [selectedDateKey]);
 
-  const selectedDateTitle = useMemo(() => { // 선택된 날짜 제목 생성
+  const selectedDateTitle = useMemo(() => {
     const m = selectedDateObj.getMonth() + 1;
     const d = selectedDateObj.getDate();
     const dayLabel = getKoreanDayLabel(selectedDateObj.getDay());
@@ -327,25 +411,21 @@ function WorkerMonthlyCalendarPage() {
 
   const displayYear = currentYear;
   const displayMonth = currentMonth + 1;
-  const todayKey = makeDateKey(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate()
-  );
+  const todayKey = makeDateKey(today.getFullYear(), today.getMonth(), today.getDate());
 
-  const handleDateClick = (day) => {
+  const handleDateClick = (day: number | null) => {
     if (!day) return;
     const key = makeDateKey(currentYear, currentMonth, day);
     setSelectedDateKey(key);
     setEditForm(null);
   };
 
-  const handleOpenEdit = (record, dateKey) => { // 수정 요청 폼 열기
-    const [year, month, day] = dateKey.split("-");
-    const [sh, sm] = record.start.split(":");
-    const [eh, em] = record.end.split(":");
+  const handleOpenEdit = (record: WorkRecord, dateKey: string) => {
+    const [year, month, day] = dateKey.split('-');
+    const [sh, sm] = record.start.split(':');
+    const [eh, em] = record.end.split(':');
 
-    const formData = {
+    const formData: EditForm = {
       recordId: record.id,
       contractId: record.contractId,
       originalDateKey: dateKey,
@@ -357,213 +437,211 @@ function WorkerMonthlyCalendarPage() {
       endHour: eh,
       endMinute: em,
       breakMinutes: record.breakMinutes ?? 60,
-    };
-
-    // 원본 데이터 저장 (변경사항 비교용) - 비교에 필요한 필드만 저장
-    formData.originalData = {
-      place: formData.place,
-      wage: formData.wage,
-      date: formData.date,
-      startHour: formData.startHour,
-      startMinute: formData.startMinute,
-      endHour: formData.endHour,
-      endMinute: formData.endMinute,
-      breakMinutes: formData.breakMinutes,
+      // 원본 데이터 저장 (변경사항 비교용)
+      originalData: {
+        place: record.place,
+        wage: record.wage,
+        date: `${year}-${pad2(Number(month))}-${pad2(Number(day))}`,
+        startHour: sh,
+        startMinute: sm,
+        endHour: eh,
+        endMinute: em,
+        breakMinutes: record.breakMinutes ?? 60,
+      },
     };
 
     setEditForm(formData);
   };
 
-  const handleCloseEdit = () => { // 수정 요청 폼 닫기
+  const handleCloseEdit = () => {
     setEditForm(null);
   };
 
-  const handleConfirmEdit = async (form) => { // 수정 요청 확인 핸들러
+  const handleConfirmEdit = async (form: EditForm) => {
     try {
       // 1. 해당 workRecordId가 현재 로그인한 근로자의 근무 기록인지 확인
-      const [year, month, day] = form.date.split("-").map(Number);
+      const [year, month, day] = form.date.split('-').map(Number);
       const targetDate = new Date(year, month - 1, day);
       const targetYear = targetDate.getFullYear();
       const targetMonth = targetDate.getMonth();
-      
+
       // 해당 날짜가 포함된 월의 시작일과 종료일 계산
       const lastDay = new Date(targetYear, targetMonth + 1, 0);
       const startDate = `${targetYear}-${pad2(targetMonth + 1)}-${pad2(1)}`;
       const endDate = `${targetYear}-${pad2(targetMonth + 1)}-${pad2(lastDay.getDate())}`;
-      
+
       // 해당 월의 근무 기록 가져오기
       const workRecordsResponse = await getWorkRecords(startDate, endDate);
-      const workRecordsData = workRecordsResponse.data || [];
-      
+      const workRecordsData: ApiWorkRecord[] = workRecordsResponse.data || [];
+
       // workRecordId가 현재 근로자의 근무 기록 목록에 있는지 확인
       const workRecordId = Number(form.recordId);
       const isValidWorkRecord = workRecordsData.some(
         (record) => Number(record.id) === workRecordId
       );
-      
+
       if (!isValidWorkRecord) {
-        toast.error(
-          "[FORBIDDEN] 본인의 근무 기록만 정정 요청할 수 있습니다.",
-          {
-            position: "top-right",
-            autoClose: 3000,
-          }
-        );
+        toast.error('[FORBIDDEN] 본인의 근무 기록만 정정 요청할 수 있습니다.', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
         return;
       }
 
       // 2. 정정 요청 보내기
-      // 시간을 "HH:mm:ss" 형식의 문자열로 변환
       const startTimeStr = `${pad2(Number(form.startHour))}:${pad2(Number(form.startMinute))}:00`;
       const endTimeStr = `${pad2(Number(form.endHour))}:${pad2(Number(form.endMinute))}:00`;
-      
-      const payload = {
-        type: 'UPDATE',  // 정정 요청 타입: 기존 근무 수정
+
+      const payload: CorrectionRequestPayload = {
+        type: 'UPDATE',
         workRecordId: workRecordId,
         requestedWorkDate: form.date,
         requestedStartTime: startTimeStr,
         requestedEndTime: endTimeStr,
       };
 
-      const response = await createCorrectionRequest(payload);
+      const response = await createCorrectionRequest(payload as Parameters<typeof createCorrectionRequest>[0]);
 
       if (response?.success) {
-        toast.success("근무 기록 정정 요청이 접수되었습니다.", {
-          position: "top-right",
+        toast.success('근무 기록 정정 요청이 접수되었습니다.', {
+          position: 'top-right',
           autoClose: 3000,
         });
         setEditForm(null);
         return;
       }
 
-      const errorMessage =
-        response?.error?.message || "근무 기록 정정 요청에 실패했습니다.";
-      const errorCode = response?.error?.code || "UNKNOWN";
+      const errorMessage = response?.error?.message || '근무 기록 정정 요청에 실패했습니다.';
+      const errorCode = response?.error?.code || 'UNKNOWN';
 
       toast.error(`[${errorCode}] ${errorMessage}`, {
-        position: "top-right",
+        position: 'top-right',
         autoClose: 3000,
       });
-    } catch (error) {
-      const status = error.status || error.response?.status || "";
-      const statusText = status ? `[${status}] ` : "";
-      const errorMessage =
-        error.error?.message ||
-        error.message ||
-        "근무 기록 정정 요청에 실패했습니다.";
-      const errorCode =
-        error.error?.code || error.errorCode || "UNKNOWN";
+    } catch (error: unknown) {
+      const err = error as {
+        status?: number;
+        response?: { status?: number };
+        error?: { message?: string; code?: string };
+        message?: string;
+        errorCode?: string;
+      };
+      const status = err.status || err.response?.status || '';
+      const statusText = status ? `[${status}] ` : '';
+      const errorMessage = err.error?.message || err.message || '근무 기록 정정 요청에 실패했습니다.';
+      const errorCode = err.error?.code || err.errorCode || 'UNKNOWN';
 
       toast.error(`${statusText}[${errorCode}] ${errorMessage}`, {
-        position: "top-right",
+        position: 'top-right',
         autoClose: 3000,
       });
     }
   };
 
-  const handleDeleteRequest = () => { // 삭제 요청 핸들러
+  const handleDeleteRequest = () => {
     // TODO: 백엔드로 삭제 요청 보내기
     setEditForm(null);
   };
 
-  const handleOpenAddModal = () => { // 근무 추가 모달 열기
+  const handleOpenAddModal = () => {
     const defaultContractId = workplaceOptions.length > 0 ? workplaceOptions[0].id : null;
     setAddForm({
       contractId: defaultContractId,
       date: selectedDateKey,
-      startHour: "09",
-      startMinute: "00",
-      endHour: "13",
-      endMinute: "00",
+      startHour: '09',
+      startMinute: '00',
+      endHour: '13',
+      endMinute: '00',
       breakMinutes: 60,
     });
     setIsAddModalOpen(true);
   };
 
-  const handleCloseAddModal = () => { // 근무 추가 모달 닫기
+  const handleCloseAddModal = () => {
     setIsAddModalOpen(false);
     setAddForm(null);
   };
 
-  const handleConfirmAddWork = async (form) => { // 근무 추가 확인 핸들러
+  const handleConfirmAddWork = async (form: AddWorkForm) => {
     try {
       // 1. contractId가 현재 로그인한 근로자의 계약 목록에 있는지 확인
       const contractsResponse = await getContracts();
-      
-      let contracts = [];
+
+      let contracts: unknown[] = [];
       if (Array.isArray(contractsResponse.data)) {
         contracts = contractsResponse.data;
       } else if (contractsResponse.data) {
         contracts = [contractsResponse.data];
       }
-      
+
       // contractId 추출 및 검증 (타입 정규화: 모두 숫자로 변환)
       const contractIds = contracts.map((contract) => {
-        const id = typeof contract === 'object' ? contract.id : contract;
+        const id =
+          typeof contract === 'object' && contract !== null && 'id' in contract
+            ? (contract as { id: number }).id
+            : (contract as number);
         return Number(id);
       });
-      
+
       const contractId = Number(form.contractId);
-      
+
       if (!contractIds.includes(contractId)) {
-        toast.error(
-          "[FORBIDDEN] 본인의 계약만 사용하여 근무를 추가할 수 있습니다.",
-          {
-            position: "top-right",
-            autoClose: 3000,
-          }
-        );
+        toast.error('[FORBIDDEN] 본인의 계약만 사용하여 근무를 추가할 수 있습니다.', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
         return;
       }
 
       // 2. 근무 추가 요청 보내기
-      // 시간을 "HH:mm:ss" 형식의 문자열로 변환
       const startTimeStr = `${pad2(Number(form.startHour))}:${pad2(Number(form.startMinute))}:00`;
       const endTimeStr = `${pad2(Number(form.endHour))}:${pad2(Number(form.endMinute))}:00`;
-      
-      const payload = {
+
+      const payload: CreateWorkRecordPayload = {
         contractId: contractId,
         workDate: form.date,
         startTime: startTimeStr,
         endTime: endTimeStr,
         breakMinutes: form.breakMinutes || 0,
-        memo: "",
+        memo: '',
       };
 
       const response = await createWorkRecord(payload);
 
       if (response?.success) {
-        toast.success("근무 추가 요청이 접수되었습니다.", {
-          position: "top-right",
+        toast.success('근무 추가 요청이 접수되었습니다.', {
+          position: 'top-right',
           autoClose: 3000,
         });
-        
+
         // 근무 기록 다시 불러오기
         await fetchWorkRecords();
         handleCloseAddModal();
         return;
       }
 
-      const errorMessage =
-        response?.error?.message || "근무 추가 요청에 실패했습니다.";
-      const errorCode = response?.error?.code || "UNKNOWN";
+      const errorMessage = response?.error?.message || '근무 추가 요청에 실패했습니다.';
+      const errorCode = response?.error?.code || 'UNKNOWN';
 
       toast.error(`[${errorCode}] ${errorMessage}`, {
-        position: "top-right",
+        position: 'top-right',
         autoClose: 3000,
       });
-    } catch (error) {
-      const status = error.status || error.response?.status || "";
-      const statusText = status ? `[${status}] ` : "";
-      const errorMessage =
-        error.error?.message ||
-        error.message ||
-        "근무 추가 요청에 실패했습니다.";
-      const errorCode =
-        error.error?.code || error.errorCode || "UNKNOWN";
+    } catch (error: unknown) {
+      const err = error as {
+        status?: number;
+        response?: { status?: number };
+        error?: { message?: string; code?: string };
+        message?: string;
+        errorCode?: string;
+      };
+      const status = err.status || err.response?.status || '';
+      const statusText = status ? `[${status}] ` : '';
+      const errorMessage = err.error?.message || err.message || '근무 추가 요청에 실패했습니다.';
+      const errorCode = err.error?.code || err.errorCode || 'UNKNOWN';
 
       toast.error(`${statusText}[${errorCode}] ${errorMessage}`, {
-        position: "top-right",
+        position: 'top-right',
         autoClose: 3000,
       });
     }
@@ -594,9 +672,7 @@ function WorkerMonthlyCalendarPage() {
         <div className="right-panel">
           <div className="work-list">
             {recordsForSelectedDay.length === 0 ? (
-              <div className="work-list-empty">
-                선택한 날짜의 근무 기록이 없습니다.
-              </div>
+              <div className="work-list-empty">선택한 날짜의 근무 기록이 없습니다.</div>
             ) : (
               recordsForSelectedDay.map((record) => (
                 <WorkListItem
@@ -629,11 +705,7 @@ function WorkerMonthlyCalendarPage() {
             + 근무 추가하기
           </button>
 
-          <MemoCard
-            title={selectedDateTitle}
-            value={memoForSelected}
-            onChange={handleMemoChange}
-          />
+          <MemoCard title={selectedDateTitle} value={memoForSelected} onChange={handleMemoChange} />
 
           <SummaryRow totalHoursText={totalHoursText} totalWage={totalWage} />
         </div>
@@ -650,5 +722,3 @@ function WorkerMonthlyCalendarPage() {
     </div>
   );
 }
-
-export default WorkerMonthlyCalendarPage;
