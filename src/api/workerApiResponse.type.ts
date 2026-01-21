@@ -32,4 +32,5 @@ export interface WorkRecordsResponse {
   status: string;
   isModified: boolean;
   memo?: string;
+  wage?: number;
 }
