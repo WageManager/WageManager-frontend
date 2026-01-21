@@ -3,6 +3,7 @@ import "./WorkerMonthlyCalendarPage.css";
 import WorkEditRequestBox from "../../components/worker/MonthlyCalendarPage/WorkEditRequestBox";
 import AddWorkModal from "../../components/worker/MonthlyCalendarPage/AddWorkModal";
 import CalendarCard from "../../components/worker/MonthlyCalendarPage/CalendarCard";
+import MonthNav from "../../components/worker/MonthlyCalendarPage/MonthNav";
 import { toast } from "react-toastify";
 import { getContracts, getContractDetail, getWorkRecords, createCorrectionRequest, createWorkRecord, getSalaries } from "../../api/workerApi";
 import { formatTime, pad2 } from "../../utils/dateUtils";
@@ -16,15 +17,6 @@ const getId = (contractId) => {
     return contractId.id;
   }
   return contractId;
-};
-
-const workLabelColor = (contractId, status, contractColorMap) => { // contractId와 상태에 따른 라벨 색상 클래스명 반환
-  // contractId를 기반으로 색상 인덱스 가져오기
-  const colorIndex = contractColorMap[contractId] ?? 3; // 기본값은 3 (4번째 색상)
-  
-  // 색상 인덱스에 따라 클래스명 반환 (0: red, 1: yellow, 2: mint, 3: brown)
-  const colorClasses = ["red", "yellow", "mint", "brown"];
-  return colorClasses[colorIndex] || "brown";
 };
 
 const getKoreanDayLabel = (dayIndex) => { 
@@ -577,17 +569,12 @@ function WorkerMonthlyCalendarPage() {
   return (
     <div className="monthly-calendar-page">
       {/* 상단 월 네비게이션 */}
-      <div className="month-nav">
-        <button className="month-nav-arrow" onClick={handlePrevMonth}>
-          {"<"}
-        </button>
-        <div className="month-nav-title">
-          {displayYear}년 {displayMonth}월
-        </div>
-        <button className="month-nav-arrow" onClick={handleNextMonth}>
-          {">"}
-        </button>
-      </div>
+      <MonthNav
+        year={displayYear}
+        month={displayMonth}
+        onPrevMonth={handlePrevMonth}
+        onNextMonth={handleNextMonth}
+      />
 
       <div className="monthly-calendar-layout">
         <CalendarCard
@@ -598,7 +585,6 @@ function WorkerMonthlyCalendarPage() {
           workRecords={workRecords}
           onSelectDay={handleDateClick}
           makeDateKey={makeDateKey}
-          workLabelColor={workLabelColor}
           contractColorMap={contractColorMap}
           todayKey={todayKey}
         />
