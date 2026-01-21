@@ -10,7 +10,6 @@ import MemoCard from '../../components/worker/MonthlyCalendarPage/MemoCard';
 import SummaryRow from '../../components/worker/MonthlyCalendarPage/SummaryRow';
 import {
   getContracts,
-  getContractDetail,
   getWorkRecords,
   createCorrectionRequest,
   createWorkRecord,
@@ -169,10 +168,8 @@ export default function WorkerMonthlyCalendarPage() {
           // 단일 객체인 경우 배열로 래핑
           fetchedContracts = [contractsResponse.data] as unknown as Contract[];
         }
-
         // 상태 저장
         setContracts(fetchedContracts);
-
         // 근무지 옵션 설정 (상세 조회 없이 목록 데이터 사용)
         const workplaces = fetchedContracts.map((contract) => {
           return {
@@ -182,14 +179,12 @@ export default function WorkerMonthlyCalendarPage() {
           };
         });
         setWorkplaceOptions(workplaces);
-
         // contractId -> 색상 인덱스 맵 생성 (순서대로 0, 1, 2, 3, 3, 3...)
         const colorMap: ContractColorMap = {};
         workplaces.forEach((workplace, index) => {
           colorMap[workplace.id] = Math.min(index, 3);
         });
         setContractColorMap(colorMap);
-
       } catch (error) {
         console.error('[WorkerMonthlyCalendarPage] 초기 데이터 조회 실패:', error);
         setContracts([]);
@@ -197,7 +192,6 @@ export default function WorkerMonthlyCalendarPage() {
         setContractColorMap({});
       }
     };
-
     fetchInitialData();
   }, []);
 
@@ -209,7 +203,6 @@ export default function WorkerMonthlyCalendarPage() {
       setMemos({});
       return;
     }
-
     try {
       // 각 계약의 시급 정보 가져오기 (이미 로드된 contracts 상태 사용)
       const hourlyWageMap: HourlyWageMap = {};
@@ -218,16 +211,13 @@ export default function WorkerMonthlyCalendarPage() {
           hourlyWageMap[contract.id] = contract.hourlyWage;
         }
       });
-
       // 3. 현재 월의 시작일과 종료일 계산
       const lastDay = new Date(currentYear, currentMonth + 1, 0);
       const startDate = `${currentYear}-${pad2(currentMonth + 1)}-${pad2(1)}`;
       const endDate = `${currentYear}-${pad2(currentMonth + 1)}-${pad2(lastDay.getDate())}`;
-
       // 4. 근무 기록 가져오기
       const workRecordsResponse = await getWorkRecords(startDate, endDate);
       const workRecordsData: ApiWorkRecord[] = workRecordsResponse.data || [];
-
       // 5. 데이터 매핑
       const { recordsByDate, memosByDate } = mapWorkRecords(workRecordsData, hourlyWageMap);
       setWorkRecords(recordsByDate);
