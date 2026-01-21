@@ -1,6 +1,3 @@
-/**
- * WorkerMonthlyCalendarPage - 근로자 월간 캘린더 페이지
- */
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import './WorkerMonthlyCalendarPage.css';
@@ -63,6 +60,7 @@ interface ApiWorkRecord {
 interface CorrectionRequestPayload {
   type: 'UPDATE';
   workRecordId: number;
+  reason: string;
   requestedWorkDate: string;
   requestedStartTime: string;
   requestedEndTime: string;
@@ -79,7 +77,6 @@ interface CreateWorkRecordPayload {
 }
 
 // ============ 유틸리티 함수 ============
-
 const makeDateKey = (y: number, m: number, d: number): string =>
   `${y}-${pad2(m + 1)}-${pad2(d)}`;
 
@@ -398,7 +395,10 @@ export default function WorkerMonthlyCalendarPage() {
   }, [totalMinutes]);
 
   const selectedDateObj = useMemo(() => {
-    const [y, m, d] = selectedDateKey.split('-').map(Number);
+    const parts = selectedDateKey.split('-').map(Number);
+    const y = parts[0] ?? 0;
+    const m = parts[1] ?? 1;
+    const d = parts[2] ?? 1;
     return new Date(y, m - 1, d);
   }, [selectedDateKey]);
 
@@ -421,9 +421,16 @@ export default function WorkerMonthlyCalendarPage() {
   };
 
   const handleOpenEdit = (record: WorkRecord, dateKey: string) => {
-    const [year, month, day] = dateKey.split('-');
-    const [sh, sm] = record.start.split(':');
-    const [eh, em] = record.end.split(':');
+    const dateParts = dateKey.split('-');
+    const year = dateParts[0] ?? '';
+    const month = dateParts[1] ?? '';
+    const day = dateParts[2] ?? '';
+    const startParts = record.start.split(':');
+    const sh = startParts[0] ?? '00';
+    const sm = startParts[1] ?? '00';
+    const endParts = record.end.split(':');
+    const eh = endParts[0] ?? '00';
+    const em = endParts[1] ?? '00';
 
     const formData: EditForm = {
       recordId: record.id,
@@ -460,7 +467,10 @@ export default function WorkerMonthlyCalendarPage() {
   const handleConfirmEdit = async (form: EditForm) => {
     try {
       // 1. 해당 workRecordId가 현재 로그인한 근로자의 근무 기록인지 확인
-      const [year, month, day] = form.date.split('-').map(Number);
+      const dateParts = form.date.split('-').map(Number);
+      const year = dateParts[0] ?? 0;
+      const month = dateParts[1] ?? 1;
+      const day = dateParts[2] ?? 1;
       const targetDate = new Date(year, month - 1, day);
       const targetYear = targetDate.getFullYear();
       const targetMonth = targetDate.getMonth();
@@ -495,6 +505,7 @@ export default function WorkerMonthlyCalendarPage() {
       const payload: CorrectionRequestPayload = {
         type: 'UPDATE',
         workRecordId: workRecordId,
+        reason: '근무 시간 정정 요청',
         requestedWorkDate: form.date,
         requestedStartTime: startTimeStr,
         requestedEndTime: endTimeStr,
@@ -544,7 +555,7 @@ export default function WorkerMonthlyCalendarPage() {
   };
 
   const handleOpenAddModal = () => {
-    const defaultContractId = workplaceOptions.length > 0 ? workplaceOptions[0].id : null;
+    const defaultContractId = workplaceOptions[0]?.id ?? null;
     setAddForm({
       contractId: defaultContractId,
       date: selectedDateKey,
