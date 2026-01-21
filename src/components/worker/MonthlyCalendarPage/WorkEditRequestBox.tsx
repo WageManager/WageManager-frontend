@@ -200,13 +200,6 @@ export default function WorkEditRequestBox({
         </button>
         <button
           type="button"
-          className="work-edit-btn work-edit-btn-delete"
-          onClick={() => onDelete(form)}
-        >
-          삭제
-        </button>
-        <button
-          type="button"
           className="work-edit-btn work-edit-btn-cancel"
           onClick={onCancel}
         >
