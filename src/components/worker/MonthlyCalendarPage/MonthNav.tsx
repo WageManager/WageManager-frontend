@@ -16,13 +16,13 @@ export default function MonthNav({
 }: MonthNavProps) {
   return (
     <div className="month-nav">
-      <button className="month-nav-arrow" onClick={onPrevMonth} type="button">
+      <button className="month-nav-arrow" onClick={onPrevMonth} type="button" aria-label="이전 달">
         <IoIosArrowBack/>
       </button>
       <div className="month-nav-title">
         {year}년 {month}월
       </div>
-      <button className="month-nav-arrow" onClick={onNextMonth} type="button">
+      <button className="month-nav-arrow" onClick={onNextMonth} type="button" aria-label="다음 달">
         <IoIosArrowForward />
       </button>
     </div>
