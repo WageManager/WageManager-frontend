@@ -1,29 +1,48 @@
-import React from "react";
-import PropTypes from "prop-types";
-import Swal from "sweetalert2";
-import "./WorkEditRequestBox.css";
-import { createUpdateField } from "../../../pages/workers/utils/updateField";
+/**
+ * WorkEditRequestBox - 근무 기록 정정 요청 폼 컴포넌트
+ * 근무 시간 수정 및 정정 요청 제출
+ */
+import { useMemo, type Dispatch, type SetStateAction } from 'react';
+import Swal from 'sweetalert2';
+import './WorkEditRequestBox.css';
+import { createUpdateField } from '../../../pages/workers/utils/updateField';
+import { HOUR_OPTIONS, MINUTE_OPTIONS, BREAK_OPTIONS } from '../../../constants/calendar';
+import type { EditForm } from '../../../types/worker/monthlyCalendar.types';
 
-import { pad2 } from "../../../utils/dateUtils";
+// ============ 로컬 타입 ============
 
-const hourOptions = Array.from({ length: 24 }, (_, i) => pad2(i));
-const minuteOptions = ["00", "10", "20", "30", "40", "50"];
-const breakOptions = [0, 30, 60, 90, 120];
+type Variant = 'weekly' | 'monthly';
 
-function WorkEditRequestBox({ form, setForm, onConfirm, onDelete, onCancel, variant }) {
+interface WorkEditRequestBoxProps {
+  form: EditForm | null;
+  setForm: Dispatch<SetStateAction<EditForm | null>>;
+  onConfirm: (form: EditForm) => void;
+  onCancel: () => void;
+  variant?: Variant;
+}
+
+// ============ 컴포넌트 ============
+
+export default function WorkEditRequestBox({
+  form,
+  setForm,
+  onConfirm,
+  onCancel,
+  variant,
+}: WorkEditRequestBoxProps) {
   const updateField = createUpdateField(setForm);
 
   // 원본 데이터와 현재 폼 데이터 비교
-  const hasChanges = React.useMemo(() => {
+  const hasChanges = useMemo(() => {
     if (!form || !form.originalData) return false;
-    
+
     const original = form.originalData;
     const current = form;
-    
+
     // 타입 변환을 고려한 비교
     const originalWage = Number(original.wage);
     const currentWage = Number(current.wage);
-    
+
     return (
       original.place !== current.place ||
       originalWage !== currentWage ||
@@ -39,13 +58,13 @@ function WorkEditRequestBox({ form, setForm, onConfirm, onDelete, onCancel, vari
 
   const handleConfirmClick = async () => {
     if (!hasChanges) return;
-    
+
     const result = await Swal.fire({
-      title: "근무 기록 정정 요청",
-      text: "입력한 내용으로 근무 정정 요청을 보내시겠어요?",
-      icon: "question",
-      confirmButtonText: "확인",
-      cancelButtonText: "취소",
+      title: '근무 기록 정정 요청',
+      text: '입력한 내용으로 근무 정정 요청을 보내시겠어요?',
+      icon: 'question',
+      confirmButtonText: '확인',
+      cancelButtonText: '취소',
       showCancelButton: true,
       reverseButtons: true,
     });
@@ -55,8 +74,10 @@ function WorkEditRequestBox({ form, setForm, onConfirm, onDelete, onCancel, vari
     }
   };
 
+  const boxClassName = `work-edit-box ${variant === 'weekly' ? 'weekly-style' : ''}`;
+
   return (
-    <div className={`work-edit-box ${variant === "weekly" ? "weekly-style" : ""}`}>
+    <div className={boxClassName}>
       {/* 근무지 / 시급 */}
       <div className="work-edit-row">
         <div className="work-edit-field">
@@ -90,16 +111,16 @@ function WorkEditRequestBox({ form, setForm, onConfirm, onDelete, onCancel, vari
               type="date"
               className="work-edit-input work-edit-input-date"
               value={form.date}
-              onChange={(e) => updateField("date", e.target.value)}
+              onChange={(e) => updateField('date', e.target.value)}
             />
 
             {/* 시작 시간 */}
             <select
               className="work-edit-select"
               value={form.startHour}
-              onChange={(e) => updateField("startHour", e.target.value)}
+              onChange={(e) => updateField('startHour', e.target.value)}
             >
-              {hourOptions.map((h) => (
+              {HOUR_OPTIONS.map((h) => (
                 <option key={h} value={h}>
                   {h}
                 </option>
@@ -109,9 +130,9 @@ function WorkEditRequestBox({ form, setForm, onConfirm, onDelete, onCancel, vari
             <select
               className="work-edit-select"
               value={form.startMinute}
-              onChange={(e) => updateField("startMinute", e.target.value)}
+              onChange={(e) => updateField('startMinute', e.target.value)}
             >
-              {minuteOptions.map((m) => (
+              {MINUTE_OPTIONS.map((m) => (
                 <option key={m} value={m}>
                   {m}
                 </option>
@@ -124,9 +145,9 @@ function WorkEditRequestBox({ form, setForm, onConfirm, onDelete, onCancel, vari
             <select
               className="work-edit-select"
               value={form.endHour}
-              onChange={(e) => updateField("endHour", e.target.value)}
+              onChange={(e) => updateField('endHour', e.target.value)}
             >
-              {hourOptions.map((h) => (
+              {HOUR_OPTIONS.map((h) => (
                 <option key={h} value={h}>
                   {h}
                 </option>
@@ -136,9 +157,9 @@ function WorkEditRequestBox({ form, setForm, onConfirm, onDelete, onCancel, vari
             <select
               className="work-edit-select"
               value={form.endMinute}
-              onChange={(e) => updateField("endMinute", e.target.value)}
+              onChange={(e) => updateField('endMinute', e.target.value)}
             >
-              {minuteOptions.map((m) => (
+              {MINUTE_OPTIONS.map((m) => (
                 <option key={m} value={m}>
                   {m}
                 </option>
@@ -153,12 +174,8 @@ function WorkEditRequestBox({ form, setForm, onConfirm, onDelete, onCancel, vari
         <div className="work-edit-field">
           <div className="work-edit-label">휴게 시간</div>
           <div className="work-edit-break-row">
-            <select
-              className="work-edit-select"
-              value={form.breakMinutes}
-              disabled
-            >
-              {breakOptions.map((m) => (
+            <select className="work-edit-select" value={form.breakMinutes} disabled>
+              {BREAK_OPTIONS.map((m) => (
                 <option key={m} value={m}>
                   {m}
                 </option>
@@ -181,13 +198,6 @@ function WorkEditRequestBox({ form, setForm, onConfirm, onDelete, onCancel, vari
         </button>
         <button
           type="button"
-          className="work-edit-btn work-edit-btn-delete"
-          onClick={() => onDelete(form)}
-        >
-          삭제
-        </button>
-        <button
-          type="button"
           className="work-edit-btn work-edit-btn-cancel"
           onClick={onCancel}
         >
@@ -197,36 +207,3 @@ function WorkEditRequestBox({ form, setForm, onConfirm, onDelete, onCancel, vari
     </div>
   );
 }
-
-export default WorkEditRequestBox;
-
-WorkEditRequestBox.propTypes = {
-  form: PropTypes.shape({
-    recordId: PropTypes.number,
-    originalDateKey: PropTypes.string,
-    place: PropTypes.string,
-    wage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    date: PropTypes.string,
-    startHour: PropTypes.string,
-    startMinute: PropTypes.string,
-    endHour: PropTypes.string,
-    endMinute: PropTypes.string,
-    breakMinutes: PropTypes.number,
-    originalData: PropTypes.shape({
-      place: PropTypes.string,
-      wage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      date: PropTypes.string,
-      startHour: PropTypes.string,
-      startMinute: PropTypes.string,
-      endHour: PropTypes.string,
-      endMinute: PropTypes.string,
-      breakMinutes: PropTypes.number,
-    }),
-  }),
-  setForm: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-  variant: PropTypes.oneOf(["weekly", "monthly"]),
-};
-

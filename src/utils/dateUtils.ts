@@ -119,3 +119,7 @@ export const formatDateTime = (dateString: string): string => {
 
   return `${year}년 ${month}월 ${day}일 ${hours}:${minutes}`;
 };
+
+// 연, 월, 일을 "YYYY-MM-DD" 형식의 문자열로 변환
+export const makeDateKey = (year: number, month: number, day: number): string =>
+  `${year}-${pad2(month + 1)}-${pad2(day)}`;
