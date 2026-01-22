@@ -1,21 +1,22 @@
 import wageManagerApi from './axios';
+import type {
+  UpdateUserProfileRequest,
+  CreateCorrectionRequestPayload,
+} from './workerApiRequest.type';
+import type { CorrectionStatus } from './workerApiResponse.type';
 
-// ============ 타입 정의 ============
+// 타입 re-export (다른 파일에서 import할 수 있도록)
+export type {
+  UpdateUserProfileRequest,
+  CorrectionRequestType,
+  CreateCorrectionRequestPayload,
+} from './workerApiRequest.type';
 
-/** 사용자 프로필 수정 요청 */
-interface UpdateUserProfileRequest {
-  name?: string;
-  phone?: string;
-}
-
-/** 근무 기록 정정 요청 생성 payload */
-interface CreateCorrectionRequestPayload {
-  workRecordId: number;
-  reason: string;
-  requestedWorkDate: string;
-  requestedStartTime: string;
-  requestedEndTime: string;
-}
+export type {
+  Contract,
+  CorrectionStatus,
+  WorkRecordsResponse
+} from './workerApiResponse.type';
 
 // ============ API 함수 ============
 
@@ -56,8 +57,6 @@ export const getContractDetail = async (contractId: number) => {
 };
 
 // 정정 요청 목록 조회
-type CorrectionStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
-
 export const getCorrectionRequests = async (status?: CorrectionStatus) => {
   const { data } = await wageManagerApi.get(`/api/worker/correction-requests`, {
     params: { status }

@@ -1,39 +1,57 @@
-import React from "react";
-import PropTypes from "prop-types";
-import Swal from "sweetalert2";
-import "./AddWorkModal.css";
-import { pad2 } from "../../../utils/dateUtils";
-const hourOptions = Array.from({ length: 24 }, (_, i) => pad2(i));
-const minuteOptions = ["00", "10", "20", "30", "40", "50"];
-const breakOptions = [0, 30, 60, 90, 120];
+/**
+ * AddWorkModal - 근무 추가 모달 컴포넌트
+ */
+import type { Dispatch, SetStateAction } from 'react';
+import Swal from 'sweetalert2';
+import './AddWorkModal.css';
+import { HOUR_OPTIONS, MINUTE_OPTIONS, BREAK_OPTIONS } from '../../../constants/calendar';
+import type { AddWorkForm, WorkplaceOption } from '../../../types/worker/monthlyCalendar.types';
 
-function AddWorkModal({
+// ============ 로컬 타입 ============
+
+interface AddWorkModalProps {
+  form: AddWorkForm | null;
+  setForm: Dispatch<SetStateAction<AddWorkForm | null>>;
+  workplaceOptions: WorkplaceOption[];
+  onConfirm: (form: AddWorkForm) => void;
+  onCancel: () => void;
+}
+
+// ============ 컴포넌트 ============
+
+export default function AddWorkModal({
   form,
   setForm,
   workplaceOptions,
   onConfirm,
   onCancel,
-}) {
+}: AddWorkModalProps) {
   if (!form) return null;
 
-  const handleFieldChange = (field, value) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleFieldChange = <K extends keyof AddWorkForm>(
+    field: K,
+    value: AddWorkForm[K]
+  ) => {
+    setForm((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        [field]: value,
+      };
+    });
   };
 
-  const handleBreakChange = (value) => {
-    handleFieldChange("breakMinutes", Number(value));
+  const handleBreakChange = (value: string) => {
+    handleFieldChange('breakMinutes', Number(value));
   };
 
   const handleConfirmClick = async () => {
     const result = await Swal.fire({
-      title: "근무 추가하기",
-      text: "입력한 내용으로 근무를 추가할까요?",
-      icon: "question",
-      confirmButtonText: "확인",
-      cancelButtonText: "취소",
+      title: '근무 추가하기',
+      text: '입력한 내용으로 근무를 추가할까요?',
+      icon: 'question',
+      confirmButtonText: '확인',
+      cancelButtonText: '취소',
       showCancelButton: true,
       reverseButtons: true,
     });
@@ -50,8 +68,8 @@ function AddWorkModal({
           <div className="add-work-modal-title">근무 추가하기</div>
           <select
             className="add-work-select"
-            value={form.contractId || ""}
-            onChange={(e) => handleFieldChange("contractId", Number(e.target.value))}
+            value={form.contractId || ''}
+            onChange={(e) => handleFieldChange('contractId', Number(e.target.value))}
           >
             {workplaceOptions.map((workplace) => (
               <option key={workplace.id} value={workplace.id}>
@@ -70,14 +88,14 @@ function AddWorkModal({
                   type="date"
                   className="work-edit-input work-edit-input-date add-work-date-input"
                   value={form.date}
-                  onChange={(e) => handleFieldChange("date", e.target.value)}
+                  onChange={(e) => handleFieldChange('date', e.target.value)}
                 />
                 <select
                   className="work-edit-select"
                   value={form.startHour}
-                  onChange={(e) => handleFieldChange("startHour", e.target.value)}
+                  onChange={(e) => handleFieldChange('startHour', e.target.value)}
                 >
-                  {hourOptions.map((h) => (
+                  {HOUR_OPTIONS.map((h) => (
                     <option key={h} value={h}>
                       {h}
                     </option>
@@ -87,11 +105,9 @@ function AddWorkModal({
                 <select
                   className="work-edit-select"
                   value={form.startMinute}
-                  onChange={(e) =>
-                    handleFieldChange("startMinute", e.target.value)
-                  }
+                  onChange={(e) => handleFieldChange('startMinute', e.target.value)}
                 >
-                  {minuteOptions.map((m) => (
+                  {MINUTE_OPTIONS.map((m) => (
                     <option key={m} value={m}>
                       {m}
                     </option>
@@ -105,9 +121,9 @@ function AddWorkModal({
                 <select
                   className="work-edit-select"
                   value={form.endHour}
-                  onChange={(e) => handleFieldChange("endHour", e.target.value)}
+                  onChange={(e) => handleFieldChange('endHour', e.target.value)}
                 >
-                  {hourOptions.map((h) => (
+                  {HOUR_OPTIONS.map((h) => (
                     <option key={h} value={h}>
                       {h}
                     </option>
@@ -117,11 +133,9 @@ function AddWorkModal({
                 <select
                   className="work-edit-select"
                   value={form.endMinute}
-                  onChange={(e) =>
-                    handleFieldChange("endMinute", e.target.value)
-                  }
+                  onChange={(e) => handleFieldChange('endMinute', e.target.value)}
                 >
-                  {minuteOptions.map((m) => (
+                  {MINUTE_OPTIONS.map((m) => (
                     <option key={m} value={m}>
                       {m}
                     </option>
@@ -139,7 +153,7 @@ function AddWorkModal({
                 value={form.breakMinutes}
                 onChange={(e) => handleBreakChange(e.target.value)}
               >
-                {breakOptions.map((m) => (
+                {BREAK_OPTIONS.map((m) => (
                   <option key={m} value={m}>
                     {m}
                   </option>
@@ -151,11 +165,11 @@ function AddWorkModal({
         </div>
 
         <div className="add-work-modal-actions">
-        <button
-          type="button"
-          className="work-edit-btn work-edit-btn-confirm"
-          onClick={handleConfirmClick}
-        >
+          <button
+            type="button"
+            className="work-edit-btn work-edit-btn-confirm"
+            onClick={handleConfirmClick}
+          >
             확인
           </button>
           <button
@@ -170,28 +184,3 @@ function AddWorkModal({
     </div>
   );
 }
-
-AddWorkModal.propTypes = {
-  form: PropTypes.shape({
-    contractId: PropTypes.number,
-    date: PropTypes.string,
-    startHour: PropTypes.string,
-    startMinute: PropTypes.string,
-    endHour: PropTypes.string,
-    endMinute: PropTypes.string,
-    breakMinutes: PropTypes.number,
-  }),
-  setForm: PropTypes.func.isRequired,
-  workplaceOptions: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      workerName: PropTypes.string.isRequired,
-      workplaceName: PropTypes.string,
-    })
-  ).isRequired,
-  onConfirm: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-};
-
-export default AddWorkModal;
-
