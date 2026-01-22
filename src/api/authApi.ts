@@ -1,11 +1,10 @@
-import axios from 'axios';
 import wageManagerApi from './axios';
-import type { KakaoRegisterParams } from '../types/auth';
+import type { KakaoRegisterParams, ApiResponse, AuthSuccessData } from '../types/auth';
 
 // 카카오 액세스 토큰으로 로그인
 export const kakaoLoginWithToken = async (kakaoAccessToken: string) => {
-  const { data } = await axios.post(
-    `${import.meta.env.VITE_WAGEMANAGER}/api/auth/kakao/login`,
+  const { data } = await wageManagerApi.post<ApiResponse<AuthSuccessData>>(
+    '/api/auth/kakao/login', 
     { kakaoAccessToken }
   );
   return data;
@@ -13,8 +12,8 @@ export const kakaoLoginWithToken = async (kakaoAccessToken: string) => {
 
 // 카카오 액세스 토큰으로 회원가입
 export const kakaoRegister = async (params: KakaoRegisterParams) => {
-  const { data } = await axios.post(
-    `${import.meta.env.VITE_WAGEMANAGER}/api/auth/kakao/register`,
+  const { data } = await wageManagerApi.post<ApiResponse<AuthSuccessData>>(
+    '/api/auth/kakao/register',
     params
   );
   return data;
@@ -26,8 +25,8 @@ export const devLogin = async (
   name: string,
   userType: string
 ) => {
-  const { data } = await axios.post(
-    `${import.meta.env.VITE_WAGEMANAGER}/api/auth/dev/login`,
+  const { data } = await wageManagerApi.post<ApiResponse<AuthSuccessData>>(
+    '/api/auth/dev/login',
     { userId, name, userType }
   );
   return data;
@@ -35,6 +34,6 @@ export const devLogin = async (
 
 // 로그아웃
 export const logout = async () => {
-  const { data } = await wageManagerApi.post('/api/auth/logout', {});
+  const { data } = await wageManagerApi.post<ApiResponse<void>>('/api/auth/logout', {});  
   return data;
 };

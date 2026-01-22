@@ -10,7 +10,8 @@
     "moduleResolution": "bundler",
     "target": "esnext",
     "types": [
-      "vite/client"
+      "vite/client",
+      "vitest/globals"
     ],
     // For nodejs:
     // "lib": ["esnext"],
