@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import SignupPage from '../SignupPage';
 
 // API 모킹
-vi.mock('../../api/authApi', () => ({
+vi.mock('../../../api/authApi', () => ({
   kakaoRegister: vi.fn(),
 }));
 
@@ -271,7 +271,7 @@ describe('API 호출', () => {
   });
 
   it('가입하기 버튼 클릭 시 kakaoRegister API가 호출된다', async () => {
-    const { kakaoRegister } = await import('../../api/authApi');
+    const { kakaoRegister } = await import('../../../api/authApi');
     (kakaoRegister as ReturnType<typeof vi.fn>).mockResolvedValue({
       success: true,
       data: { accessToken: 'test-token', userType: 'WORKER' },

@@ -55,8 +55,8 @@ export const useSignupForm = ({ kakaoAccessToken }: UseSignupFormProps) => {
         kakaoAccessToken,
         userType,
         phone,
-        bankName: '카카오뱅크', // 은행명 (현재 미사용)
-        accountNumber: '3333159467737', // 계좌번호 (현재 미사용)
+        bankName: '', // 은행명 (현재 미사용)
+        accountNumber: '', // 계좌번호 (현재 미사용)
         profileImageUrl: '' // 이것도 귀찮아서 그냥 미구현(카카오 oauth를 한번 더 해야함)
       });
 
