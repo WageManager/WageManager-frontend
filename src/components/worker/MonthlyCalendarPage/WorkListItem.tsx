@@ -46,7 +46,7 @@ export default function WorkListItem({
             {record.start} ~ {record.end}
           </div>
           {/* 현재 record.wage는 존재하지 않음, 추후 백엔드한테 문의 후 추가 예정 */}
-          <div className="work-list-wage">{record.wage.toLocaleString()}원</div> 
+          <div className="work-list-wage">{(record.wage ?? 0).toLocaleString()}원</div> 
           <div className="work-list-place">{record.place}</div>
         </div>
         <button

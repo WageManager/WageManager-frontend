@@ -31,6 +31,6 @@ export interface WorkRecordsResponse {
   totalWorkMinutes: number;
   status: string;
   isModified: boolean;
-  memo?: string;
   wage?: number;
+  memo?: string;
 }
