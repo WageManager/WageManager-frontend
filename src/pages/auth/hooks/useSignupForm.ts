@@ -65,7 +65,7 @@ export const useSignupForm = ({ kakaoAccessToken }: UseSignupFormProps) => {
         phone,
         bankName: '', // 은행명 (현재 미사용)
         accountNumber: '', // 계좌번호 (현재 미사용)
-        profileImageUrl: '' // 이것도 귀찮아서 그냥 미구현(카카오 oauth를 한번 더 해야함)
+        profileImageUrl: '' // TODO: 카카오 OAuth 추가 호출 후 프로필 이미지 연동
       });
 
       if (!registerResponse.success || !registerResponse.data?.accessToken) {
@@ -104,7 +104,7 @@ export const useSignupForm = ({ kakaoAccessToken }: UseSignupFormProps) => {
       Swal.fire({
         icon: 'error',
         title: errorTitle,
-        text: error.error?.message || error.message || '알 수 없는 오류가 발생했습니다.',
+        text: error.response?.data?.error?.message || error.error?.message || error.message || '알 수 없는 오류가 발생했습니다.',
         confirmButtonColor: '#769fcd',
       }).then(() => {
         if (shouldRedirect) {
