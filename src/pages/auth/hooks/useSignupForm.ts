@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { kakaoRegister } from '../../../api/authApi';
 import type { UserType } from '../../../types/auth';
 import { AUTH_CONSTANTS } from '../../../constants/auth';
+import { wageManagerApi } from '../../../api/axios';
 
 interface UseSignupFormProps {
   kakaoAccessToken?: string;
@@ -71,6 +72,9 @@ export const useSignupForm = ({ kakaoAccessToken }: UseSignupFormProps) => {
       if (!registerResponse.success || !registerResponse.data?.accessToken) {
         throw new Error(registerResponse.error?.message || '회원가입 실패');
       }
+
+      // accessToken을 localStorage에 저장
+      localStorage.setItem('token', registerResponse.data.accessToken);
 
       Swal.fire({
         icon: 'success',
