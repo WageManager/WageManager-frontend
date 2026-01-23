@@ -7,8 +7,10 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 }
 
 // axios 인스턴스 생성
+const baseURL = import.meta.env.DEV ? '' : import.meta.env.VITE_WAGEMANAGER;
+
 export const wageManagerApi = axios.create({
-  baseURL: import.meta.env.VITE_WAGEMANAGER,
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
