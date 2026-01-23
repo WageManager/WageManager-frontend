@@ -16,6 +16,9 @@ export default defineConfig({
     // 테스트 setup 파일
     setupFiles: ['./src/test/setup.ts'],
 
+    // 환경 변수 자동 복원
+    unstubEnvs: true,
+
     // 커버리지 설정 (선택사항)
     coverage: {
       provider: 'v8',

@@ -47,7 +47,15 @@ export const useSignupForm = ({ kakaoAccessToken }: UseSignupFormProps) => {
       }).then(() => navigate('/'));
       return;
     }
-    if (!userType) return;
+    if (!userType || !isValidName || !isValidPhone) {
+      Swal.fire({
+        icon: 'error',
+        title: '입력 오류',
+        text: '이름/전화번호/역할을 다시 확인해주세요.',
+        confirmButtonColor: '#769fcd',
+      });
+      return;
+    }
 
     try {
       // 카카오 회원가입 API 호출 (회원가입 + 로그인 동시 처리)

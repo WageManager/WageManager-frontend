@@ -72,14 +72,9 @@ describe('SignupPage 렌더링', () => {
   it('닫기 버튼 클릭 시 홈으로 이동한다', async () => {
     renderSignupPage();
 
-    const closeButton = screen.getByRole('button', { name: '' }); // FaTimes 아이콘 버튼
-    const buttons = screen.getAllByRole('button');
-    const closeBtn = buttons.find(btn => btn.classList.contains('close-button'));
-
-    if (closeBtn) {
-      fireEvent.click(closeBtn);
-      expect(mockNavigate).toHaveBeenCalledWith('/');
-    }
+    const closeButton = screen.getByRole('button', { name: '닫기' });
+    fireEvent.click(closeButton);
+    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 });
 

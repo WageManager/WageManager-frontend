@@ -54,17 +54,6 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock 환경 변수
-vi.stubGlobal('import', {
-  meta: {
-    env: {
-      VITE_KAKAO_REST_API_KEY: 'test-rest-api-key',
-      VITE_KAKAO_REDIRECT_URI: 'http://localhost:3000/oauth/kakao/redirect',
-      VITE_WAGEMANAGER: 'http://localhost:8080',
-    },
-  },
-});
-
 // Imports 수행
 import KakaoRedirectPage from '../KakaoRedirect';
 import * as authApi from '../../../api/authApi';
@@ -92,6 +81,10 @@ const createLocalStorageMock = () => {
 let localStorageMock: ReturnType<typeof createLocalStorageMock>;
 
 beforeEach(() => {
+  vi.stubEnv('VITE_KAKAO_REST_API_KEY', 'test-rest-api-key');
+  vi.stubEnv('VITE_KAKAO_REDIRECT_URI', 'http://localhost:3000/oauth/kakao/redirect');
+  vi.stubEnv('VITE_WAGEMANAGER', 'http://localhost:8080');
+
   localStorageMock = createLocalStorageMock();
   Object.defineProperty(window, 'localStorage', {
     value: localStorageMock,
@@ -375,7 +368,9 @@ describe('KakaoRedirectPage', () => {
       window.history.replaceState({}, '', '?code=auth-code-123');
       render(<KakaoRedirectPage />);
       
-      expect(screen.getByText('카카오 인증 토큰 요청 중...')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('카카오 인증 토큰 요청 중...')).toBeInTheDocument();
+      });
     });
   });
 });

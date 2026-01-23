@@ -23,7 +23,7 @@ export default function SignupForm({ kakaoAccessToken }: SignupFormProps) {
       {/* 헤더 - 회원가입 제목과 X 버튼 */}
       <div className="signup-header">
         <h2 className="signup-title">회원가입</h2>
-        <button onClick={() => navigate('/')} className="close-button">
+        <button onClick={() => navigate('/')} className="close-button" aria-label="닫기">
           <FaTimes size={20} />
         </button>
       </div>
