@@ -2,10 +2,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
-import SignupPage from './SignupPage';
+import SignupPage from '../SignupPage';
 
 // API 모킹
-vi.mock('../../api/authApi', () => ({
+vi.mock('../../../api/authApi', () => ({
   kakaoRegister: vi.fn(),
 }));
 
@@ -72,14 +72,9 @@ describe('SignupPage 렌더링', () => {
   it('닫기 버튼 클릭 시 홈으로 이동한다', async () => {
     renderSignupPage();
 
-    const closeButton = screen.getByRole('button', { name: '' }); // FaTimes 아이콘 버튼
-    const buttons = screen.getAllByRole('button');
-    const closeBtn = buttons.find(btn => btn.classList.contains('close-button'));
-
-    if (closeBtn) {
-      fireEvent.click(closeBtn);
-      expect(mockNavigate).toHaveBeenCalledWith('/');
-    }
+    const closeButton = screen.getByRole('button', { name: '닫기' });
+    fireEvent.click(closeButton);
+    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 });
 
@@ -271,7 +266,7 @@ describe('API 호출', () => {
   });
 
   it('가입하기 버튼 클릭 시 kakaoRegister API가 호출된다', async () => {
-    const { kakaoRegister } = await import('../../api/authApi');
+    const { kakaoRegister } = await import('../../../api/authApi');
     (kakaoRegister as ReturnType<typeof vi.fn>).mockResolvedValue({
       success: true,
       data: { accessToken: 'test-token', userType: 'WORKER' },
