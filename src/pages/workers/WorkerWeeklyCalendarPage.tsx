@@ -145,7 +145,7 @@ const submitCorrectionRequest = async (
 ): Promise<void> => {
   // 1. 기존 상태에서 해당 workRecordId가 있는지 확인
   const workRecordId = Number(form.recordId);
-  const dateRecords = workRecords[form.date] || [];
+  const dateRecords = workRecords[form.originalDateKey] || [];
   const matchingRecord = dateRecords.find((record) => record.id === workRecordId);
   const isValidWorkRecord = Boolean(matchingRecord);
 

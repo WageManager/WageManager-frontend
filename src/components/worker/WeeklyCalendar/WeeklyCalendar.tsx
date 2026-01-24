@@ -1,15 +1,11 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MdArrowForwardIos } from "react-icons/md";
 import WorkEditRequestBox from "../MonthlyCalendarPage/WorkEditRequestBox";
-import { pad2, getWeekStart } from "../../../utils/dateUtils";
+import { pad2, getWeekStart, makeDateKey } from "../../../utils/dateUtils";
 import type { WorkRecord, WorkRecordsByDate, EditForm, WeeklyCalendarProps, WeeklySummary} from "../../../types/worker/weeklyCalendar.types";
 import "./WeeklyCalendar.css";
 
 // ============ 유틸리티 함수 ============
-
-// 날짜 키 생성 함수
-const makeDateKey = (y: number, m: number, d: number): string =>
-  `${y}-${pad2(m + 1)}-${pad2(d)}`;
 
 // 요일 레이블 조회 함수
 const getDayLabel = (dayIndex: number): string => {
@@ -110,29 +106,32 @@ const createEditFormFromRecord = (
   const [sh, sm] = [startParts[0] ?? "", startParts[1] ?? ""];
   const [eh, em] = [endParts[0] ?? "", endParts[1] ?? ""];
 
+  const dateString = `${year}-${pad2(Number(month))}-${pad2(Number(day))}`;
+  const breakTime = record.breakMinutes ?? 60;
+
   const formData: EditForm = {
     recordId: record.id,
+    contractId: record.contractId,
     originalDateKey: dateKey,
     place: record.place,
     wage: record.wage,
-    date: `${year}-${pad2(Number(month))}-${pad2(Number(day))}`,
+    date: dateString,
     startHour: sh,
     startMinute: sm,
     endHour: eh,
     endMinute: em,
-    breakMinutes: record.breakMinutes ?? 60,
-  };
-
-  // 원본 데이터 저장 (변경사항 비교용) 
-  formData.originalData = {
-    place: formData.place,
-    wage: formData.wage,
-    date: formData.date,
-    startHour: formData.startHour,
-    startMinute: formData.startMinute,
-    endHour: formData.endHour,
-    endMinute: formData.endMinute,
-    breakMinutes: formData.breakMinutes,
+    breakMinutes: breakTime,
+    // 원본 데이터 저장 (변경사항 비교용)
+    originalData: {
+      place: record.place,
+      wage: record.wage,
+      date: dateString,
+      startHour: sh,
+      startMinute: sm,
+      endHour: eh,
+      endMinute: em,
+      breakMinutes: breakTime,
+    },
   };
 
   return formData;
@@ -302,8 +301,8 @@ function WeeklyCalendar({
 
               {isSelected && editForm && (
                 <WorkEditRequestBox
-                  form={editForm as any}
-                  setForm={setEditForm as any}
+                  form={editForm}
+                  setForm={setEditForm}
                   onConfirm={handleConfirmEditInternal}
                   onCancel={handleCancelEdit}
                   variant="weekly"
