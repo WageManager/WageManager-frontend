@@ -78,7 +78,7 @@ const calculateWeeklySummary = (
         const endParts = record.end.split(":").map(Number);
         const [sh, sm] = [startParts[0] ?? 0, startParts[1] ?? 0];
         const [eh, em] = [endParts[0] ?? 0, endParts[1] ?? 0];
-        const diff = eh * 60 + em - (sh * 60 + sm);
+        const diff = eh * 60 + em - (sh * 60 + sm) - (record.breakMinutes ?? 0);
         totalMinutes += diff;
       }
       wage += record.wage || 0;
