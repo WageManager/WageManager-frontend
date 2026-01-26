@@ -77,12 +77,11 @@ export default function EmployerMyPage(): JSX.Element {
     });
   };
 
-  // 프로필 이미지 변경 핸들러 (미구현)
+  // TODO: 프로필 이미지 변경 핸들러 (미구현)
   const handleProfileImageChange = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // TODO: 프로필 이미지 업로드 기능 구현 필요
     Swal.fire("알림", "프로필 이미지 수정 기능은 준비 중입니다.", "info");
     e.target.value = "";
   };

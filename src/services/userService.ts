@@ -10,6 +10,7 @@ export interface UserInfo {
 export interface UpdateMyInfoRequest {
   name?: string;
   phone?: string;
+  profileImageUrl?: string;
 }
 
 const userService = {

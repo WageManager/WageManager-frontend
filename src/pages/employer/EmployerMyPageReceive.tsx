@@ -1,50 +1,68 @@
-import { useState, useMemo, useEffect } from "react";
+import { useEffect, useMemo, useState, type MouseEvent, type JSX } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
-import "../../styles/employerMyPageReceive.css";
 import Swal from "sweetalert2";
-import userService from "../../services/userService";
+import "../../styles/employerMyPageReceive.css";
+import userService, { type UserInfo } from "../../services/userService";
 import workplaceService from "../../services/workplaceService";
 import correctionRequestService from "../../services/correctionRequestService";
 import workRecordService from "../../services/workRecordService";
 
-export default function EmployerMyPageReceive() {
+interface RequestItem {
+  id: string;
+  type: "correction" | "creation";
+  originalId: number;
+  workRecordId?: number;
+  workerName: string;
+  workplace: string;
+  date: string;
+  startTime?: string;
+  endTime?: string;
+  originalDate?: string;
+  originalStartTime?: string;
+  originalEndTime?: string;
+  requestType?: string;
+  status?: string;
+  createdAt?: string;
+}
+
+export default function EmployerMyPageReceive(): JSX.Element {
   const navigate = useNavigate();
-  const [expandedCardId, setExpandedCardId] = useState(null);
-  const [user, setUser] = useState(null);
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [profileImage, setProfileImage] = useState(null);
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const [requests, setRequests] = useState<RequestItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   // 사용자 정보 및 요청 목록 로드
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (): Promise<void> => {
       try {
         // 사용자 정보 조회
         const userData = await userService.getMyInfo();
         setUser(userData);
-        setProfileImage(userData.profileImageUrl);
+        setProfileImage(userData.profileImageUrl ?? null);
 
         // 모든 근무지 조회
         const workplaces = await workplaceService.getWorkplaces();
 
         // 모든 근무지의 승인 대기 요청 조회
-        const allRequests = [];
+        const allRequests: RequestItem[] = [];
         for (const workplace of workplaces) {
           try {
             const response = await correctionRequestService.getPendingApprovals(workplace.id);
-
+            
             // 백엔드는 List<CorrectionRequestDto.ListResponse>를 직접 반환
             // response가 배열인 경우 처리
             const correctionRequests = Array.isArray(response) ? response : [];
 
-            correctionRequests.forEach(req => {
+            correctionRequests.forEach((req: any) => {
               allRequests.push({
                 id: `correction-${req.id}`,
-                type: 'correction',
+                type: "correction",
                 originalId: req.id,
                 workRecordId: req.workRecordId,
-                workerName: req.requester?.name || '알 수 없음',
+                workerName: req.requester?.name || "알 수 없음",
                 workplace: req.workplaceName || workplace.name,
                 date: req.workDate || req.requestedWorkDate,
                 startTime: req.requestedStartTime,
@@ -60,7 +78,7 @@ export default function EmployerMyPageReceive() {
           } catch (error) {
             console.error(`[EmployerMyPageReceive] 근무지 ${workplace.id} 요청 조회 실패:`, error);
             // 개별 근무지 요청 조회 실패 무시
-          }
+        }
         }
 
         setRequests(allRequests);
@@ -77,31 +95,31 @@ export default function EmployerMyPageReceive() {
   // 날짜 기준으로 최신순 정렬
   const sortedRequests = useMemo(() => {
     return [...requests].sort((a, b) => {
-      const dateA = new Date(a.createdAt);
-      const dateB = new Date(b.createdAt);
+      const dateA = new Date(a.createdAt ?? a.date).getTime();
+      const dateB = new Date(b.createdAt ?? b.date).getTime();
       return dateB - dateA;
     });
   }, [requests]);
 
-  const handleNavClick = (path) => {
+  const handleNavClick = (path: string): void => {
     navigate(path);
   };
 
-  const handleCardClick = (cardId) => {
+  const handleCardClick = (cardId: string): void => {
     setExpandedCardId(expandedCardId === cardId ? null : cardId);
   };
 
-  const handleApprove = async (request, e) => {
+  const handleApprove = async (request: RequestItem, e: MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.stopPropagation();
 
-    const displayDate = new Date(request.date).toLocaleDateString('ko-KR');
-    const confirmText = request.type === 'correction'
+    const displayDate = new Date(request.date).toLocaleDateString("ko-KR");
+    const confirmText = request.type === "correction"
       ? `${displayDate} ${request.originalStartTime} ~ ${request.originalEndTime}\n→ ${request.startTime} ~ ${request.endTime}`
       : `${displayDate} ${request.startTime} ~ ${request.endTime}`;
 
     const result = await Swal.fire({
       icon: "question",
-      title: `${request.workerName}님의 ${request.type === 'correction' ? '정정' : '근무'} 요청을 승인하시겠습니까?`,
+      title: `${request.workerName}님의 ${request.type === "correction" ? "정정" : "근무"} 요청을 승인하시겠습니까?`,
       text: `${request.workplace}\n${confirmText}`,
       showCancelButton: true,
       confirmButtonText: "승인",
@@ -111,29 +129,29 @@ export default function EmployerMyPageReceive() {
 
     if (result.isConfirmed) {
       try {
-        if (request.type === 'correction') {
+        if (request.type === "correction") {
           await correctionRequestService.approveRequest(request.originalId);
         } else {
           await workRecordService.approveWorkRecord(request.originalId);
         }
 
         // 목록에서 제거
-        setRequests(prevRequests => prevRequests.filter(req => req.id !== request.id));
+        setRequests((prevRequests) => prevRequests.filter((req) => req.id !== request.id));
         setExpandedCardId(null);
 
-        Swal.fire("승인 완료", `${request.type === 'correction' ? '정정' : '근무'} 요청이 승인되었습니다.`, "success");
-      } catch (error) {
-        Swal.fire("승인 실패", error.message || "승인 처리 중 오류가 발생했습니다.", "error");
+        Swal.fire("승인 완료", `${request.type === "correction" ? "정정" : "근무"} 요청이 승인되었습니다.`, "success");
+      } catch (error: any) {
+        Swal.fire("승인 실패", error?.message || "승인 처리 중 오류가 발생했습니다.", "error");
       }
     }
   };
 
-  const handleReject = async (request, e) => {
+  const handleReject = async (request: RequestItem, e: MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.stopPropagation();
 
     const result = await Swal.fire({
       icon: "warning",
-      title: `${request.workerName}님의 ${request.type === 'correction' ? '정정' : '근무'} 요청을 거절하시겠습니까?`,
+      title: `${request.workerName}님의 ${request.type === "correction" ? "정정" : "근무"} 요청을 거절하시겠습니까?`,
       text: "거절된 요청은 복구할 수 없습니다.",
       showCancelButton: true,
       confirmButtonText: "거절",
@@ -143,19 +161,19 @@ export default function EmployerMyPageReceive() {
 
     if (result.isConfirmed) {
       try {
-        if (request.type === 'correction') {
+        if (request.type === "correction") {
           await correctionRequestService.rejectRequest(request.originalId);
         } else {
           await workRecordService.rejectWorkRecord(request.originalId);
         }
 
         // 목록에서 제거
-        setRequests(prevRequests => prevRequests.filter(req => req.id !== request.id));
+        setRequests((prevRequests) => prevRequests.filter((req) => req.id !== request.id));
         setExpandedCardId(null);
 
-        Swal.fire("거절 완료", `${request.type === 'correction' ? '정정' : '근무'} 요청이 거절되었습니다.`, "success");
-      } catch (error) {
-        Swal.fire("거절 실패", error.message || "거절 처리 중 오류가 발생했습니다.", "error");
+        Swal.fire("거절 완료", `${request.type === "correction" ? "정정" : "근무"} 요청이 거절되었습니다.`, "success");
+      } catch (error: any) {
+        Swal.fire("거절 실패", error?.message || "거절 처리 중 오류가 발생했습니다.", "error");
       }
     }
   };
@@ -205,9 +223,7 @@ export default function EmployerMyPageReceive() {
               <button
                 type="button"
                 className="mypage-nav-checked"
-                onClick={() =>
-                  handleNavClick("/employer/employer-mypage-receive")
-                }
+                onClick={() => handleNavClick("/employer/employer-mypage-receive")}
               >
                 받은 근무 요청
               </button>
@@ -239,19 +255,19 @@ export default function EmployerMyPageReceive() {
                       <div className="mypage-receive-info">
                         <div className="mypage-receive-worker">
                           {request.workerName}({request.workplace})
-                          {request.type === 'correction' && (
-                            <span style={{ marginLeft: '8px', color: 'var(--color-orange)', fontSize: '0.9em' }}>
+                          {request.type === "correction" && (
+                            <span style={{ marginLeft: "8px", color: "var(--color-orange)", fontSize: "0.9em" }}>
                               [정정 요청]
                             </span>
                           )}
                         </div>
                         <div className="mypage-receive-time">
-                          {request.type === 'correction' ? (
+                          {request.type === "correction" ? (
                             <>
-                              <span style={{ textDecoration: 'line-through', color: '#999' }}>
+                              <span style={{ textDecoration: "line-through", color: "#999" }}>
                                 {request.originalStartTime} ~ {request.originalEndTime}
                               </span>
-                              {' → '}
+                              {" → "}
                               <span>{request.startTime} ~ {request.endTime}</span>
                             </>
                           ) : (
@@ -307,16 +323,16 @@ export default function EmployerMyPageReceive() {
                         <div>
                           <p className="detail-label">요청 타입</p>
                           <p className="detail-value">
-                            {request.type === 'correction' ? '정정 요청' : '근무 생성 요청'}
+                            {request.type === "correction" ? "정정 요청" : "근무 생성 요청"}
                           </p>
                         </div>
                         <div>
                           <p className="detail-label">근무 날짜</p>
                           <p className="detail-value">
-                            {requestDate.toLocaleDateString('ko-KR')}
+                            {requestDate.toLocaleDateString("ko-KR")}
                           </p>
                         </div>
-                        {request.type === 'correction' && (
+                        {request.type === "correction" && (
                           <>
                             <div>
                               <p className="detail-label">기존 근무 시간</p>
@@ -332,7 +348,7 @@ export default function EmployerMyPageReceive() {
                             </div>
                           </>
                         )}
-                        {request.type === 'creation' && (
+                        {request.type === "creation" && (
                           <div>
                             <p className="detail-label">근무 시간</p>
                             <p className="detail-value">
