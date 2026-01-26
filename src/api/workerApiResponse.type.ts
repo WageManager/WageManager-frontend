@@ -49,6 +49,21 @@ export interface ContractDetailResponse {
 /** 정정 요청 상태 */
 export type CorrectionStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
+/** 정정 요청 목록 조회 응답 아이템 (/api/worker/correction-requests) */
+export interface CorrectionRequestResponse {
+  id: number;
+  workplaceName: string;
+  /** YYYY-MM-DD */
+  workDate: string;
+  /** HH:mm:ss */
+  requestedStartTime: string;
+  /** HH:mm:ss */
+  requestedEndTime: string;
+  status: CorrectionStatus;
+  /** ISO-8601 */
+  createdAt: string;
+}
+
 /** 근무 기록 조회 응답 (/api/worker/work-records) */
 export interface WorkRecordsResponse {
   id: number;

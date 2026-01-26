@@ -5,10 +5,13 @@ import type {
 } from './workerApiRequest.type';
 import type {
   ApiResponse,
-  CorrectionStatus,
+  Contract,
   ContractDetailResponse,
+  CorrectionStatus,
+  CorrectionRequestResponse,
   WorkRecordsResponse,
   SalaryListItem,
+  SalaryDetailResponse,
   PaymentResponse,
 } from './workerApiResponse.type';
 
@@ -24,6 +27,7 @@ export type {
   Contract,
   ContractDetailResponse,
   CorrectionStatus,
+  CorrectionRequestResponse,
   WorkRecordsResponse,
   PayrollDeductionType,
   SalaryListItem,
@@ -59,7 +63,7 @@ export const updateAccountInfo = async (accountData: { kakaoPayLink: string }) =
 };
 
 // 근로자 계약 목록 조회
-export const getContracts = async () => {
+export const getContracts = async (): Promise<ApiResponse<Contract[]>> => {
   const { data } = await wageManagerApi.get('/api/worker/contracts');
   return data;
 };
@@ -71,7 +75,7 @@ export const getContractDetail = async (contractId: number): Promise<ApiResponse
 };
 
 // 정정 요청 목록 조회
-export const getCorrectionRequests = async (status?: CorrectionStatus) => {
+export const getCorrectionRequests = async (status?: CorrectionStatus): Promise<ApiResponse<CorrectionRequestResponse[]>> => {
   const { data } = await wageManagerApi.get(`/api/worker/correction-requests`, {
     params: { status }
   });
@@ -79,7 +83,7 @@ export const getCorrectionRequests = async (status?: CorrectionStatus) => {
 };
 
 // 근무 기록 정정 요청 생성
-export const createCorrectionRequest = async (payload: CreateCorrectionRequestPayload) => {
+export const createCorrectionRequest = async (payload: CreateCorrectionRequestPayload): Promise<ApiResponse<unknown>> => {
   const { data } = await wageManagerApi.post('/api/worker/correction-requests', payload);
   return data;
 };
@@ -104,7 +108,7 @@ export const getSalaries = async (): Promise<ApiResponse<SalaryListItem[]>> => {
 };
 
 // 급여 자동 계산
-export const calculateSalary = async (contractId: number, year: number, month: number) => {
+export const calculateSalary = async (contractId: number, year: number, month: number): Promise<ApiResponse<SalaryDetailResponse>> => {
   const { data } = await wageManagerApi.post(
     `/api/worker/salaries/contracts/${contractId}/calculate`, { year, month }
   );
