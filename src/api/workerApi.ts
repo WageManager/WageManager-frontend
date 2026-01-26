@@ -3,7 +3,14 @@ import type {
   UpdateUserProfileRequest,
   CreateCorrectionRequestPayload,
 } from './workerApiRequest.type';
-import type { CorrectionStatus } from './workerApiResponse.type';
+import type {
+  ApiResponse,
+  CorrectionStatus,
+  ContractDetailResponse,
+  WorkRecordsResponse,
+  SalaryListItem,
+  PaymentResponse,
+} from './workerApiResponse.type';
 
 // 타입 re-export (다른 파일에서 import할 수 있도록)
 export type {
@@ -13,9 +20,16 @@ export type {
 } from './workerApiRequest.type';
 
 export type {
+  ApiResponse,
   Contract,
+  ContractDetailResponse,
   CorrectionStatus,
-  WorkRecordsResponse
+  WorkRecordsResponse,
+  PayrollDeductionType,
+  SalaryListItem,
+  SalaryDetailResponse,
+  PaymentStatus,
+  PaymentResponse,
 } from './workerApiResponse.type';
 
 // ============ API 함수 ============
@@ -51,7 +65,7 @@ export const getContracts = async () => {
 };
 
 // 근로자 계약 상세 정보 조회
-export const getContractDetail = async (contractId: number) => {
+export const getContractDetail = async (contractId: number): Promise<ApiResponse<ContractDetailResponse>> => {
   const { data } = await wageManagerApi.get(`/api/worker/contracts/${contractId}`);
   return data;
 };
@@ -71,7 +85,7 @@ export const createCorrectionRequest = async (payload: CreateCorrectionRequestPa
 };
 
 // 근로자 근무 기록 조회
-export const getWorkRecords = async (startDate: string, endDate: string) => {
+export const getWorkRecords = async (startDate: string, endDate: string): Promise<ApiResponse<WorkRecordsResponse[]>> => {
   const { data } = await wageManagerApi.get('/api/worker/work-records', { params: { startDate, endDate } });
   return data;
 };
@@ -84,7 +98,7 @@ export const createWorkRecord = async (payload: any) => {
 };
 
 // 근로자 급여 기록 목록 조회
-export const getSalaries = async () => {
+export const getSalaries = async (): Promise<ApiResponse<SalaryListItem[]>> => {
   const { data } = await wageManagerApi.get(`/api/worker/salaries`);
   return data;
 };
@@ -98,7 +112,7 @@ export const calculateSalary = async (contractId: number, year: number, month: n
 };
 
 // 송금 내역 조회
-export const getPayments = async () => {
+export const getPayments = async (): Promise<ApiResponse<PaymentResponse[]>> => {
   const { data } = await wageManagerApi.get('/api/worker/payments');
   return data;
 };
