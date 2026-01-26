@@ -4,7 +4,14 @@ import { formatCurrency } from "../employer/utils/formatUtils";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import WorkDetailList from "../../components/worker/RemittancePage/WorkDetailList";
 import { getContracts, getContractDetail, getWorkRecords, getSalaries, getPayments } from "../../api/workerApi";
+import type { Contract, SalaryListItem, PaymentResponse } from "../../api/workerApi";
 import { formatTime, parseWorkDate, pad2 } from "../../utils/dateUtils";
+import type {
+  Workplace,
+  RemittanceWorkRecord,
+  RemittanceInfo,
+  SortOrder,
+} from "../../types/worker/remittancePage.types";
 
 /**
  * 근로자 송금 관리 페이지
@@ -12,34 +19,32 @@ import { formatTime, parseWorkDate, pad2 } from "../../utils/dateUtils";
  * - 급여 및 입금 상태 확인
  * - 근무 상세 내역 확인
  */
+
 // contractId를 안전하게 id로 변환하는 함수
-const getId = (contractId) => {
+// API가 number[] 또는 Contract[] 형태로 응답할 수 있어 두 경우를 모두 처리
+const extractContractId = (contractId: number | Contract | null | undefined): number | null => {
   if (contractId === null || contractId === undefined) return null;
   if (typeof contractId === 'object' && 'id' in contractId) {
     return contractId.id;
   }
-  return contractId;
+  return contractId as number;
 };
 
 export default function WorkerRemittancePage() {
   // State 관리
-  const [workplaces, setWorkplaces] = useState([]); // 근무지 목록
-  const [selectedWorkplaceId, setSelectedWorkplaceId] = useState(null); // 선택된 근무지 ID (contractId)
-  const [currentYear, setCurrentYear] = useState(() =>
-    new Date().getFullYear()
-  ); // 현재 선택된 연도
-  const [currentMonth, setCurrentMonth] = useState(
-    () => new Date().getMonth() + 1
-  ); // 현재 선택된 월 (1-12)
-  const [expandedRecordIndex, setExpandedRecordIndex] = useState(null); // 확장된 근무 내역 카드의 인덱스
-  const [sortOrder, setSortOrder] = useState("latest"); // 정렬 순서: "latest" (최신순) 또는 "oldest" (과거순)
-  const [view, setView] = useState(false); // 정렬 드롭다운 열림/닫힘 상태
-  const [workplaceView, setWorkplaceView] = useState(false); // 근무지 선택 드롭다운 열림/닫힘 상태
-  const [workRecords, setWorkRecords] = useState([]); // 근무 기록 목록
-  const [isLoading, setIsLoading] = useState(false);
-  const [calculatedSalary, setCalculatedSalary] = useState(null); // 계산된 급여 정보
-  const [isCalculatingSalary, setIsCalculatingSalary] = useState(false); // 급여 계산 중 상태
-  const [payments, setPayments] = useState([]); // 송금 내역 목록
+  const [workplaces, setWorkplaces] = useState<Workplace[]>([]);
+  const [selectedWorkplaceId, setSelectedWorkplaceId] = useState<number | null>(null);
+  const [currentYear, setCurrentYear] = useState<number>(() => new Date().getFullYear());
+  const [currentMonth, setCurrentMonth] = useState<number>(() => new Date().getMonth() + 1);
+  const [expandedRecordIndex, setExpandedRecordIndex] = useState<number | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("latest");
+  const [view, setView] = useState<boolean>(false);
+  const [workplaceView, setWorkplaceView] = useState<boolean>(false);
+  const [workRecords, setWorkRecords] = useState<RemittanceWorkRecord[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [calculatedSalary, setCalculatedSalary] = useState<SalaryListItem | null>(null);
+  const [isCalculatingSalary, setIsCalculatingSalary] = useState<boolean>(false);
+  const [payments, setPayments] = useState<PaymentResponse[]>([]);
 
   // 선택된 근무지 정보 조회
   const selectedWorkplace = workplaces.find((wp) => wp.id === selectedWorkplaceId);
@@ -49,16 +54,16 @@ export default function WorkerRemittancePage() {
     const fetchWorkplaces = async () => {
       try {
         const contractsResponse = await getContracts();
-        let contracts = [];
+        let contracts: (number | Contract)[] = [];
         if (Array.isArray(contractsResponse.data)) {
           contracts = contractsResponse.data;
         } else if (contractsResponse.data) {
-          contracts = [contractsResponse.data];
+          contracts = [contractsResponse.data as unknown as Contract];
         }
 
         const workplacesList = await Promise.all(
           contracts.map(async (contract) => {
-            const contractId = getId(contract);
+            const contractId = extractContractId(contract);
             if (!contractId) return null;
 
             try {
@@ -74,12 +79,15 @@ export default function WorkerRemittancePage() {
           })
         );
 
-        const validWorkplaces = workplacesList.filter((wp) => wp !== null);
+        const validWorkplaces: Workplace[] = workplacesList.filter(
+          (wp): wp is Workplace => wp !== null
+        );
         setWorkplaces(validWorkplaces);
-        
+
         // 첫 번째 근무지를 기본 선택
-        if (validWorkplaces.length > 0 && !selectedWorkplaceId) {
-          setSelectedWorkplaceId(validWorkplaces[0].id);
+        const firstWorkplace = validWorkplaces[0];
+        if (firstWorkplace && !selectedWorkplaceId) {
+          setSelectedWorkplaceId(firstWorkplace.id);
         }
       } catch (error) {
         console.error("[WorkerRemittancePage] 근무지 목록 조회 실패:", error);
@@ -100,12 +108,12 @@ export default function WorkerRemittancePage() {
 
     try {
       setIsLoading(true);
-      
+
       // 계약 상세 정보 가져오기 (workplaceName 등)
       const contractDetail = await getContractDetail(selectedWorkplaceId);
       const hourlyWage = contractDetail.data?.hourlyWage || 0;
       const payrollDeductionType = contractDetail.data?.payrollDeductionType || '';
-      
+
       // 4대 보험 및 세금 정보 추출
       const hasSocialInsurance = payrollDeductionType.includes('INSURANCE');
       const hasWithholdingTax = payrollDeductionType.includes('TAX');
@@ -119,7 +127,7 @@ export default function WorkerRemittancePage() {
       const workRecordsData = workRecordsResponse.data || [];
 
       // 근무 기록 매핑 (급여 계산은 calculateSalary API 결과 사용)
-      const mappedRecords = workRecordsData
+      const mappedRecords: RemittanceWorkRecord[] = workRecordsData
         .filter((record) => record.contractId === selectedWorkplaceId && record.status !== "PENDING_APPROVAL")
         .map((record) => {
           // 날짜 파싱
@@ -130,27 +138,18 @@ export default function WorkerRemittancePage() {
 
           return {
             id: record.id,
-            date: date,
-            day: day,
+            date,
+            day,
             startTime: formatTime(record.startTime) || "00:00",
             endTime: formatTime(record.endTime) || "00:00",
             workplace: contractDetail.data?.workplaceName || '',
             breakMinutes: record.breakMinutes || 0,
-            hourlyWage: hourlyWage,
-            wage: baseWage, // 기본 급여만 표시 (실제 급여는 calculateSalary API 결과 사용)
+            hourlyWage,
+            wage: baseWage,
             allowances: {
-              overtime: {
-                enabled: false,
-                rate: 0,
-              },
-              night: {
-                enabled: false,
-                rate: 0,
-              },
-              holiday: {
-                enabled: false,
-                rate: 0,
-              },
+              overtime: { enabled: false, rate: 0 },
+              night: { enabled: false, rate: 0 },
+              holiday: { enabled: false, rate: 0 },
             },
             socialInsurance: hasSocialInsurance,
             withholdingTax: hasWithholdingTax,
@@ -174,9 +173,9 @@ export default function WorkerRemittancePage() {
   const sortedWorkRecords = useMemo(() => {
     return [...workRecords].sort((a, b) => {
       if (sortOrder === "latest") {
-        return b.date - a.date; // 최신순 (큰 날짜가 먼저)
+        return b.date - a.date;
       } else {
-        return a.date - b.date; // 과거순 (작은 날짜가 먼저)
+        return a.date - b.date;
       }
     });
   }, [workRecords, sortOrder]);
@@ -237,35 +236,25 @@ export default function WorkerRemittancePage() {
   // 해당 월의 총 급여 계산 (근무 기록 wage 합산)
   const totalWage = useMemo(() => {
     return workRecords.reduce((sum, record) => {
-      // 승인 대기 중이거나 삭제된 근무는 제외
-      if (record.status === "pending" || record.status === "deleted") {
-        return sum;
-      }
       return sum + (record.wage || 0);
     }, 0);
   }, [workRecords]);
 
   // 입금 상태 정보 계산 (API 데이터 기반)
-  // - completed: 입금 완료 (isPaid === true, 송금 날짜 표시)
-  // - pending: 입금 대기 (isPaid === false, 해당 월이 지났지만 아직 입금되지 않음)
-  // - before: 입금 전 (isPaid === false, 해당 월이 아직 지나지 않음)
-  const remittanceInfo = useMemo(() => {
+  const remittanceInfo: RemittanceInfo = useMemo(() => {
     if (!calculatedSalary?.id) {
-      // 급여 계산 결과가 없으면 "입금 전"으로 표시
       return { status: "before", remittanceDate: null };
     }
 
-    // 현재 선택된 월의 송금 내역 찾기 (salaryId로 매칭)
     const payment = payments.find((p) => p.salaryId === calculatedSalary.id);
 
     if (!payment) {
-      // 송금 내역이 없으면 해당 월이 지났는지 확인
       const today = new Date();
       const currentYearNum = today.getFullYear();
       const currentMonthNum = today.getMonth() + 1;
-      
-      const isMonthPassed = 
-        currentYearNum > currentYear || 
+
+      const isMonthPassed =
+        currentYearNum > currentYear ||
         (currentYearNum === currentYear && currentMonthNum > currentMonth);
 
       return {
@@ -274,7 +263,6 @@ export default function WorkerRemittancePage() {
       };
     }
 
-    // isPaid가 true면 입금 완료
     if (payment.isPaid) {
       return {
         status: "completed",
@@ -282,13 +270,12 @@ export default function WorkerRemittancePage() {
       };
     }
 
-    // isPaid가 false면 입금 대기 또는 입금 전
     const today = new Date();
     const currentYearNum = today.getFullYear();
     const currentMonthNum = today.getMonth() + 1;
-    
-    const isMonthPassed = 
-      currentYearNum > currentYear || 
+
+    const isMonthPassed =
+      currentYearNum > currentYear ||
       (currentYearNum === currentYear && currentMonthNum > currentMonth);
 
     return {
@@ -297,7 +284,7 @@ export default function WorkerRemittancePage() {
     };
   }, [calculatedSalary, payments, currentYear, currentMonth]);
 
-  // 이전 월로 이동 (1월이면 이전 년도 12월로 이동)
+  // 이전 월로 이동
   const handlePrevMonth = () => {
     setCurrentMonth((prev) => {
       if (prev === 1) {
@@ -306,10 +293,10 @@ export default function WorkerRemittancePage() {
       }
       return prev - 1;
     });
-    setExpandedRecordIndex(null); // 월 변경 시 확장된 패널 닫기
+    setExpandedRecordIndex(null);
   };
 
-  // 다음 월로 이동 (12월이면 다음 년도 1월로 이동)
+  // 다음 월로 이동
   const handleNextMonth = () => {
     setCurrentMonth((prev) => {
       if (prev === 12) {
@@ -318,26 +305,26 @@ export default function WorkerRemittancePage() {
       }
       return prev + 1;
     });
-    setExpandedRecordIndex(null); // 월 변경 시 확장된 패널 닫기
+    setExpandedRecordIndex(null);
   };
 
   // 근무지 선택 핸들러
-  const handleWorkplaceSelect = (workplaceId) => {
+  const handleWorkplaceSelect = (workplaceId: number) => {
     setSelectedWorkplaceId(workplaceId);
-    setWorkplaceView(false); // 드롭다운 닫기
-    setExpandedRecordIndex(null); // 근무지 변경 시 확장된 패널 닫기
+    setWorkplaceView(false);
+    setExpandedRecordIndex(null);
   };
 
   // 근무 내역 카드 클릭 핸들러 (상세 정보 펼치기/접기)
-  const handleRecordClick = (index) => {
+  const handleRecordClick = (index: number) => {
     setExpandedRecordIndex((prev) => (prev === index ? null : index));
   };
 
   // 정렬 옵션 선택 핸들러
-  const handleSortSelect = (order) => {
+  const handleSortSelect = (order: SortOrder) => {
     setSortOrder(order);
-    setView(false); // 드롭다운 닫기
-    setExpandedRecordIndex(null); // 정렬 변경 시 확장된 패널 닫기
+    setView(false);
+    setExpandedRecordIndex(null);
   };
 
   return (
@@ -408,7 +395,6 @@ export default function WorkerRemittancePage() {
               </div>
             </div>
             <div className="remittance-status-card">
-              {/* 입금 상태에 따른 버튼 및 정보 표시 */}
               {remittanceInfo.status === "completed" ? (
                 <>
                   <button className="remittance-status-button completed">
