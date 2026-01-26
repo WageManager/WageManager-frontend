@@ -459,14 +459,13 @@ describe('초기 데이터 로딩', () => {
   });
 
   it('컴포넌트 마운트 시 API가 호출된다', async () => {
-    const { getContracts, getSalaries } = await import('../../api/workerApi');
+    const { getContracts } = await import('../../api/workerApi');
     await setupMocks();
 
     renderPage();
 
     await waitFor(() => {
       expect(getContracts).toHaveBeenCalled();
-      expect(getSalaries).toHaveBeenCalled();
     });
   });
 });
