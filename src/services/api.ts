@@ -1,8 +1,8 @@
-import axios from "axios";
+import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 const API_BASE_URL = "https://port-0-paycheck-backend-mkmluzdp5be20e47.sel3.cloudtype.app/api";
 
-const api = axios.create({
+const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
@@ -11,14 +11,14 @@ const api = axios.create({
 
 // Request interceptor - add JWT token
 api.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  (error: AxiosError) => {
     return Promise.reject(error);
   }
 );
@@ -29,7 +29,7 @@ api.interceptors.response.use(
     // Extract ApiResponse<T>.data
     return response.data?.data !== undefined ? response.data.data : response.data;
   },
-  (error) => {
+  (error: AxiosError) => {
     if (error.response) {
       const { status, data } = error.response;
       if (status === 401) {
@@ -41,7 +41,7 @@ api.interceptors.response.use(
         window.location.href = "/";
       }
       const errorMessage =
-        data?.message || data?.error || "알 수 없는 오류가 발생했습니다.";
+        (data as any)?.message || (data as any)?.error || "알 수 없는 오류가 발생했습니다.";
       return Promise.reject(new Error(errorMessage));
     }
     return Promise.reject(

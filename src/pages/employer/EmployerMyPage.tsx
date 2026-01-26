@@ -1,30 +1,43 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import type { ChangeEvent, JSX } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaCamera, FaUser } from "react-icons/fa";
-import "../../styles/employerMyPage.css";
 import Swal from "sweetalert2";
-import userService from "../../services/userService";
+import "../../styles/employerMyPage.css";
 import { logout } from "../../api/authApi";
+import userService from "../../services/userService";
 
-export default function EmployerMyPage() {
-  const [user, setUser] = useState(null);
-  const [editableSections, setEditableSections] = useState({
-    name: false,
-    phone: false,
-  });
-  const [profileImage, setProfileImage] = useState(null);
-  const [loading, setLoading] = useState(true);
+interface User {
+  id?: number;
+  name: string;
+  phone?: string;
+  profileImageUrl?: string | null;
+}
+
+type EditableField = "name" | "phone";
+
+export default function EmployerMyPage(): JSX.Element {
+  const [user, setUser] = useState<User | null>(null);
+  const [editableSections, setEditableSections] = useState<{ name: boolean; phone: boolean }>(
+    {
+      name: false,
+      phone: false,
+    }
+  );
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
   // 사용자 정보 로드
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (): Promise<void> => {
       try {
-        const userData = await userService.getMyInfo();
+        const userData: User = await userService.getMyInfo();
         setUser(userData);
-        setProfileImage(userData.profileImageUrl);
+        setProfileImage(userData.profileImageUrl ?? null);
       } catch (error) {
-        Swal.fire("오류", "사용자 정보를 불러오는데 실패했습니다.", "error");
+        const message = error instanceof Error ? error.message : "사용자 정보를 불러오는데 실패했습니다.";
+        Swal.fire("오류", message, "error");
       } finally {
         setLoading(false);
       }
@@ -34,45 +47,47 @@ export default function EmployerMyPage() {
   }, []);
 
   // 입력 필드 변경 핸들러
-  const handleChange = (field, value) => {
-    setUser(prev => ({ ...prev, [field]: value }));
+  const handleChange = (field: EditableField, value: string): void => {
+    setUser((prev) => (prev ? { ...prev, [field]: value } : prev));
+  };
+
+  const handleSave = async (field: EditableField): Promise<void> => {
+    if (!user) return;
+
+    try {
+      await userService.updateMyInfo({ [field]: user[field] ?? "" });
+      Swal.fire("완료", field === "name" ? "이름이 수정되었습니다." : "전화번호가 수정되었습니다.", "success");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "정보 수정 중 오류가 발생했습니다.";
+      Swal.fire("수정 실패", message, "error");
+    }
   };
 
   // 수정 모드 토글
-  const toggleEdit = (field) => {
-    setEditableSections(prev => ({ ...prev, [field]: !prev[field] }));
-    
-    // 완료 버튼 클릭 시 저장
-    if (editableSections[field]) {
-      handleSave(field);
-    }
+  const toggleEdit = (field: EditableField): void => {
+    setEditableSections((prev) => {
+      const wasEditing = prev[field];
+      const nextState = { ...prev, [field]: !prev[field] };
+
+      if (wasEditing) {
+        void handleSave(field);
+      }
+
+      return nextState;
+    });
   };
 
-  const handleSave = async (field) => {
-    try {
-      await userService.updateMyInfo({ [field]: user[field] });
-      Swal.fire("완료", `${field === 'name' ? '이름' : '전화번호'}이 수정되었습니다.`, "success");
-    } catch (error) {
-      Swal.fire("수정 실패", error.message || "정보 수정 중 오류가 발생했습니다.", "error");
-    }
-  };
-
-  // 프로필 이미지 변경 핸들러
-  const handleProfileImageChange = async (e) => {
+  // 프로필 이미지 변경 핸들러 (미구현)
+  const handleProfileImageChange = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    try {
-      await userService.updateProfileImage(file);
-      const userData = await userService.getMyInfo();
-      setProfileImage(userData.profileImageUrl);
-      Swal.fire("완료", "프로필 사진이 수정되었습니다.", "success");
-    } catch (error) {
-      Swal.fire("수정 실패", error.message || "프로필 사진 수정 중 오류가 발생했습니다.", "error");
-    }
+    // TODO: 프로필 이미지 업로드 기능 구현 필요
+    Swal.fire("알림", "프로필 이미지 수정 기능은 준비 중입니다.", "info");
+    e.target.value = "";
   };
 
-  const handleWithdraw = async () => {
+  const handleWithdraw = async (): Promise<void> => {
     const result = await Swal.fire({
       icon: "warning",
       title: "회원 탈퇴 하시겠습니까?",
@@ -91,15 +106,16 @@ export default function EmployerMyPage() {
 
         // 로그아웃 처리
         await logout();
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
         navigate("/");
       } catch (error) {
-        Swal.fire("탈퇴 실패", error.message || "회원 탈퇴 중 오류가 발생했습니다.", "error");
+        const message = error instanceof Error ? error.message : "회원 탈퇴 중 오류가 발생했습니다.";
+        Swal.fire("탈퇴 실패", message, "error");
       }
     }
   };
 
-  const handleNavClick = (path) => {
+  const handleNavClick = (path: string): void => {
     navigate(path);
   };
 
@@ -130,11 +146,7 @@ export default function EmployerMyPage() {
           <div className="mypage-profile-card">
             <div className="mypage-avatar-wrapper">
               {profileImage ? (
-                <img
-                  src={profileImage}
-                  alt="프로필"
-                  className="mypage-avatar-image"
-                />
+                <img src={profileImage} alt="프로필" className="mypage-avatar-image" />
               ) : (
                 <div className="mypage-avatar-placeholder">
                   <FaUser />
@@ -142,11 +154,7 @@ export default function EmployerMyPage() {
               )}
               <label className="mypage-avatar-camera">
                 <FaCamera />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleProfileImageChange}
-                />
+                <input type="file" accept="image/*" onChange={handleProfileImageChange} />
               </label>
             </div>
             <div className="mypage-profile-name">{user.name}</div>
@@ -166,9 +174,7 @@ export default function EmployerMyPage() {
               <button
                 type="button"
                 className="mypage-nav-li"
-                onClick={() =>
-                  handleNavClick("/employer/employer-mypage-receive")
-                }
+                onClick={() => handleNavClick("/employer/employer-mypage-receive")}
               >
                 받은 근무 요청
               </button>
@@ -187,10 +193,7 @@ export default function EmployerMyPage() {
                 onChange={(e) => handleChange("name", e.target.value)}
               />
             </div>
-            <button
-              className="mypage-edit-button"
-              onClick={() => toggleEdit("name")}
-            >
+            <button className="mypage-edit-button" onClick={() => toggleEdit("name")}>
               {editableSections.name ? "완료" : "수정"}
             </button>
           </div>
@@ -199,23 +202,17 @@ export default function EmployerMyPage() {
             <span className="mypage-label">전화번호</span>
             <input
               type="tel"
-              value={user.phone || ""}
+              value={user.phone ?? ""}
               disabled={!editableSections.phone}
               onChange={(e) => handleChange("phone", e.target.value)}
               placeholder="010-1234-5678"
             />
-            <button
-              className="mypage-edit-button"
-              onClick={() => toggleEdit("phone")}
-            >
+            <button className="mypage-edit-button" onClick={() => toggleEdit("phone")}>
               {editableSections.phone ? "완료" : "수정"}
             </button>
           </div>
           <div className="mypage-withdraw-section">
-            <button
-              className="mypage-withdraw-button"
-              onClick={handleWithdraw}
-            >
+            <button className="mypage-withdraw-button" onClick={handleWithdraw}>
               회원 탈퇴 &gt;
             </button>
           </div>
