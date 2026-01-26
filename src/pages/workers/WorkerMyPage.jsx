@@ -4,7 +4,8 @@ import ProfileBox from "../../components/worker/MyPage/ProfileBox";
 import ProfileEdit from "../../components/worker/MyPage/ProfileEdit";
 import WorkplaceManage from "../../components/worker/MyPage/WorkplaceManage";
 import WorkEditRequestList from "../../components/worker/MyPage/WorkEditRequestList";
-import { getUserProfile, getWorkerInfo, updateUserProfile, updateAccountInfo, getContracts, getContractDetail, getCorrectionRequests } from "../../api/workerApi";
+import { getUserProfile, updateUserProfile, updateAccountInfo } from "../../api/userApi";
+import { getWorkerInfo, getContracts, getContractDetail, getCorrectionRequests } from "../../api/workerApi";
 import { formatDateToKorean, formatDateToMonthDay, formatTime } from "../../utils/dateUtils";
 import "./WorkerMyPage.css";
 

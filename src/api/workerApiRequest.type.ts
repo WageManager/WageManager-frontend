@@ -1,11 +1,3 @@
-// ============ 사용자 프로필 관련 타입 ============
-
-/** 사용자 프로필 수정 요청 */
-export interface UpdateUserProfileRequest {
-  name?: string;
-  phone?: string;
-}
-
 // ============ 정정 요청 관련 타입 ============
 
 /** 정정 요청 타입 */

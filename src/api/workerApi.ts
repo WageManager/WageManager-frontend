@@ -1,6 +1,5 @@
 import wageManagerApi from './axios';
 import type {
-  UpdateUserProfileRequest,
   CreateCorrectionRequestPayload,
 } from './workerApiRequest.type';
 import type {
@@ -14,10 +13,10 @@ import type {
   SalaryDetailResponse,
   PaymentResponse,
 } from './workerApiResponse.type';
+import type { WorkerResponse } from './userApiResponse.type';
 
 // 타입 re-export (다른 파일에서 import할 수 있도록)
 export type {
-  UpdateUserProfileRequest,
   CorrectionRequestType,
   CreateCorrectionRequestPayload,
 } from './workerApiRequest.type';
@@ -38,27 +37,9 @@ export type {
 
 // ============ API 함수 ============
 
-// 사용자 프로필 조회
-export const getUserProfile = async () => {
-  const { data } = await wageManagerApi.get('/api/users/me');
-  return data;
-};
-
 // 근로자 정보 조회
-export const getWorkerInfo = async (userId: number) => {
+export const getWorkerInfo = async (userId: number): Promise<ApiResponse<WorkerResponse>> => {
   const { data } = await wageManagerApi.get(`/api/workers/user/${userId}`);
-  return data;
-};
-
-// 사용자 프로필 수정
-export const updateUserProfile = async (userData: UpdateUserProfileRequest) => {
-  const { data } = await wageManagerApi.put('/api/users/me', userData);
-  return data;
-};
-
-// 계좌 정보 수정 (카카오페이 링크)
-export const updateAccountInfo = async (accountData: { kakaoPayLink: string }) => {
-  const { data } = await wageManagerApi.put('/api/users/me/account', accountData);
   return data;
 };
 

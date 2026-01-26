@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { MdNotificationsNone } from "react-icons/md";
 import NotificationDropdown from "./NotificationDropdown";
-import { getUserProfile } from "../../api/workerApi";
+import { getUserProfile } from "../../api/userApi";
 import { logout } from "../../api/authApi";
 import "../../styles/header.css";
 import logoImage from "../../image/logo.png";
