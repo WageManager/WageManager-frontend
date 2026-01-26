@@ -16,6 +16,62 @@ export default function EmployerMyPage() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // 사용자 정보 로드
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userData = await userService.getMyInfo();
+        setUser(userData);
+        setProfileImage(userData.profileImageUrl);
+      } catch (error) {
+        Swal.fire("오류", "사용자 정보를 불러오는데 실패했습니다.", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // 입력 필드 변경 핸들러
+  const handleChange = (field, value) => {
+    setUser(prev => ({ ...prev, [field]: value }));
+  };
+
+  // 수정 모드 토글
+  const toggleEdit = (field) => {
+    setEditableSections(prev => ({ ...prev, [field]: !prev[field] }));
+    
+    // 완료 버튼 클릭 시 저장
+    if (editableSections[field]) {
+      handleSave(field);
+    }
+  };
+
+  const handleSave = async (field) => {
+    try {
+      await userService.updateMyInfo({ [field]: user[field] });
+      Swal.fire("완료", `${field === 'name' ? '이름' : '전화번호'}이 수정되었습니다.`, "success");
+    } catch (error) {
+      Swal.fire("수정 실패", error.message || "정보 수정 중 오류가 발생했습니다.", "error");
+    }
+  };
+
+  // 프로필 이미지 변경 핸들러
+  const handleProfileImageChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      await userService.updateProfileImage(file);
+      const userData = await userService.getMyInfo();
+      setProfileImage(userData.profileImageUrl);
+      Swal.fire("완료", "프로필 사진이 수정되었습니다.", "success");
+    } catch (error) {
+      Swal.fire("수정 실패", error.message || "프로필 사진 수정 중 오류가 발생했습니다.", "error");
+    }
+  };
+
   const handleWithdraw = async () => {
     const result = await Swal.fire({
       icon: "warning",
