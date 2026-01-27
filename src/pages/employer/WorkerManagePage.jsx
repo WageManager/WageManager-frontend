@@ -9,7 +9,7 @@ import {
   workerInfo,
   workerCodeMap,
 } from "./dummyData";
-import { formatCurrency } from "./utils/formatUtils";
+import { formatKRW } from "../../utils/formatUtils";
 import TimeInput from "./components/TimeInput";
 import WorkplaceForm from "./components/WorkplaceForm";
 import ScheduleGrid from "./components/ScheduleGrid";
@@ -1952,7 +1952,7 @@ export default function WorkerManagePage() {
                       </div>
                     ) : (
                       <div className="info-value">
-                        {formatCurrency(
+                        {formatKRW(
                           currentWorkInfo?.hourlyWage ||
                             workerData.workInfo.hourlyWage
                         )}

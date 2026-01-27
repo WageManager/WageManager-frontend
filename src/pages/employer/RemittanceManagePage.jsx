@@ -5,7 +5,7 @@ import {
   workplaceWorkers,
   remittanceData,
 } from "./dummyData";
-import { formatCurrency, formatBreakTime } from "./utils/formatUtils";
+import { formatKRW, formatBreakTime } from "../../utils/formatUtils";
 import { allowanceDefinitions } from "./utils/shiftUtils";
 import workplaceService from "../../services/workplaceService";
 import contractService from "../../services/contractService";
@@ -380,7 +380,7 @@ export default function RemittanceManagePage() {
                     </span>
                   </div>
                   <div className="detail-wage">
-                    {formatCurrency(record.wage)}
+                    {formatKRW(record.wage)}
                   </div>
                 </div>
                 <div
@@ -420,7 +420,7 @@ export default function RemittanceManagePage() {
                       <p className="detail-label">시급</p>
                       <p className="detail-value">
                         {record.hourlyWage
-                          ? formatCurrency(record.hourlyWage)
+                          ? formatKRW(record.hourlyWage)
                           : "-"}
                       </p>
                     </div>
@@ -485,7 +485,7 @@ export default function RemittanceManagePage() {
       <div className="remittance-right-panel">
         <div className="remittance-summary-box">
           <h3 className="summary-title">이번 달 급여</h3>
-          <div className="summary-amount">{formatCurrency(totalWage)}</div>
+          <div className="summary-amount">{formatKRW(totalWage)}</div>
         </div>
         <button
           type="button"

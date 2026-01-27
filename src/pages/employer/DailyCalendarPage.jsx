@@ -14,12 +14,8 @@ import {
   cloneShiftWithDefaults,
   generateShiftId,
 } from "./utils/shiftUtils";
-import {
-  formatCurrency,
-  formatBreakTime,
-  formatDuration,
-  timeStringToDecimal,
-} from "./utils/formatUtils";
+import { formatKRW, formatBreakTime } from "../../utils/formatUtils";
+import { formatDuration, timeStringToDecimal } from "./utils/formatUtils";
 import { hours } from "./constants";
 import TimeInput from "./components/TimeInput";
 import Swal from "sweetalert2";
@@ -1048,7 +1044,7 @@ export default function DailyCalendarPage() {
                   />
                 ) : (
                   <p className="detail-value">
-                    {formatCurrency(shiftForDisplay?.hourlyWage)}
+                    {formatKRW(shiftForDisplay?.hourlyWage)}
                   </p>
                 )}
               </div>

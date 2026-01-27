@@ -1,5 +1,5 @@
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
-import { formatCurrency, formatBreakTime } from "../../../pages/employer/utils/formatUtils";
+import { formatKRW, formatBreakTime } from "../../../utils/formatUtils";
 import { allowanceDefinitions } from "../../../pages/employer/utils/shiftUtils";
 import "../../../pages/workers/WorkerRemittancePage.css";
 import type { RemittanceWorkRecord, AllowanceKey, SortOrder } from "../../../types/worker/remittancePage.types";
@@ -120,7 +120,7 @@ function WorkDetailList({
                     </div>
                     <div className="detail-form-item">
                       <label className="detail-form-label">시급</label>
-                      <div className="detail-form-value">{formatCurrency(record.hourlyWage)}</div>
+                      <div className="detail-form-value">{formatKRW(record.hourlyWage)}</div>
                     </div>
                   </div>
                   {/* 오른쪽 섹션: 수당, 보험, 세금 정보 */}

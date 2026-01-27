@@ -7,7 +7,7 @@
 
 import { useState, useMemo } from "react";
 import "./WorkerRemittancePage.css";
-import { formatCurrency } from "../employer/utils/formatUtils";
+import { formatKRW } from "../../utils/formatUtils";
 import MonthNav from "../../components/worker/MonthlyCalendarPage/MonthNav";
 import WorkDetailList from "../../components/worker/RemittancePage/WorkDetailList";
 import WorkplaceDropdown from "../../components/worker/RemittancePage/WorkplaceDropdown";
@@ -98,7 +98,7 @@ export default function WorkerRemittancePage() {
             <div className="wage-info-section">
               <div className="wage-label">급여</div>
               <div className="wage-amount">
-                {isCalculatingSalary ? "계산 중..." : formatCurrency(totalWage)}
+                {isCalculatingSalary ? "계산 중..." : formatKRW(totalWage)}
               </div>
             </div>
             <div className="remittance-status-card">

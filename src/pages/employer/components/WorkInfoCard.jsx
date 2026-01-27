@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { FaTimes } from "react-icons/fa";
 import TimeInput from "./TimeInput";
-import { formatCurrency } from "../utils/formatUtils";
+import { formatKRW } from "../../../utils/formatUtils";
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -320,7 +320,7 @@ export default function WorkInfoCard({
               </div>
             ) : (
               <div className="info-value">
-                {formatCurrency(
+                {formatKRW(
                   currentWorkInfo?.hourlyWage ?? workerData.workInfo.hourlyWage
                 )}
               </div>
