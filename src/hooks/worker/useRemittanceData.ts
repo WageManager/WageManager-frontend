@@ -198,38 +198,18 @@ export function useRemittanceData() {
 
     const payment = payments.find((p) => p.salaryId === calculatedSalary.id);
 
-    if (!payment) {
-      const today = new Date();
-      const currentYearNum = today.getFullYear();
-      const currentMonthNum = today.getMonth() + 1;
-
-      const isMonthPassed =
-        currentYearNum > currentYear ||
-        (currentYearNum === currentYear && currentMonthNum > currentMonth);
-
-      return {
-        status: isMonthPassed ? "pending" : "before",
-        remittanceDate: null,
-      };
+    if (payment?.isPaid) {
+      return { status: "completed", remittanceDate: payment.paymentDate || null };
     }
 
-    if (payment.isPaid) {
-      return {
-        status: "completed",
-        remittanceDate: payment.paymentDate || null,
-      };
-    }
-
+    // payment가 없거나 isPaid가 false인 경우: 해당 월이 지났으면 "대기", 아니면 "입금 전"
     const today = new Date();
-    const currentYearNum = today.getFullYear();
-    const currentMonthNum = today.getMonth() + 1;
-
-    const isMonthPassed =
-      currentYearNum > currentYear ||
-      (currentYearNum === currentYear && currentMonthNum > currentMonth);
+    const isSelectedMonthPassed =
+      today.getFullYear() > currentYear ||
+      (today.getFullYear() === currentYear && today.getMonth() + 1 > currentMonth);
 
     return {
-      status: isMonthPassed ? "pending" : "before",
+      status: isSelectedMonthPassed ? "pending" : "before",
       remittanceDate: null,
     };
   }, [calculatedSalary, payments, currentYear, currentMonth]);
