@@ -1,6 +1,6 @@
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import { formatKRW, formatBreakTime } from "../../../utils/formatUtils";
-import { allowanceDefinitions } from "../../../pages/employer/utils/shiftUtils";
+import { extraPayTypes } from "../../../constants/extraPay";
 import "../../../pages/workers/WorkerRemittancePage.css";
 import type { RemittanceWorkRecord, AllowanceKey, SortOrder } from "../../../types/worker/remittancePage.types";
 
@@ -127,7 +127,7 @@ function WorkDetailList({
                   <div className="detail-right-section">
                     {/* 수당 버튼들 (야간, 연장, 휴일 등) */}
                     <div className="allowance-buttons">
-                      {allowanceDefinitions.map(({ key, label }: { key: AllowanceKey; label: string }) => {
+                      {extraPayTypes.map(({ key, label }: { key: AllowanceKey; label: string }) => {
                         const allowance = record.allowances[key] || {
                           enabled: false,
                           rate: 0,

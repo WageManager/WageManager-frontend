@@ -10,10 +10,10 @@ import workRecordService from "../../services/workRecordService";
 import contractService from "../../services/contractService";
 import { getDateKey, isSameDate, buildCalendarCells } from "./utils/dateUtils";
 import {
-  allowanceDefinitions,
   cloneShiftWithDefaults,
   generateShiftId,
 } from "./utils/shiftUtils";
+import { extraPayTypes } from "../../constants/extraPay";
 import { formatKRW, formatBreakTime } from "../../utils/formatUtils";
 import { formatDuration, timeStringToDecimal } from "./utils/formatUtils";
 import { hours } from "./constants";
@@ -1052,7 +1052,7 @@ export default function DailyCalendarPage() {
             <div className="detail-section">
               <p className="detail-label">수당 정보</p>
               <ul className="allowance-list">
-                {allowanceDefinitions.map(({ key, label }) => {
+                {extraPayTypes.map(({ key, label }) => {
                   const allowance = (isEditing ? editedShift : activeShift)
                     ?.allowances?.[key] || {
                     enabled: false,

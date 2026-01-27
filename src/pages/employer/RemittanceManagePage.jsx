@@ -6,7 +6,7 @@ import {
   remittanceData,
 } from "./dummyData";
 import { formatKRW, formatBreakTime } from "../../utils/formatUtils";
-import { allowanceDefinitions } from "./utils/shiftUtils";
+import { extraPayTypes } from "../../constants/extraPay";
 import workplaceService from "../../services/workplaceService";
 import contractService from "../../services/contractService";
 import workRecordService from "../../services/workRecordService";
@@ -434,7 +434,7 @@ export default function RemittanceManagePage() {
                   <div className="detail-section">
                     <p className="detail-label">수당 정보</p>
                     <ul className="allowance-list">
-                      {allowanceDefinitions.map(({ key, label }) => {
+                      {extraPayTypes.map(({ key, label }) => {
                         const allowance = record.allowances?.[key] || {
                           enabled: false,
                           rate: 0,

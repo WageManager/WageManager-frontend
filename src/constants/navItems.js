@@ -6,7 +6,6 @@ import {
   FiBriefcase,
   FiUser,
 } from "react-icons/fi";
-import { IoMdPerson } from "react-icons/io";
 
 export const workerNavItems = [
   {
