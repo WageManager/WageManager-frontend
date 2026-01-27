@@ -95,8 +95,8 @@ export default function EmployerMyPageReceive(): JSX.Element {
   // 날짜 기준으로 최신순 정렬
   const sortedRequests = useMemo(() => {
     return [...requests].sort((a, b) => {
-      const dateA = new Date(a.createdAt ?? a.date).getTime();
-      const dateB = new Date(b.createdAt ?? b.date).getTime();
+      const dateA = new Date(a.createdAt ?? a.date ?? 0).getTime();
+      const dateB = new Date(b.createdAt ?? b.date ?? 0).getTime();
       return dateB - dateA;
     });
   }, [requests]);
