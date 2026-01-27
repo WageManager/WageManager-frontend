@@ -8,6 +8,7 @@
 import { useState, useMemo } from "react";
 import "./WorkerRemittancePage.css";
 import { formatCurrency } from "../employer/utils/formatUtils";
+import MonthNav from "../../components/worker/MonthlyCalendarPage/MonthNav";
 import WorkDetailList from "../../components/worker/RemittancePage/WorkDetailList";
 import WorkplaceDropdown from "../../components/worker/RemittancePage/WorkplaceDropdown";
 import { useRemittanceData } from "../../hooks/worker/useRemittanceData";
@@ -76,29 +77,12 @@ export default function WorkerRemittancePage() {
   return (
     <div className="remittance-page">
         {/* 상단: 월 선택 */}
-        <div className="remittance-header">
-          <div className="remittance-header-left"></div>
-          <div className="remittance-month-nav">
-            <button
-              type="button"
-              className="month-nav-button"
-              onClick={handlePrevMonth}
-            >
-              &lt;
-            </button>
-            <span className="month-display">
-              {currentYear}년 {currentMonth}월
-            </span>
-            <button
-              type="button"
-              className="month-nav-button"
-              onClick={handleNextMonth}
-            >
-              &gt;
-            </button>
-          </div>
-          <div className="remittance-header-right"></div>
-        </div>
+        <MonthNav
+          year={currentYear}
+          month={currentMonth}
+          onPrevMonth={handlePrevMonth}
+          onNextMonth={handleNextMonth}
+        />
 
         {/* 급여 카드 및 입금 상태 */}
         <div className="remittance-wage-section">
