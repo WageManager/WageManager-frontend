@@ -1,9 +1,19 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import { formatCurrency, formatBreakTime } from "../../../pages/employer/utils/formatUtils";
 import { allowanceDefinitions } from "../../../pages/employer/utils/shiftUtils";
 import "../../../pages/workers/WorkerRemittancePage.css";
+import type { RemittanceWorkRecord, AllowanceKey, SortOrder } from "../../../types/worker/remittancePage.types";
+
+interface WorkDetailListProps {
+  workRecords: RemittanceWorkRecord[];
+  isLoading: boolean;
+  sortOrder: SortOrder;
+  view: boolean;
+  expandedRecordIndex: number | null;
+  onSortSelect: (order: SortOrder) => void;
+  onViewToggle: () => void;
+  onRecordClick: (index: number) => void;
+}
 
 function WorkDetailList({
   workRecords,
@@ -14,7 +24,7 @@ function WorkDetailList({
   onSortSelect,
   onViewToggle,
   onRecordClick,
-}) {
+}: WorkDetailListProps) {
   return (
     <div className="remittance-detail-section">
       {/* 근무 상세 내역 헤더 및 정렬 드롭다운 */}
@@ -66,8 +76,7 @@ function WorkDetailList({
                 onClick={() => onRecordClick(index)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => {
-                  // 키보드 접근성: Enter 또는 Space 키로도 카드 클릭 가능
+                onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     onRecordClick(index);
@@ -118,8 +127,8 @@ function WorkDetailList({
                   <div className="detail-right-section">
                     {/* 수당 버튼들 (야간, 연장, 휴일 등) */}
                     <div className="allowance-buttons">
-                      {allowanceDefinitions.map(({ key, label }) => {
-                        const allowance = record.allowances?.[key] || {
+                      {allowanceDefinitions.map(({ key, label }: { key: AllowanceKey; label: string }) => {
+                        const allowance = record.allowances[key] || {
                           enabled: false,
                           rate: 0,
                         };
@@ -137,7 +146,7 @@ function WorkDetailList({
                       })}
                     </div>
                     {/* 야간 근무 수당이 활성화된 경우에만 표시 */}
-                    {record.allowances?.night?.enabled && (
+                    {record.allowances.night.enabled && (
                       <div className="detail-form-item">
                         <label className="detail-form-label">
                           야간 근무 금액
@@ -180,44 +189,4 @@ function WorkDetailList({
   );
 }
 
-WorkDetailList.propTypes = {
-  workRecords: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      date: PropTypes.number.isRequired,
-      day: PropTypes.string.isRequired,
-      startTime: PropTypes.string.isRequired,
-      endTime: PropTypes.string.isRequired,
-      workplace: PropTypes.string.isRequired,
-      breakMinutes: PropTypes.number.isRequired,
-      hourlyWage: PropTypes.number.isRequired,
-      wage: PropTypes.number.isRequired,
-      allowances: PropTypes.shape({
-        overtime: PropTypes.shape({
-          enabled: PropTypes.bool,
-          rate: PropTypes.number,
-        }),
-        night: PropTypes.shape({
-          enabled: PropTypes.bool,
-          rate: PropTypes.number,
-        }),
-        holiday: PropTypes.shape({
-          enabled: PropTypes.bool,
-          rate: PropTypes.number,
-        }),
-      }),
-      socialInsurance: PropTypes.bool,
-      withholdingTax: PropTypes.bool,
-    })
-  ).isRequired,
-  isLoading: PropTypes.bool.isRequired,
-  sortOrder: PropTypes.oneOf(["latest", "oldest"]).isRequired,
-  view: PropTypes.bool.isRequired,
-  expandedRecordIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
-  onSortSelect: PropTypes.func.isRequired,
-  onViewToggle: PropTypes.func.isRequired,
-  onRecordClick: PropTypes.func.isRequired,
-};
-
 export default WorkDetailList;
-
