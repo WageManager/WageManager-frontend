@@ -1,3 +1,10 @@
+/**
+ * 근로자 송금 관리 페이지
+ * - 월별 근무 내역 조회
+ * - 급여 및 입금 상태 확인
+ * - 근무 상세 내역 확인
+ */
+
 import { useState, useMemo, useEffect, useCallback } from "react";
 import "./WorkerRemittancePage.css";
 import { formatCurrency } from "../employer/utils/formatUtils";
@@ -13,12 +20,6 @@ import type {
   SortOrder,
 } from "../../types/worker/remittancePage.types";
 
-/**
- * 근로자 송금 관리 페이지
- * - 월별 근무 내역 조회
- * - 급여 및 입금 상태 확인
- * - 근무 상세 내역 확인
- */
 
 export default function WorkerRemittancePage() {
   // State 관리
@@ -28,8 +29,8 @@ export default function WorkerRemittancePage() {
   const [currentMonth, setCurrentMonth] = useState<number>(() => new Date().getMonth() + 1);
   const [expandedRecordIndex, setExpandedRecordIndex] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("latest");
-  const [view, setView] = useState<boolean>(false);
-  const [workplaceView, setWorkplaceView] = useState<boolean>(false);
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState<boolean>(false);
+  const [isWorkplaceDropdownOpen, setIsWorkplaceDropdownOpen] = useState<boolean>(false);
   const [workRecords, setWorkRecords] = useState<RemittanceWorkRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [calculatedSalary, setCalculatedSalary] = useState<SalaryListItem | null>(null);
@@ -293,7 +294,7 @@ export default function WorkerRemittancePage() {
   // 근무지 선택 핸들러
   const handleWorkplaceSelect = (workplaceId: number) => {
     setSelectedWorkplaceId(workplaceId);
-    setWorkplaceView(false);
+    setIsWorkplaceDropdownOpen(false);
     setExpandedRecordIndex(null);
   };
 
@@ -305,7 +306,7 @@ export default function WorkerRemittancePage() {
   // 정렬 옵션 선택 핸들러
   const handleSortSelect = (order: SortOrder) => {
     setSortOrder(order);
-    setView(false);
+    setIsSortDropdownOpen(false);
     setExpandedRecordIndex(null);
   };
 
@@ -345,12 +346,12 @@ export default function WorkerRemittancePage() {
                 <button
                   type="button"
                   className="workplace-dropdown-button"
-                  onClick={() => setWorkplaceView(!workplaceView)}
+                  onClick={() => setIsWorkplaceDropdownOpen(!isWorkplaceDropdownOpen)}
                 >
                   <span>{selectedWorkplace?.name || "근무지 선택"}</span>
-                  {workplaceView ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
+                  {isWorkplaceDropdownOpen ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
                 </button>
-                {workplaceView && (
+                {isWorkplaceDropdownOpen && (
                   <div className="workplace-dropdown-menu">
                     {workplaces.map((wp) => (
                       <button
@@ -405,10 +406,10 @@ export default function WorkerRemittancePage() {
           workRecords={sortedWorkRecords}
           isLoading={isLoading}
           sortOrder={sortOrder}
-          view={view}
+          isSortDropdownOpen={isSortDropdownOpen}
           expandedRecordIndex={expandedRecordIndex}
           onSortSelect={handleSortSelect}
-          onViewToggle={() => setView(!view)}
+          onSortDropdownToggle={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
           onRecordClick={handleRecordClick}
         />
   </div>

@@ -8,10 +8,10 @@ interface WorkDetailListProps {
   workRecords: RemittanceWorkRecord[];
   isLoading: boolean;
   sortOrder: SortOrder;
-  view: boolean;
+  isSortDropdownOpen: boolean;
   expandedRecordIndex: number | null;
   onSortSelect: (order: SortOrder) => void;
-  onViewToggle: () => void;
+  onSortDropdownToggle: () => void;
   onRecordClick: (index: number) => void;
 }
 
@@ -19,10 +19,10 @@ function WorkDetailList({
   workRecords,
   isLoading,
   sortOrder,
-  view,
+  isSortDropdownOpen,
   expandedRecordIndex = null,
   onSortSelect,
-  onViewToggle,
+  onSortDropdownToggle,
   onRecordClick,
 }: WorkDetailListProps) {
   return (
@@ -34,12 +34,12 @@ function WorkDetailList({
           <button
             type="button"
             className="sort-dropdown-button"
-            onClick={onViewToggle}
+            onClick={onSortDropdownToggle}
           >
             <span>{sortOrder === "latest" ? "최신순" : "과거순"}</span>
-            {view ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
+            {isSortDropdownOpen ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
           </button>
-          {view && (
+          {isSortDropdownOpen && (
             <div className="sort-dropdown-menu">
               <button
                 type="button"
