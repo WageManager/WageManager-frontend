@@ -4,7 +4,7 @@ import { formatCurrency } from "../employer/utils/formatUtils";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import WorkDetailList from "../../components/worker/RemittancePage/WorkDetailList";
 import { getContracts, getContractDetail, getWorkRecords, getSalaries, getPayments } from "../../api/workerApi";
-import type { Contract, SalaryListItem, PaymentResponse } from "../../api/workerApi";
+import type { SalaryListItem, PaymentResponse } from "../../api/workerApi";
 import { formatTime, parseWorkDate, pad2 } from "../../utils/dateUtils";
 import type {
   Workplace,
@@ -19,16 +19,6 @@ import type {
  * - 급여 및 입금 상태 확인
  * - 근무 상세 내역 확인
  */
-
-// contractId를 안전하게 id로 변환하는 함수
-// API가 number[] 또는 Contract[] 형태로 응답할 수 있어 두 경우를 모두 처리
-const extractContractId = (contractId: number | Contract | null | undefined): number | null => {
-  if (contractId === null || contractId === undefined) return null;
-  if (typeof contractId === 'object' && 'id' in contractId) {
-    return contractId.id;
-  }
-  return contractId as number;
-};
 
 export default function WorkerRemittancePage() {
   // State 관리
@@ -54,26 +44,18 @@ export default function WorkerRemittancePage() {
     const fetchWorkplaces = async () => {
       try {
         const contractsResponse = await getContracts();
-        let contracts: (number | Contract)[] = [];
-        if (Array.isArray(contractsResponse.data)) {
-          contracts = contractsResponse.data;
-        } else if (contractsResponse.data) {
-          contracts = [contractsResponse.data as unknown as Contract];
-        }
+        const contracts = contractsResponse.data || [];
 
         const workplacesList = await Promise.all(
           contracts.map(async (contract) => {
-            const contractId = extractContractId(contract);
-            if (!contractId) return null;
-
             try {
-              const contractDetail = await getContractDetail(contractId);
+              const contractDetail = await getContractDetail(contract.id);
               return {
-                id: contractId,
+                id: contract.id,
                 name: contractDetail.data?.workplaceName || '',
               };
             } catch (error) {
-              console.error(`[WorkerRemittancePage] 계약 ${contractId} 상세 정보 조회 실패:`, error);
+              console.error(`[WorkerRemittancePage] 계약 ${contract.id} 상세 정보 조회 실패:`, error);
               return null;
             }
           })
