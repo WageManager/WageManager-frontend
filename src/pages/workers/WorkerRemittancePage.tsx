@@ -8,8 +8,8 @@
 import { useState, useMemo } from "react";
 import "./WorkerRemittancePage.css";
 import { formatCurrency } from "../employer/utils/formatUtils";
-import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import WorkDetailList from "../../components/worker/RemittancePage/WorkDetailList";
+import WorkplaceDropdown from "../../components/worker/RemittancePage/WorkplaceDropdown";
 import { useRemittanceData } from "../../hooks/worker/useRemittanceData";
 import type { SortOrder } from "../../types/worker/remittancePage.types";
 
@@ -19,7 +19,6 @@ export default function WorkerRemittancePage() {
   const {
     workplaces,
     selectedWorkplaceId,
-    selectedWorkplace,
     setSelectedWorkplaceId,
     currentYear,
     currentMonth,
@@ -36,7 +35,6 @@ export default function WorkerRemittancePage() {
   const [expandedRecordIndex, setExpandedRecordIndex] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("latest");
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState<boolean>(false);
-  const [isWorkplaceDropdownOpen, setIsWorkplaceDropdownOpen] = useState<boolean>(false);
 
   // ── 정렬된 근무 기록 (UI 정렬 상태 + 데이터) ────
   const sortedWorkRecords = useMemo(() => {
@@ -62,7 +60,6 @@ export default function WorkerRemittancePage() {
 
   const handleWorkplaceSelect = (workplaceId: number) => {
     setSelectedWorkplaceId(workplaceId);
-    setIsWorkplaceDropdownOpen(false);
     setExpandedRecordIndex(null);
   };
 
@@ -107,34 +104,11 @@ export default function WorkerRemittancePage() {
         <div className="remittance-wage-section">
           <div className="wage-card-wrapper">
             {/* 근무지 선택 드롭다운 */}
-            <div className="remittance-workplace-select-top">
-              <div className="workplace-dropdown-wrapper">
-                <button
-                  type="button"
-                  className="workplace-dropdown-button"
-                  onClick={() => setIsWorkplaceDropdownOpen(!isWorkplaceDropdownOpen)}
-                >
-                  <span>{selectedWorkplace?.name || "근무지 선택"}</span>
-                  {isWorkplaceDropdownOpen ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
-                </button>
-                {isWorkplaceDropdownOpen && (
-                  <div className="workplace-dropdown-menu">
-                    {workplaces.map((wp) => (
-                      <button
-                        key={wp.id}
-                        type="button"
-                        className={`workplace-dropdown-item ${
-                          selectedWorkplaceId === wp.id ? "active" : ""
-                        }`}
-                        onClick={() => handleWorkplaceSelect(wp.id)}
-                      >
-                        {wp.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            <WorkplaceDropdown
+              workplaces={workplaces}
+              selectedWorkplaceId={selectedWorkplaceId}
+              onSelect={handleWorkplaceSelect}
+            />
             {/* 급여 정보 및 입금 상태 카드 */}
             <div className="wage-card">
             <div className="wage-info-section">
