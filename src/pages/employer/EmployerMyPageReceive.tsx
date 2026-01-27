@@ -78,7 +78,7 @@ export default function EmployerMyPageReceive(): JSX.Element {
           } catch (error) {
             console.error(`[EmployerMyPageReceive] 근무지 ${workplace.id} 요청 조회 실패:`, error);
             // 개별 근무지 요청 조회 실패 무시
-        }
+          }
         }
 
         setRequests(allRequests);
