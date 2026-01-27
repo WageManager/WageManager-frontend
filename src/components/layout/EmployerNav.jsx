@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { employerNavItems } from "../../constants/navItems.js";
+import { employerNavItems } from "../../constants/navItems";
 import "../../styles/employerNav.css";
 
 export default function EmployerNav() {

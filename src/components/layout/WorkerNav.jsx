@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { workerNavItems } from "../../constants/navItems.js";
+import { workerNavItems } from "../../constants/navItems";
 import "../../styles/workerNav.css";
 
 export default function WorkerNav() {
