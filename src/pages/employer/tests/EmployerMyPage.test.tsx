@@ -25,7 +25,7 @@ import Swal from 'sweetalert2';
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
-    getItem: vi.fn((key: string) => store[key] || null),
+    getItem: vi.fn((key: string) => (key in store ? store[key] : null)),
     setItem: vi.fn((key: string, value: string) => {
       store[key] = value;
     }),
