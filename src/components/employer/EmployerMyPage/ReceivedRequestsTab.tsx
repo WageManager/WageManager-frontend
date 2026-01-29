@@ -182,7 +182,29 @@ export default function ReceivedRequestsTab(): JSX.Element {
             const requestDate = new Date(request.date);
             const month = requestDate.getMonth() + 1;
             const date = requestDate.getDate();
-            const isCorrectionRequest = request.type === "correction";
+            // requestType: CREATE(신규 등록), UPDATE(시간 변경), DELETE(삭제)
+            const isCreateRequest = request.requestType === "CREATE";
+            const hasOriginalTime = request.originalStartTime && request.originalEndTime;
+
+            // 요청 타입 라벨
+            const getRequestTypeLabel = () => {
+              switch (request.requestType) {
+                case "CREATE": return "신규 등록 요청";
+                case "UPDATE": return "시간 변경 요청";
+                case "DELETE": return "삭제 요청";
+                default: return "근무 요청";
+              }
+            };
+
+            // 요청 타입 태그 색상
+            const getRequestTypeColor = () => {
+              switch (request.requestType) {
+                case "CREATE": return "var(--color-green)";
+                case "UPDATE": return "var(--color-orange)";
+                case "DELETE": return "var(--color-red)";
+                default: return "var(--color-grey)";
+              }
+            };
 
             return (
               <div key={request.id}>
@@ -198,14 +220,12 @@ export default function ReceivedRequestsTab(): JSX.Element {
                   <div className="mypage-receive-info">
                     <div className="mypage-receive-worker">
                       {request.workerName}({request.workplace})
-                      {isCorrectionRequest && (
-                        <span style={{ marginLeft: "8px", color: "var(--color-orange)", fontSize: "0.9em" }}>
-                          [정정 요청]
-                        </span>
-                      )}
+                      <span style={{ marginLeft: "8px", color: getRequestTypeColor(), fontSize: "0.9em" }}>
+                        [{request.requestType === "CREATE" ? "신규" : request.requestType === "UPDATE" ? "변경" : "삭제"}]
+                      </span>
                     </div>
                     <div className="mypage-receive-time">
-                      {isCorrectionRequest ? (
+                      {hasOriginalTime ? (
                         <>
                           <span style={{ textDecoration: "line-through", color: "#999" }}>
                             {request.originalStartTime} ~ {request.originalEndTime}
@@ -261,38 +281,26 @@ export default function ReceivedRequestsTab(): JSX.Element {
                   <div className="detail-grid">
                     <div>
                       <p className="detail-label">요청 타입</p>
-                      <p className="detail-value">
-                        {isCorrectionRequest ? "정정 요청" : "근무 생성 요청"}
-                      </p>
+                      <p className="detail-value">{getRequestTypeLabel()}</p>
                     </div>
                     <div>
                       <p className="detail-label">근무 날짜</p>
                       <p className="detail-value">{requestDate.toLocaleDateString("ko-KR")}</p>
                     </div>
-                    {isCorrectionRequest && (
-                      <>
-                        <div>
-                          <p className="detail-label">기존 근무 시간</p>
-                          <p className="detail-value">
-                            {request.originalStartTime} ~ {request.originalEndTime}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="detail-label">변경 요청 시간</p>
-                          <p className="detail-value">
-                            {request.startTime} ~ {request.endTime}
-                          </p>
-                        </div>
-                      </>
-                    )}
-                    {!isCorrectionRequest && (
+                    {hasOriginalTime && (
                       <div>
-                        <p className="detail-label">근무 시간</p>
+                        <p className="detail-label">기존 근무 시간</p>
                         <p className="detail-value">
-                          {request.startTime} ~ {request.endTime}
+                          {request.originalStartTime} ~ {request.originalEndTime}
                         </p>
                       </div>
                     )}
+                    <div>
+                      <p className="detail-label">{isCreateRequest ? "요청 시간" : "변경 요청 시간"}</p>
+                      <p className="detail-value">
+                        {request.startTime} ~ {request.endTime}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
