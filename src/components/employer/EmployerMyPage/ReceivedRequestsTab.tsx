@@ -135,14 +135,20 @@ export default function ReceivedRequestsTab(): JSX.Element {
 
     if (result.isConfirmed) {
       try {
-        if (isCorrectionRequest) {
-          isApprove
-            ? await approveCorrectionRequest(request.originalId)
-            : await rejectCorrectionRequest(request.originalId);
-        } else {
-          isApprove
-            ? await approveWorkRecord(request.originalId)
-            : await rejectWorkRecord(request.originalId);
+        const callApprovalApi = async () => {
+          if (isCorrectionRequest) {
+            return isApprove
+              ? approveCorrectionRequest(request.originalId)
+              : rejectCorrectionRequest(request.originalId);
+          }
+          return isApprove
+            ? approveWorkRecord(request.originalId)
+            : rejectWorkRecord(request.originalId);
+        };
+
+        const response = await callApprovalApi();
+        if (!response.success) {
+          throw new Error(response.error?.message ?? `${actionLabel} 처리에 실패했습니다.`);
         }
 
         setRequests((prev) => prev.filter((req) => req.id !== request.id));
