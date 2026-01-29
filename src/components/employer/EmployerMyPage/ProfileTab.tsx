@@ -43,9 +43,38 @@ export default function ProfileTab({ user, onUserUpdate }: ProfileTabProps): JSX
     onUserUpdate({ ...user, [field]: value });
   };
 
+  const validateField = (field: EditableField, value: string | undefined): { isValid: boolean; message: string } => {
+    if (!value || value.trim() === "") {
+      return { isValid: false, message: "필수 입력 항목입니다." };
+    }
+
+    if (field === "name") {
+      if (value.trim().length < 2) {
+        return { isValid: false, message: "이름은 2자 이상이어야 합니다." };
+      }
+    }
+
+    if (field === "phone") {
+      const phoneRegex = /^010-\d{4}-\d{4}$/;
+      if (!phoneRegex.test(value)) {
+        return { isValid: false, message: "전화번호는 010-XXXX-XXXX 형식이어야 합니다." };
+      }
+    }
+
+    return { isValid: true, message: "" };
+  };
+
   const handleSave = async (field: EditableField): Promise<void> => {
+    const value = user[field];
+    const validation = validateField(field, value);
+
+    if (!validation.isValid) {
+      Swal.fire("입력 오류", validation.message, "error");
+      return;
+    }
+
     try {
-      await updateMyInfo({ [field]: user[field] ?? "" });
+      await updateMyInfo({ [field]: value ?? "" });
       Swal.fire("완료", field === "name" ? "이름이 수정되었습니다." : "전화번호가 수정되었습니다.", "success");
       setOriginalUser(user);
       setEditableSections((prev) => ({ ...prev, [field]: false }));
