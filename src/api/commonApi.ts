@@ -1,4 +1,4 @@
-import wageManagerApi from "./axios";
+import { wageManagerApi } from "./axios";
 import type { UpdateMyInfoRequest } from "./commonApiResponse.type";
 
 // 내 정보 조회

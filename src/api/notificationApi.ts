@@ -1,4 +1,4 @@
-import wageManagerApi from './axios';
+import {wageManagerApi} from './axios';
 
 /**
  * 알림 목록 조회

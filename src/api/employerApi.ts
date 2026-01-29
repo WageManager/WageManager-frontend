@@ -1,4 +1,4 @@
-import wageManagerApi from "./axios";
+import { wageManagerApi } from "./axios";
 import type {
   CreateWorkplaceRequest,
   UpdateWorkplaceRequest,

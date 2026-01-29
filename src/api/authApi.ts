@@ -1,4 +1,4 @@
-import wageManagerApi from './axios';
+import {wageManagerApi} from './axios';
 import type { KakaoRegisterParams, ApiResponse, AuthSuccessData } from '../types/auth';
 
 // 카카오 액세스 토큰으로 로그인
