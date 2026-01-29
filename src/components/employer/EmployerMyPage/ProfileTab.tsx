@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ChangeEvent, JSX } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { logout } from "../../../api/authApi";
 import { updateMyInfo, deleteMyAccount } from "../../../api/commonApi";
+import EditButton from "../../common/EditButton";
 
 interface User {
   id?: number;
@@ -25,6 +26,18 @@ export default function ProfileTab({ user, onUserUpdate }: ProfileTabProps): JSX
     name: false,
     phone: false,
   });
+  const [originalUser, setOriginalUser] = useState<User>(user);
+
+  useEffect(() => {
+    const isEditing = Object.values(editableSections).some((value) => value);
+    if (!isEditing) {
+      setOriginalUser(user);
+    }
+  }, [user, editableSections]);
+
+  const hasChanges = (field: EditableField): boolean => {
+    return user[field] !== originalUser[field];
+  };
 
   const handleChange = (field: EditableField, value: string): void => {
     onUserUpdate({ ...user, [field]: value });
@@ -34,17 +47,23 @@ export default function ProfileTab({ user, onUserUpdate }: ProfileTabProps): JSX
     try {
       await updateMyInfo({ [field]: user[field] ?? "" });
       Swal.fire("완료", field === "name" ? "이름이 수정되었습니다." : "전화번호가 수정되었습니다.", "success");
+      setOriginalUser(user);
+      setEditableSections((prev) => ({ ...prev, [field]: false }));
     } catch (error) {
       const message = error instanceof Error ? error.message : "정보 수정 중 오류가 발생했습니다.";
       Swal.fire("수정 실패", message, "error");
     }
   };
 
-  const handleEditButtonClick = (field: EditableField): void => {
+  const toggleEdit = (field: EditableField): void => {
     const isCurrentlyEditing = editableSections[field];
 
     if (isCurrentlyEditing) {
-      void handleSave(field);
+      // 취소: 원래 값으로 복원
+      onUserUpdate({ ...user, [field]: originalUser[field] ?? "" });
+    } else {
+      // 수정 모드 진입
+      setOriginalUser(user);
     }
 
     setEditableSections((prev) => ({ ...prev, [field]: !prev[field] }));
@@ -88,9 +107,13 @@ export default function ProfileTab({ user, onUserUpdate }: ProfileTabProps): JSX
             onChange={(e) => handleChange("name", e.target.value)}
           />
         </div>
-        <button className="mypage-edit-button" onClick={() => handleEditButtonClick("name")}>
-          {editableSections.name ? "완료" : "수정"}
-        </button>
+        <EditButton
+          isEditing={editableSections.name}
+          hasChanges={hasChanges("name")}
+          onEditClick={() => toggleEdit("name")}
+          onSaveClick={() => void handleSave("name")}
+          className="mypage-edit-button-override"
+        />
       </div>
       <hr />
       <div className="mypage-phone">
@@ -102,9 +125,13 @@ export default function ProfileTab({ user, onUserUpdate }: ProfileTabProps): JSX
           onChange={(e) => handleChange("phone", e.target.value)}
           placeholder="010-1234-5678"
         />
-        <button className="mypage-edit-button" onClick={() => handleEditButtonClick("phone")}>
-          {editableSections.phone ? "완료" : "수정"}
-        </button>
+        <EditButton
+          isEditing={editableSections.phone}
+          hasChanges={hasChanges("phone")}
+          onEditClick={() => toggleEdit("phone")}
+          onSaveClick={() => void handleSave("phone")}
+          className="mypage-edit-button-override"
+        />
       </div>
       <div className="mypage-withdraw-section">
         <button className="mypage-withdraw-button" onClick={handleWithdraw}>
