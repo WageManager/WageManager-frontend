@@ -1,3 +1,5 @@
+import type { PayrollDeductionType } from "./employerApiRequest.type";
+
 // ============ 근무지 (Workplace) ============
 
 // GET /api/employer/workplaces - 사업장 목록 조회
@@ -72,10 +74,9 @@ export interface Contract {
   payrollDeductionType: PayrollDeductionType;
 }
 
-export type PayrollDeductionType =
-  | "NONE"
-  | "PERCENT_3_3"
-  | "FOUR_MAJOR_INSURANCE";
+// PayrollDeductionType은 employerApiRequest.type.ts에서 정의됨
+// 요청/응답 모두 동일한 값을 사용
+export type { PayrollDeductionType };
 
 export interface WorkScheduleItem {
   dayOfWeek: string; // "MONDAY", "TUESDAY", etc.

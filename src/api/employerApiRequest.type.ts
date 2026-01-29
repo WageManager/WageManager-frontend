@@ -62,7 +62,15 @@ export interface UpdateContractRequest {
   payrollDeductionType?: PayrollDeductionType;
 }
 
+/**
+ * 급여 공제 유형
+ * - FREELANCER: 프리랜서 (3.3% 공제 - 소득세 3% + 지방소득세 0.3%)
+ * - PART_TIME_NONE: 비정규직 공제 없음 (세금 X, 보험료 X)
+ * - PART_TIME_TAX_ONLY: 비정규직 세금만 공제 (소득세 + 지방소득세)
+ * - PART_TIME_TAX_AND_INSURANCE: 비정규직 전체 공제 (4대보험 + 소득세)
+ */
 export type PayrollDeductionType =
+  | "FREELANCER"
   | "PART_TIME_NONE"
   | "PART_TIME_TAX_ONLY"
   | "PART_TIME_TAX_AND_INSURANCE";
