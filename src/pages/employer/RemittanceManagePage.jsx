@@ -1,16 +1,15 @@
 import { useState, useMemo, useEffect } from "react";
 import "../../styles/remittanceManagePage.css";
+import { formatCurrency, formatBreakTime } from "./utils/formatUtils";
+import { allowanceDefinitions } from "./utils/shiftUtils";
 import {
-  initialWorkplaces,
-  workplaceWorkers,
-  remittanceData,
-} from "./dummyData";
-import { formatKRW, formatBreakTime } from "../../utils/formatUtils";
-import { extraPayTypes } from "../../constants/extraPay";
-import workplaceService from "../../services/workplaceService";
-import contractService from "../../services/contractService";
-import workRecordService from "../../services/workRecordService";
-import workerService from "../../services/workerService";
+  getWorkplaces,
+  getContractsByWorkplace,
+  getWorkRecords,
+  getContract,
+  getWorkerById,
+  getWorkerByCode,
+} from "../../api/employerApi";
 import Swal from "sweetalert2";
 
 export default function RemittanceManagePage() {
@@ -26,17 +25,15 @@ export default function RemittanceManagePage() {
   useEffect(() => {
     const fetchWorkplaces = async () => {
       try {
-        const data = await workplaceService.getWorkplaces();
-        setWorkplaces(data);
-        if (data.length > 0 && !selectedWorkplaceId) {
-          setSelectedWorkplaceId(data[0].id);
+        const response = await getWorkplaces();
+        const workplacesData = response.data || [];
+        setWorkplaces(workplacesData);
+        if (workplacesData.length > 0 && !selectedWorkplaceId) {
+          setSelectedWorkplaceId(workplacesData[0].id);
         }
       } catch (error) {
-        // 에러 시 더미 데이터 사용
-        setWorkplaces(initialWorkplaces);
-        if (!selectedWorkplaceId) {
-          setSelectedWorkplaceId(1);
-        }
+        // 에러 시 빈 배열 사용
+        setWorkplaces([]);
       }
     };
     fetchWorkplaces();
@@ -48,18 +45,17 @@ export default function RemittanceManagePage() {
 
     const fetchWorkers = async () => {
       try {
-        const workers = await contractService.getContractsByWorkplace(
-          selectedWorkplaceId
-        );
+        const response = await getContractsByWorkplace(selectedWorkplaceId);
+        const workers = response.data || [];
         setWorkersList((prev) => ({
           ...prev,
           [selectedWorkplaceId]: workers,
         }));
       } catch (error) {
-        // 에러 시 더미 데이터 사용
+        // 에러 시 빈 배열 사용
         setWorkersList((prev) => ({
           ...prev,
-          [selectedWorkplaceId]: workplaceWorkers[selectedWorkplaceId] || [],
+          [selectedWorkplaceId]: [],
         }));
       }
     };
@@ -76,13 +72,13 @@ export default function RemittanceManagePage() {
         const startDate = new Date(currentYear, currentMonth - 1, 1);
         const endDate = new Date(currentYear, currentMonth, 0);
 
-        const data = await workRecordService.getWorkRecords(
+        const response = await getWorkRecords(
           selectedWorkplaceId,
           startDate,
           endDate
         );
 
-        setWorkRecords(data);
+        setWorkRecords(response.data || []);
       } catch (error) {
         setWorkRecords([]);
       }
@@ -217,10 +213,8 @@ export default function RemittanceManagePage() {
       // workerId가 없으면 contractId로 상세 정보 조회
       if (!workerId && currentSelectedWorker?.id) {
         try {
-          const contractDetail = await contractService.getContract(
-            currentSelectedWorker.id
-          );
-          workerId = contractDetail?.workerId;
+          const contractResponse = await getContract(currentSelectedWorker.id);
+          workerId = contractResponse.data?.workerId;
         } catch (contractError) {
           console.error("계약 상세 조회 실패:", contractError);
           Swal.fire("오류", "계약 정보를 불러올 수 없습니다.", "error");
@@ -239,8 +233,8 @@ export default function RemittanceManagePage() {
 
       // 근로자 정보 조회하여 카카오페이 링크 가져오기
       try {
-        const workerData = await workerService.getWorkerById(workerId);
-        const kakaoPayLink = workerData?.kakaoPayLink;
+        const workerResponse = await getWorkerById(workerId);
+        const kakaoPayLink = workerResponse.data?.kakaoPayLink;
 
         if (!kakaoPayLink) {
           Swal.fire(
@@ -258,10 +252,10 @@ export default function RemittanceManagePage() {
         // 권한 문제일 수 있으므로 workerCode로 재시도
         if (currentSelectedWorker?.workerCode) {
           try {
-            const workerDataByCode = await workerService.getWorkerByCode(
+            const workerResponseByCode = await getWorkerByCode(
               currentSelectedWorker.workerCode
             );
-            const kakaoPayLink = workerDataByCode?.kakaoPayLink;
+            const kakaoPayLink = workerResponseByCode.data?.kakaoPayLink;
 
             if (!kakaoPayLink) {
               Swal.fire(
@@ -380,7 +374,7 @@ export default function RemittanceManagePage() {
                     </span>
                   </div>
                   <div className="detail-wage">
-                    {formatKRW(record.wage)}
+                    {formatCurrency(record.wage)}
                   </div>
                 </div>
                 <div
@@ -420,7 +414,7 @@ export default function RemittanceManagePage() {
                       <p className="detail-label">시급</p>
                       <p className="detail-value">
                         {record.hourlyWage
-                          ? formatKRW(record.hourlyWage)
+                          ? formatCurrency(record.hourlyWage)
                           : "-"}
                       </p>
                     </div>
@@ -434,7 +428,7 @@ export default function RemittanceManagePage() {
                   <div className="detail-section">
                     <p className="detail-label">수당 정보</p>
                     <ul className="allowance-list">
-                      {extraPayTypes.map(({ key, label }) => {
+                      {allowanceDefinitions.map(({ key, label }) => {
                         const allowance = record.allowances?.[key] || {
                           enabled: false,
                           rate: 0,
@@ -485,7 +479,7 @@ export default function RemittanceManagePage() {
       <div className="remittance-right-panel">
         <div className="remittance-summary-box">
           <h3 className="summary-title">이번 달 급여</h3>
-          <div className="summary-amount">{formatKRW(totalWage)}</div>
+          <div className="summary-amount">{formatCurrency(totalWage)}</div>
         </div>
         <button
           type="button"

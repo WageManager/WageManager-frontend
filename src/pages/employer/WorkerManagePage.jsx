@@ -3,19 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { FaUser, FaTimes } from "react-icons/fa";
 import Swal from "sweetalert2";
 import "../../styles/workerManagePage.css";
-import {
-  initialWorkplaces,
-  workplaceWorkers,
-  workerInfo,
-  workerCodeMap,
-} from "./dummyData";
-import { formatKRW } from "../../utils/formatUtils";
+import { formatCurrency } from "./utils/formatUtils";
 import TimeInput from "./components/TimeInput";
 import WorkplaceForm from "./components/WorkplaceForm";
 import ScheduleGrid from "./components/ScheduleGrid";
-import workplaceService from "../../services/workplaceService";
-import contractService from "../../services/contractService";
-import workerService from "../../services/workerService";
+import {
+  getWorkplaces,
+  createWorkplace,
+  updateWorkplace,
+  deleteWorkplace,
+  getContractsByWorkplace,
+  getContract,
+  createContract,
+  updateContract,
+  deleteContract,
+  getWorkerByCode,
+} from "../../api/employerApi";
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -25,7 +28,7 @@ export default function WorkerManagePage() {
   const [selectedWorkplaceId, setSelectedWorkplaceId] = useState(null);
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [hoveredBlockGroup, setHoveredBlockGroup] = useState(null);
-  const [workersList, setWorkersList] = useState(() => workplaceWorkers);
+  const [workersList, setWorkersList] = useState({});
   const [isEditingWork, setIsEditingWork] = useState(false);
   const [editedWorkInfo, setEditedWorkInfo] = useState(null);
   // 수정된 근무 정보를 저장하는 상태
@@ -57,17 +60,15 @@ export default function WorkerManagePage() {
   useEffect(() => {
     const fetchWorkplaces = async () => {
       try {
-        const data = await workplaceService.getWorkplaces();
-        setWorkplaces(data);
-        if (data.length > 0 && !selectedWorkplaceId) {
-          setSelectedWorkplaceId(data[0].id);
+        const response = await getWorkplaces();
+        const workplacesData = response.data || [];
+        setWorkplaces(workplacesData);
+        if (workplacesData.length > 0 && !selectedWorkplaceId) {
+          setSelectedWorkplaceId(workplacesData[0].id);
         }
       } catch (error) {
-        // 에러 시 더미 데이터 사용
-        setWorkplaces(initialWorkplaces);
-        if (!selectedWorkplaceId) {
-          setSelectedWorkplaceId(1);
-        }
+        // 에러 시 빈 배열 사용
+        setWorkplaces([]);
       }
     };
     fetchWorkplaces();
@@ -75,22 +76,23 @@ export default function WorkerManagePage() {
 
   // 근로자 목록 조회 함수 (재사용 가능하도록 분리)
   const fetchWorkers = async (workplaceId) => {
-    if (!workplaceId) return;
+    if (!workplaceId) return [];
 
     try {
-      const contracts = await contractService.getContractsByWorkplace(
-        workplaceId
-      );
+      const response = await getContractsByWorkplace(workplaceId);
+      const contracts = response.data || [];
       setWorkersList((prev) => ({
         ...prev,
         [workplaceId]: contracts,
       }));
+      return contracts;
     } catch (error) {
       // 에러 시 빈 배열 사용
       setWorkersList((prev) => ({
         ...prev,
         [workplaceId]: [],
       }));
+      return [];
     }
   };
 
@@ -136,10 +138,8 @@ export default function WorkerManagePage() {
       }
 
       try {
-        const fullContract = await contractService.getContract(
-          currentWorker.id
-        );
-        setFullContractData(fullContract);
+        const response = await getContract(currentWorker.id);
+        setFullContractData(response.data);
       } catch (error) {
         setFullContractData(null);
       }
@@ -333,16 +333,14 @@ export default function WorkerManagePage() {
         };
 
         // 백엔드 API 호출
-        await contractService.updateContract(currentWorker.id, requestData);
+        await updateContract(currentWorker.id, requestData);
 
         // 성공 시 근로자 목록 다시 조회
         await fetchWorkers(selectedWorkplaceId);
 
         // 전체 계약 정보도 다시 조회하여 UI에 즉시 반영
-        const updatedContract = await contractService.getContract(
-          currentWorker.id
-        );
-        setFullContractData(updatedContract);
+        const response = await getContract(currentWorker.id);
+        setFullContractData(response.data);
 
         Swal.fire("저장 완료", "근무 정보가 수정되었습니다.", "success");
         setIsEditingWork(false);
@@ -417,12 +415,14 @@ export default function WorkerManagePage() {
 
     try {
       // 백엔드에 근무지 생성 요청
-      const createdWorkplace = await workplaceService.createWorkplace({
-        companyName: newWorkplaceName.trim(),
+      const response = await createWorkplace({
+        businessName: newWorkplaceName.trim(),
+        workplaceName: newWorkplaceName.trim(),
         address: newWorkplaceAddress.trim(),
         businessNumber: newWorkplaceBusinessNumber.trim(),
         isLessThanFiveEmployees: newWorkplaceIsSmallBusiness,
       });
+      const createdWorkplace = response.data;
 
       // UI 업데이트
       setWorkplaces((prev) => [...prev, createdWorkplace]);
@@ -500,7 +500,7 @@ export default function WorkerManagePage() {
 
         try {
           // 백엔드에 삭제 요청
-          await workplaceService.deleteWorkplace(selectedWorkplaceId);
+          await deleteWorkplace(selectedWorkplaceId);
 
           // UI 업데이트
           setWorkplaces(updatedWorkplaces);
@@ -591,10 +591,10 @@ export default function WorkerManagePage() {
 
     try {
       // 백엔드에 수정 요청
-      await workplaceService.updateWorkplace(editingWorkplace.id, {
-        companyName: editingWorkplace.name.trim(),
+      await updateWorkplace(editingWorkplace.id, {
+        businessName: editingWorkplace.name.trim(),
+        workplaceName: editingWorkplace.name.trim(),
         address: editingWorkplace.address.trim(),
-        businessNumber: editingWorkplace.businessNumber.trim(),
         isLessThanFiveEmployees: editingWorkplace.isSmallBusiness,
       });
 
@@ -707,7 +707,7 @@ export default function WorkerManagePage() {
     if (result.isConfirmed) {
       try {
         // 백엔드 API 호출로 계약 종료
-        await contractService.deleteContract(currentWorker.id);
+        await deleteContract(currentWorker.id);
 
         // UI 업데이트
         setWorkersList((prev) => {
@@ -747,19 +747,20 @@ export default function WorkerManagePage() {
     setIsSearching(true);
 
     try {
-      const response = await workerService.getWorkerByCode(code);
+      const response = await getWorkerByCode(code);
+      const workerData = response.data;
       setIsSearching(false);
 
-      if (response && response.id) {
+      if (workerData && workerData.id) {
         // 백엔드 응답을 프론트엔드 형식으로 변환
         const worker = {
-          id: response.id,
-          name: response.name,
-          phone: response.phone,
-          workerCode: response.workerCode,
-          bankName: response.bankName || "",
-          accountNumber: response.accountNumber || "",
-          kakaoPayLink: response.kakaoPayLink || "",
+          id: workerData.id,
+          name: workerData.name,
+          phone: workerData.phone,
+          workerCode: workerData.workerCode,
+          bankName: workerData.bankName || "",
+          accountNumber: workerData.accountNumber || "",
+          kakaoPayLink: workerData.kakaoPayLink || "",
         };
         setSearchedWorker(worker);
       } else {
@@ -895,13 +896,14 @@ export default function WorkerManagePage() {
       };
 
       // 백엔드 API 호출
-      const response = await contractService.createContract(
+      const response = await createContract(
         selectedWorkplaceId,
         requestData
       );
+      const createdContract = response.data;
 
       // 성공 시 백엔드에서 최신 근로자 목록 다시 조회
-      await fetchWorkers(selectedWorkplaceId);
+      const workers = await fetchWorkers(selectedWorkplaceId);
 
       Swal.fire(
         "추가 완료",
@@ -912,8 +914,11 @@ export default function WorkerManagePage() {
       resetAddWorkerFlow();
       setIsAddingWorker(false);
 
-      // 추가된 근무자 선택 (response는 생성된 계약 객체)
-      setSelectedWorker(response);
+      // 추가된 근무자 선택 (완전한 객체 사용)
+      const foundWorker = workers.find((w) => w.id === createdContract.id);
+      if (foundWorker) {
+        setSelectedWorker(foundWorker);
+      }
     } catch (error) {
       Swal.fire(
         "추가 실패",
@@ -1952,7 +1957,7 @@ export default function WorkerManagePage() {
                       </div>
                     ) : (
                       <div className="info-value">
-                        {formatKRW(
+                        {formatCurrency(
                           currentWorkInfo?.hourlyWage ||
                             workerData.workInfo.hourlyWage
                         )}
