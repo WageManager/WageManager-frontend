@@ -104,5 +104,4 @@ export interface UpdateWorkerRequest {
   phone?: string;
   bankName?: string;
   accountNumber?: string;
-  kakaoPayLink?: string;
 }

@@ -1,4 +1,4 @@
-import wageManagerApi from './axios';
+import {wageManagerApi} from './axios';
 import type { ApiResponse } from './workerApiResponse.type';
 import type { UserUpdateRequest, WorkerUpdateRequest } from './userApiRequest.type';
 import type { UserResponse, WorkerResponse } from './userApiResponse.type';
