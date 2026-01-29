@@ -16,15 +16,33 @@ export interface ApiResponse<T> {
 // 로그인 성공 시 응답 데이터
 export interface AuthSuccessData {
   accessToken: string;
+  userId: number;
+  name: string;
   userType: UserType;
 }
 
-// 카카오 로그인/회원가입 요청 시 필요한 파라미터 박스
-export interface KakaoRegisterParams {
+// 카카오 로그인/회원가입 요청 시 필요한 파라미터
+
+// 공통으로 사용하는 필드들
+interface BaseRegisterParams {
   kakaoAccessToken: string;
-  userType: UserType;
   phone: string;
+  profileImageUrl?: string;
+}
+
+// 근로자일 때의 타입 (은행 정보 필수)
+interface WorkerRegisterParams extends BaseRegisterParams {
+  userType: 'WORKER';
   bankName: string;
   accountNumber: string;
-  profileImageUrl: string;
 }
+
+// 고용주일 때의 타입 (은행 정보 없음)
+interface EmployerRegisterParams extends BaseRegisterParams {
+  userType: 'EMPLOYER';
+  bankName?: never;
+  accountNumber?: never;
+}
+
+// 최종 유니온 타입
+export type KakaoRegisterParams = WorkerRegisterParams | EmployerRegisterParams;
