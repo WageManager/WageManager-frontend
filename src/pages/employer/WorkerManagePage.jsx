@@ -76,7 +76,7 @@ export default function WorkerManagePage() {
 
   // 근로자 목록 조회 함수 (재사용 가능하도록 분리)
   const fetchWorkers = async (workplaceId) => {
-    if (!workplaceId) return;
+    if (!workplaceId) return [];
 
     try {
       const response = await getContractsByWorkplace(workplaceId);
@@ -85,12 +85,14 @@ export default function WorkerManagePage() {
         ...prev,
         [workplaceId]: contracts,
       }));
+      return contracts;
     } catch (error) {
       // 에러 시 빈 배열 사용
       setWorkersList((prev) => ({
         ...prev,
         [workplaceId]: [],
       }));
+      return [];
     }
   };
 
@@ -901,7 +903,7 @@ export default function WorkerManagePage() {
       const createdContract = response.data;
 
       // 성공 시 백엔드에서 최신 근로자 목록 다시 조회
-      await fetchWorkers(selectedWorkplaceId);
+      const workers = await fetchWorkers(selectedWorkplaceId);
 
       Swal.fire(
         "추가 완료",
@@ -912,8 +914,11 @@ export default function WorkerManagePage() {
       resetAddWorkerFlow();
       setIsAddingWorker(false);
 
-      // 추가된 근무자 선택
-      setSelectedWorker(createdContract);
+      // 추가된 근무자 선택 (완전한 객체 사용)
+      const foundWorker = workers.find((w) => w.id === createdContract.id);
+      if (foundWorker) {
+        setSelectedWorker(foundWorker);
+      }
     } catch (error) {
       Swal.fire(
         "추가 실패",
