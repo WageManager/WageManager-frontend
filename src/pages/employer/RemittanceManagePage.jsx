@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import "../../styles/remittanceManagePage.css";
-import { formatCurrency, formatBreakTime } from "./utils/formatUtils";
-import { allowanceDefinitions } from "./utils/shiftUtils";
+import { formatKRW, formatBreakTime } from "../../utils/formatUtils";
+import { extraPayTypes } from "../../constants/extraPay";
 import {
   getWorkplaces,
   getContractsByWorkplace,
@@ -153,7 +153,7 @@ export default function RemittanceManagePage() {
           allowances: {
             overtime: { enabled: false, rate: 0 },
             night: { enabled: false, rate: 0 },
-            weekend: { enabled: false, rate: 0 },
+            holiday: { enabled: false, rate: 0 },
           },
           socialInsurance: true,
           withholdingTax: true,
@@ -374,7 +374,7 @@ export default function RemittanceManagePage() {
                     </span>
                   </div>
                   <div className="detail-wage">
-                    {formatCurrency(record.wage)}
+                    {formatKRW(record.wage)}
                   </div>
                 </div>
                 <div
@@ -414,7 +414,7 @@ export default function RemittanceManagePage() {
                       <p className="detail-label">시급</p>
                       <p className="detail-value">
                         {record.hourlyWage
-                          ? formatCurrency(record.hourlyWage)
+                          ? formatKRW(record.hourlyWage)
                           : "-"}
                       </p>
                     </div>
@@ -428,7 +428,7 @@ export default function RemittanceManagePage() {
                   <div className="detail-section">
                     <p className="detail-label">수당 정보</p>
                     <ul className="allowance-list">
-                      {allowanceDefinitions.map(({ key, label }) => {
+                      {extraPayTypes.map(({ key, label }) => {
                         const allowance = record.allowances?.[key] || {
                           enabled: false,
                           rate: 0,
@@ -479,7 +479,7 @@ export default function RemittanceManagePage() {
       <div className="remittance-right-panel">
         <div className="remittance-summary-box">
           <h3 className="summary-title">이번 달 급여</h3>
-          <div className="summary-amount">{formatCurrency(totalWage)}</div>
+          <div className="summary-amount">{formatKRW(totalWage)}</div>
         </div>
         <button
           type="button"

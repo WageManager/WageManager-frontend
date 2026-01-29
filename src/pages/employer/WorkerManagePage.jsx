@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaUser, FaTimes } from "react-icons/fa";
 import Swal from "sweetalert2";
 import "../../styles/workerManagePage.css";
-import { formatCurrency } from "./utils/formatUtils";
+import { formatKRW } from "../../utils/formatUtils";
 import TimeInput from "./components/TimeInput";
 import WorkplaceForm from "./components/WorkplaceForm";
 import ScheduleGrid from "./components/ScheduleGrid";
@@ -1957,7 +1957,7 @@ export default function WorkerManagePage() {
                       </div>
                     ) : (
                       <div className="info-value">
-                        {formatCurrency(
+                        {formatKRW(
                           currentWorkInfo?.hourlyWage ||
                             workerData.workInfo.hourlyWage
                         )}
