@@ -179,7 +179,6 @@ describe("Workplace API", () => {
     mockApi.onPut("/api/employer/workplaces/1").reply(200, mockResponse);
 
     const result = await updateWorkplace(1, {
-      businessNumber: "123-45-67890",
       businessName: "수정된회사",
       workplaceName: "수정된점포",
       address: "서울시 서초구",

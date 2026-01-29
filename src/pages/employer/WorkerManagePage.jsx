@@ -593,7 +593,6 @@ export default function WorkerManagePage() {
         businessName: editingWorkplace.name.trim(),
         workplaceName: editingWorkplace.name.trim(),
         address: editingWorkplace.address.trim(),
-        businessNumber: editingWorkplace.businessNumber.trim(),
         isLessThanFiveEmployees: editingWorkplace.isSmallBusiness,
       });
 

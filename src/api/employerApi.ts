@@ -46,8 +46,8 @@ export const updateWorkplace = async (
   id: number | string,
   reqData: UpdateWorkplaceRequest
 ) => {
+  // 참고: businessNumber는 수정 불가 (API 스펙)
   const { data } = await wageManagerApi.put(`/api/employer/workplaces/${id}`, {
-    businessNumber: reqData.businessNumber,
     businessName: reqData.businessName,
     name: reqData.workplaceName,
     address: reqData.address,

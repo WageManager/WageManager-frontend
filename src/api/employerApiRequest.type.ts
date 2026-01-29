@@ -9,12 +9,12 @@ export interface CreateWorkplaceRequest {
 }
 
 export interface UpdateWorkplaceRequest {
-  businessNumber?: string;
-  businessName?: string;
-  workplaceName?: string;
+  businessName?: string;       // 사업장 상호명
+  workplaceName?: string;      // 지점명 또는 별칭
   address?: string;
   colorCode?: string;
   isLessThanFiveEmployees?: boolean;
+  // 참고: businessNumber는 수정 불가
 }
 
 // ============ 근무 기록 (Work Record) ============
