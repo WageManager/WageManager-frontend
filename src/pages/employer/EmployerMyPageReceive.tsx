@@ -3,10 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import Swal from "sweetalert2";
 import "../../styles/employerMyPageReceive.css";
-import userService, { type UserInfo } from "../../services/userService";
-import workplaceService from "../../services/workplaceService";
-import correctionRequestService from "../../services/correctionRequestService";
-import workRecordService from "../../services/workRecordService";
+import { getMyInfo } from "../../api/commonApi";
+import type { UserInfo } from "../../api/commonApiResponse.type";
+import {
+  getWorkplaces,
+  getPendingApprovals,
+  approveCorrectionRequest,
+  rejectCorrectionRequest,
+  approveWorkRecord,
+  rejectWorkRecord,
+} from "../../api/employerApi";
 
 interface RequestItem {
   id: string;
@@ -39,22 +45,23 @@ export default function EmployerMyPageReceive(): JSX.Element {
     const fetchData = async (): Promise<void> => {
       try {
         // 사용자 정보 조회
-        const userData = await userService.getMyInfo();
+        const userResponse = await getMyInfo();
+        const userData = userResponse.data;
         setUser(userData);
         setProfileImage(userData.profileImageUrl ?? null);
 
         // 모든 근무지 조회
-        const workplaces = await workplaceService.getWorkplaces();
+        const workplacesResponse = await getWorkplaces();
+        const workplaces = workplacesResponse.data || [];
 
         // 모든 근무지의 승인 대기 요청 조회
         const allRequests: RequestItem[] = [];
         for (const workplace of workplaces) {
           try {
-            const response = await correctionRequestService.getPendingApprovals(workplace.id);
-            
+            const response = await getPendingApprovals(workplace.id);
+
             // 백엔드는 List<CorrectionRequestDto.ListResponse>를 직접 반환
-            // response가 배열인 경우 처리
-            const correctionRequests = Array.isArray(response) ? response : [];
+            const correctionRequests = Array.isArray(response.data) ? response.data : [];
 
             correctionRequests.forEach((req: any) => {
               allRequests.push({
@@ -130,9 +137,9 @@ export default function EmployerMyPageReceive(): JSX.Element {
     if (result.isConfirmed) {
       try {
         if (request.type === "correction") {
-          await correctionRequestService.approveRequest(request.originalId);
+          await approveCorrectionRequest(request.originalId);
         } else {
-          await workRecordService.approveWorkRecord(request.originalId);
+          await approveWorkRecord(request.originalId);
         }
 
         // 목록에서 제거
@@ -162,9 +169,9 @@ export default function EmployerMyPageReceive(): JSX.Element {
     if (result.isConfirmed) {
       try {
         if (request.type === "correction") {
-          await correctionRequestService.rejectRequest(request.originalId);
+          await rejectCorrectionRequest(request.originalId);
         } else {
-          await workRecordService.rejectWorkRecord(request.originalId);
+          await rejectWorkRecord(request.originalId);
         }
 
         // 목록에서 제거

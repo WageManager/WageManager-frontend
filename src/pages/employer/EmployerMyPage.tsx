@@ -5,7 +5,7 @@ import { FaCamera, FaUser } from "react-icons/fa";
 import Swal from "sweetalert2";
 import "../../styles/employerMyPage.css";
 import { logout } from "../../api/authApi";
-import userService from "../../services/userService";
+import { getMyInfo, updateMyInfo, deleteMyAccount } from "../../api/commonApi";
 
 interface User {
   id?: number;
@@ -32,7 +32,8 @@ export default function EmployerMyPage(): JSX.Element {
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
       try {
-        const userData: User = await userService.getMyInfo();
+        const response = await getMyInfo();
+        const userData: User = response.data;
         setUser(userData);
         setProfileImage(userData.profileImageUrl ?? null);
       } catch (error) {
@@ -55,7 +56,7 @@ export default function EmployerMyPage(): JSX.Element {
     if (!user) return;
 
     try {
-      await userService.updateMyInfo({ [field]: user[field] ?? "" });
+      await updateMyInfo({ [field]: user[field] ?? "" });
       Swal.fire("완료", field === "name" ? "이름이 수정되었습니다." : "전화번호가 수정되었습니다.", "success");
     } catch (error) {
       const message = error instanceof Error ? error.message : "정보 수정 중 오류가 발생했습니다.";
@@ -99,7 +100,7 @@ export default function EmployerMyPage(): JSX.Element {
 
     if (result.isConfirmed) {
       try {
-        await userService.deleteMyAccount();
+        await deleteMyAccount();
 
         Swal.fire("탈퇴 완료", "회원 탈퇴가 완료되었습니다.", "success");
 
