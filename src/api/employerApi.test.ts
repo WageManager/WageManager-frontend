@@ -79,6 +79,7 @@ afterEach(() => {
   Object.defineProperty(window, "localStorage", {
     value: originalLocalStorage,
     writable: true,
+    configurable: true,
   });
 });
 
