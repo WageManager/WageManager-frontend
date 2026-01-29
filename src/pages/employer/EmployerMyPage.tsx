@@ -35,6 +35,10 @@ export default function EmployerMyPage(): JSX.Element {
     const fetchData = async (): Promise<void> => {
       try {
         const response = await getMyInfo();
+        if (!response.success || !response.data) {
+          Swal.fire("오류", "사용자 정보를 불러오는데 실패했습니다.", "error");
+          return;
+        }
         const userData: User = response.data;
         setUser(userData);
         setProfileImage(userData.profileImageUrl ?? null);
