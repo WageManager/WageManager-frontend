@@ -16,6 +16,8 @@ export interface ApiResponse<T> {
 // 로그인 성공 시 응답 데이터
 export interface AuthSuccessData {
   accessToken: string;
+  userId: number;
+  name: string;
   userType: UserType;
 }
 
