@@ -135,37 +135,60 @@ describe("Workplace API", () => {
   it("createWorkplace - 사업장을 생성한다", async () => {
     const mockResponse = {
       success: true,
-      data: { id: 3, businessName: "새회사", name: "신규점" },
+      data: {
+        id: 3,
+        businessNumber: "123-45-67890",
+        businessName: "(주)메가커피",
+        name: "강남역점",
+        address: "서울시 강남구",
+        colorCode: "#FF5733",
+        isLessThanFiveEmployees: true,
+      },
       error: null,
     };
     mockApi.onPost("/api/employer/workplaces").reply(201, mockResponse);
 
     const result = await createWorkplace({
-      companyName: "새회사",
-      address: "서울시 강남구",
       businessNumber: "123-45-67890",
+      businessName: "(주)메가커피",
+      workplaceName: "강남역점",
+      address: "서울시 강남구",
+      colorCode: "#FF5733",
+      isLessThanFiveEmployees: true,
     });
 
     expect(result.success).toBe(true);
     expect(result.data.id).toBe(3);
+    expect(result.data.businessName).toBe("(주)메가커피");
+    expect(result.data.name).toBe("강남역점");
   });
 
   it("updateWorkplace - 사업장을 수정한다", async () => {
     const mockResponse = {
       success: true,
-      data: { id: 1, businessName: "수정된회사", name: "수정된점포" },
+      data: {
+        id: 1,
+        businessNumber: "123-45-67890",
+        businessName: "수정된회사",
+        name: "수정된점포",
+        address: "서울시 서초구",
+        colorCode: "#00FF00",
+      },
       error: null,
     };
     mockApi.onPut("/api/employer/workplaces/1").reply(200, mockResponse);
 
     const result = await updateWorkplace(1, {
-      companyName: "수정된회사",
-      address: "서울시 서초구",
       businessNumber: "123-45-67890",
+      businessName: "수정된회사",
+      workplaceName: "수정된점포",
+      address: "서울시 서초구",
+      colorCode: "#00FF00",
     });
 
     expect(result.success).toBe(true);
     expect(result.data.businessName).toBe("수정된회사");
+    expect(result.data.name).toBe("수정된점포");
   });
 
   it("deleteWorkplace - 사업장을 삭제한다", async () => {

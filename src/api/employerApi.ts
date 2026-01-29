@@ -33,9 +33,10 @@ export const getWorkplace = async (id: number | string) => {
 export const createWorkplace = async (reqData: CreateWorkplaceRequest) => {
   const { data } = await wageManagerApi.post("/api/employer/workplaces", {
     businessNumber: reqData.businessNumber,
-    businessName: reqData.companyName,
-    name: reqData.companyName,
+    businessName: reqData.businessName,
+    name: reqData.workplaceName,
     address: reqData.address,
+    colorCode: reqData.colorCode,
     isLessThanFiveEmployees: reqData.isLessThanFiveEmployees ?? false,
   });
   return data;
@@ -47,10 +48,11 @@ export const updateWorkplace = async (
 ) => {
   const { data } = await wageManagerApi.put(`/api/employer/workplaces/${id}`, {
     businessNumber: reqData.businessNumber,
-    businessName: reqData.companyName,
-    name: reqData.companyName,
+    businessName: reqData.businessName,
+    name: reqData.workplaceName,
     address: reqData.address,
-    isLessThanFiveEmployees: reqData.isLessThanFiveEmployees ?? false,
+    colorCode: reqData.colorCode,
+    isLessThanFiveEmployees: reqData.isLessThanFiveEmployees,
   });
   return data;
 };

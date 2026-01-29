@@ -414,7 +414,8 @@ export default function WorkerManagePage() {
     try {
       // 백엔드에 근무지 생성 요청
       const response = await createWorkplace({
-        companyName: newWorkplaceName.trim(),
+        businessName: newWorkplaceName.trim(),
+        workplaceName: newWorkplaceName.trim(),
         address: newWorkplaceAddress.trim(),
         businessNumber: newWorkplaceBusinessNumber.trim(),
         isLessThanFiveEmployees: newWorkplaceIsSmallBusiness,
@@ -589,7 +590,8 @@ export default function WorkerManagePage() {
     try {
       // 백엔드에 수정 요청
       await updateWorkplace(editingWorkplace.id, {
-        companyName: editingWorkplace.name.trim(),
+        businessName: editingWorkplace.name.trim(),
+        workplaceName: editingWorkplace.name.trim(),
         address: editingWorkplace.address.trim(),
         businessNumber: editingWorkplace.businessNumber.trim(),
         isLessThanFiveEmployees: editingWorkplace.isSmallBusiness,

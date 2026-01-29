@@ -1,15 +1,19 @@
 // ============ 근무지 (Workplace) ============
 export interface CreateWorkplaceRequest {
-  businessNumber: string;
-  companyName: string;
+  businessNumber: string;      // 사업자 등록번호 (형식: 000-00-00000)
+  businessName: string;        // 사업장 상호명
+  workplaceName: string;       // 지점명 또는 별칭
   address: string;
-  isLessThanFiveEmployees?: boolean;
+  colorCode?: string;          // 앱 내 캘린더 등에서 구분하기 위한 색상 (Hex Code)
+  isLessThanFiveEmployees?: boolean;  // 5인 미만 사업장 여부
 }
 
 export interface UpdateWorkplaceRequest {
-  businessNumber: string;
-  companyName: string;
-  address: string;
+  businessNumber?: string;
+  businessName?: string;
+  workplaceName?: string;
+  address?: string;
+  colorCode?: string;
   isLessThanFiveEmployees?: boolean;
 }
 
