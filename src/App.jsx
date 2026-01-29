@@ -20,7 +20,6 @@ import RemittanceManagePage from "./pages/employer/RemittanceManagePage";
 import WorkerManagePage from "./pages/employer/WorkerManagePage";
 import AddWorkplacePage from "./pages/employer/AddWorkplacePage";
 import EmployerMyPage from "./pages/employer/EmployerMyPage";
-import EmployerMyPageReceive from "./pages/employer/EmployerMyPageReceive";
 
 // Layouts
 import NotificationLayout from "./layouts/NotificationLayout";
@@ -56,10 +55,7 @@ function App() {
           <Route path="worker-manage" element={<WorkerManagePage />} />
           <Route path="add-workplace" element={<AddWorkplacePage />} />
           <Route path="employer-mypage" element={<EmployerMyPage />} />
-          <Route
-            path="employer-mypage-receive"
-            element={<EmployerMyPageReceive />}
-          />
+          <Route path="employer-mypage-receive" element={<EmployerMyPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

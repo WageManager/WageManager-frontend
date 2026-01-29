@@ -1,13 +1,13 @@
 import { useMemo, useState, useEffect } from "react";
 import "../../styles/dailyCalendarPage.css";
 import {
-  initialScheduleData,
-  initialWorkplaces,
-  workplaceWorkers,
-} from "./dummyData";
-import workplaceService from "../../services/workplaceService";
-import workRecordService from "../../services/workRecordService";
-import contractService from "../../services/contractService";
+  getWorkplaces,
+  getWorkRecords,
+  createWorkRecord,
+  updateWorkRecord,
+  deleteWorkRecord,
+  getContractsByWorkplace,
+} from "../../api/employerApi";
 import { getDateKey, isSameDate, buildCalendarCells } from "./utils/dateUtils";
 import {
   allowanceDefinitions,
@@ -33,22 +33,22 @@ export default function DailyCalendarPage() {
   );
 
   // 근무지 리스트 (백엔드에서 받아옴)
-  const [workplaces, setWorkplaces] = useState(initialWorkplaces);
+  const [workplaces, setWorkplaces] = useState([]);
   const [selectedWorkplaceId, setSelectedWorkplaceId] = useState(null);
 
   // 근무지 목록 조회
   useEffect(() => {
     const fetchWorkplaces = async () => {
       try {
-        const data = await workplaceService.getWorkplaces();
-        setWorkplaces(data);
-        if (data.length > 0) {
-          setSelectedWorkplaceId(data[0].id);
+        const response = await getWorkplaces();
+        const workplacesData = response.data || [];
+        setWorkplaces(workplacesData);
+        if (workplacesData.length > 0) {
+          setSelectedWorkplaceId(workplacesData[0].id);
         }
       } catch (error) {
-        // 에러 시 더미 데이터 사용
-        setWorkplaces(initialWorkplaces);
-        setSelectedWorkplaceId(1);
+        // 에러 시 빈 배열 사용
+        setWorkplaces([]);
       }
     };
     fetchWorkplaces();
@@ -60,9 +60,7 @@ export default function DailyCalendarPage() {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeShiftId, setActiveShiftId] = useState(null);
-  const [scheduleData, setScheduleData] = useState(() =>
-    JSON.parse(JSON.stringify(initialScheduleData))
-  );
+  const [scheduleData, setScheduleData] = useState({});
   const [editedShift, setEditedShift] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showWorkerListModal, setShowWorkerListModal] = useState(false);
@@ -84,18 +82,19 @@ export default function DailyCalendarPage() {
           0
         );
 
-        const data = await workRecordService.getWorkRecords(
+        const response = await getWorkRecords(
           selectedWorkplaceId,
           startDate,
           endDate
         );
+        const recordsData = response.data || [];
 
         // API 응답을 기존 데이터 구조로 변환
-        const transformedData = transformWorkRecordsToScheduleData(data);
+        const transformedData = transformWorkRecordsToScheduleData(recordsData);
         setScheduleData(transformedData);
       } catch (error) {
-        // 에러 시 더미 데이터 사용
-        setScheduleData(initialScheduleData);
+        // 에러 시 빈 객체 사용
+        setScheduleData({});
       }
     };
 
@@ -313,13 +312,13 @@ export default function DailyCalendarPage() {
 
     const fetchWorkers = async () => {
       try {
-        const workers = await contractService.getWorkersByWorkplace(
-          selectedWorkplaceId
-        );
-        setWorkersInWorkplace(workers);
+        const response = await getContractsByWorkplace(selectedWorkplaceId);
+        const contracts = response.data || [];
+        const workerNames = [...new Set(contracts.map((c) => c.workerName))];
+        setWorkersInWorkplace(workerNames);
       } catch (error) {
-        // 에러 시 더미 데이터 사용
-        setWorkersInWorkplace(workplaceWorkers[selectedWorkplaceId] || []);
+        // 에러 시 빈 배열 사용
+        setWorkersInWorkplace([]);
       }
     };
 
@@ -393,10 +392,10 @@ export default function DailyCalendarPage() {
     // 백엔드에 근무 기록 생성 (비동기)
     try {
       // 먼저 근로자의 contractId 조회
-      const contractId = await contractService.getContractIdByWorkerName(
-        selectedWorkplaceId,
-        workerName
-      );
+      const contractsResponse = await getContractsByWorkplace(selectedWorkplaceId);
+      const contracts = contractsResponse.data || [];
+      const contract = contracts.find((c) => c.workerName === workerName);
+      const contractId = contract?.contractId ?? contract?.id;
 
       if (!contractId) {
         return;
@@ -411,9 +410,8 @@ export default function DailyCalendarPage() {
         memo: "",
       };
 
-      const createdRecord = await workRecordService.createWorkRecord(
-        workRecordData
-      );
+      const response = await createWorkRecord(workRecordData);
+      const createdRecord = response.data;
 
       // 백엔드에서 받은 ID로 업데이트
       setScheduleData((prev) => {
@@ -531,7 +529,7 @@ export default function DailyCalendarPage() {
         // 백엔드에 삭제 요청
         if (activeShift.workRecordId) {
           try {
-            await workRecordService.deleteWorkRecord(activeShift.workRecordId);
+            await deleteWorkRecord(activeShift.workRecordId);
             Swal.fire(
               "삭제 완료",
               `${activeShift.name} 근무자가 삭제되었습니다.`,
@@ -721,7 +719,7 @@ export default function DailyCalendarPage() {
           memo: "",
         };
 
-        await workRecordService.updateWorkRecord(
+        await updateWorkRecord(
           shiftToUpdate.workRecordId,
           updateData
         );

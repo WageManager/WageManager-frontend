@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import "../../../pages/workers/WorkerMyPage.css";
+import EditButton from "../../common/EditButton";
 
 export default function ProfileEdit({ user, onUserUpdate }) {
   const [editableSections, setEditableSections] = useState({
@@ -9,6 +10,7 @@ export default function ProfileEdit({ user, onUserUpdate }) {
     kakaoPay: false,
   });
   const [localUser, setLocalUser] = useState(user);
+  const [originalUser, setOriginalUser] = useState(user);
   const [errors, setErrors] = useState({});
 
   // user prop이 변경될 때 localUser 동기화
@@ -17,9 +19,24 @@ export default function ProfileEdit({ user, onUserUpdate }) {
     const isEditing = Object.values(editableSections).some((value) => value);
     if (!isEditing) {
       setLocalUser(user);
+      setOriginalUser(user);
       setErrors({});
     }
   }, [user, editableSections]);
+
+  // 섹션별 변경 여부 확인
+  const hasChanges = (section) => {
+    switch (section) {
+      case "basic":
+        return localUser.name !== originalUser.name;
+      case "phone":
+        return localUser.phone !== originalUser.phone;
+      case "kakaoPay":
+        return localUser.kakaoPayLink !== originalUser.kakaoPayLink;
+      default:
+        return false;
+    }
+  };
 
   const validateField = (section, value) => {
     if (!value || value.trim() === "") {
@@ -60,53 +77,17 @@ export default function ProfileEdit({ user, onUserUpdate }) {
     return { isValid: true, message: "" };
   };
 
+  // 수정 모드 진입/취소 토글
   const toggleEdit = (section) => {
     const wasEditing = editableSections[section];
 
     if (wasEditing) {
-      // 완료 버튼을 눌렀을 때 유효성 검사
-      const fieldName =
-        section === "kakaoPay"
-          ? "kakaoPayLink"
-          : section === "basic"
-            ? "name"
-            : section;
-      const fieldValue = localUser[fieldName];
-
-      // basic 섹션의 경우 이름만 검증
-      if (section === "basic") {
-        const validation = validateField("name", localUser.name);
-        if (!validation.isValid) {
-          setErrors({ basic: validation.message });
-          return;
-        }
-      } else if (section === "kakaoPay") {
-        // kakaoPay 섹션의 경우 kakaoPayLink 검증
-        const validation = validateField("kakaoPay", localUser.kakaoPayLink);
-        if (!validation.isValid) {
-          setErrors({ kakaoPay: validation.message });
-          return;
-        }
-      } else {
-        const validation = validateField(section, fieldValue);
-        if (!validation.isValid) {
-          setErrors({ [section]: validation.message });
-          return;
-        }
-      }
-
-      // 유효성 검사 통과 시 에러 초기화 및 API 호출
+      // 취소: 원래 값으로 복원
+      setLocalUser(originalUser);
       setErrors({});
-      onUserUpdate(localUser, section);
-    }
-
-    setEditableSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-
-    // 수정 모드로 전환 시 해당 필드의 에러 초기화
-    if (!wasEditing) {
+    } else {
+      // 수정 모드 진입: 현재 값을 원본으로 저장
+      setOriginalUser(localUser);
       setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[section];
@@ -114,6 +95,45 @@ export default function ProfileEdit({ user, onUserUpdate }) {
         return newErrors;
       });
     }
+
+    setEditableSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  // 완료 버튼 클릭 시 저장
+  const handleSave = (section) => {
+    // 유효성 검사
+    if (section === "basic") {
+      const validation = validateField("name", localUser.name);
+      if (!validation.isValid) {
+        setErrors({ basic: validation.message });
+        return;
+      }
+    } else if (section === "kakaoPay") {
+      const validation = validateField("kakaoPay", localUser.kakaoPayLink);
+      if (!validation.isValid) {
+        setErrors({ kakaoPay: validation.message });
+        return;
+      }
+    } else {
+      const fieldValue = localUser[section];
+      const validation = validateField(section, fieldValue);
+      if (!validation.isValid) {
+        setErrors({ [section]: validation.message });
+        return;
+      }
+    }
+
+    // 유효성 검사 통과 시 에러 초기화 및 API 호출
+    setErrors({});
+    onUserUpdate(localUser, section);
+    setOriginalUser(localUser);
+    setEditableSections((prev) => ({
+      ...prev,
+      [section]: false,
+    }));
   };
 
   const handleChange = (field, value) => {
@@ -191,12 +211,13 @@ export default function ProfileEdit({ user, onUserUpdate }) {
               {getUserTypeText(localUser.userType)}
             </div>
           </div>
-          <button
-            className="worker-mypage-edit-button"
-            onClick={() => toggleEdit("basic")}
-          >
-            {editableSections.basic ? "완료" : "수정"}
-          </button>
+          <EditButton
+            isEditing={editableSections.basic}
+            hasChanges={hasChanges("basic")}
+            onEditClick={() => toggleEdit("basic")}
+            onSaveClick={() => handleSave("basic")}
+            className="worker-mypage-edit-button-override"
+          />
         </div>
         {editableSections.basic && (
           <div className="worker-mypage-edit-fields">
@@ -236,12 +257,13 @@ export default function ProfileEdit({ user, onUserUpdate }) {
             <span className="worker-mypage-error-message">{errors.phone}</span>
           )}
         </div>
-        <button
-          className="worker-mypage-edit-button"
-          onClick={() => toggleEdit("phone")}
-        >
-          {editableSections.phone ? "완료" : "수정"}
-        </button>
+        <EditButton
+          isEditing={editableSections.phone}
+          hasChanges={hasChanges("phone")}
+          onEditClick={() => toggleEdit("phone")}
+          onSaveClick={() => handleSave("phone")}
+          className="worker-mypage-edit-button-override"
+        />
       </div>
       <hr />
 
@@ -261,12 +283,13 @@ export default function ProfileEdit({ user, onUserUpdate }) {
             <span className="worker-mypage-error-message">{errors.kakaoPay}</span>
           )}
         </div>
-        <button
-          className="worker-mypage-edit-button"
-          onClick={() => toggleEdit("kakaoPay")}
-        >
-          {editableSections.kakaoPay ? "완료" : "수정"}
-        </button>
+        <EditButton
+          isEditing={editableSections.kakaoPay}
+          hasChanges={hasChanges("kakaoPay")}
+          onEditClick={() => toggleEdit("kakaoPay")}
+          onSaveClick={() => handleSave("kakaoPay")}
+          className="worker-mypage-edit-button-override"
+        />
       </div>
       <hr />
 
