@@ -9,6 +9,7 @@ import {
   approveWorkRecord,
   rejectWorkRecord,
 } from "../../../api/employerApi";
+import type { CorrectionRequestListItem, Workplace } from "../../../api/employerApiResponse.type";
 
 interface RequestItem {
   id: string;
@@ -28,6 +29,8 @@ interface RequestItem {
   createdAt?: string;
 }
 
+type RequestAction = "approve" | "reject";
+
 export default function ReceivedRequestsTab(): JSX.Element {
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
@@ -37,32 +40,43 @@ export default function ReceivedRequestsTab(): JSX.Element {
     const fetchRequests = async (): Promise<void> => {
       try {
         const workplacesResponse = await getWorkplaces();
-        const workplaces = workplacesResponse.data || [];
+        const workplaces: Workplace[] = workplacesResponse.data || [];
 
         const allRequests: RequestItem[] = [];
         for (const workplace of workplaces) {
           try {
             const response = await getPendingApprovals(workplace.id);
-            const correctionRequests = Array.isArray(response.data) ? response.data : [];
+            const correctionRequests: CorrectionRequestListItem[] = Array.isArray(response.data)
+              ? response.data
+              : [];
 
-            correctionRequests.forEach((req: any) => {
-              allRequests.push({
+            correctionRequests.forEach((req) => {
+              const requestItem: RequestItem = {
                 id: `correction-${req.id}`,
                 type: "correction",
                 originalId: req.id,
-                workRecordId: req.workRecordId,
                 workerName: req.requester?.name || "알 수 없음",
                 workplace: req.workplaceName || workplace.name,
-                date: req.workDate || req.requestedWorkDate,
+                date: req.workDate || req.requestedStartTime,
                 startTime: req.requestedStartTime,
                 endTime: req.requestedEndTime,
-                originalDate: req.originalWorkDate,
-                originalStartTime: req.originalStartTime,
-                originalEndTime: req.originalEndTime,
                 requestType: req.type,
                 status: req.status,
                 createdAt: req.createdAt,
-              });
+              };
+
+              if (req.workRecordId != null) {
+                requestItem.workRecordId = req.workRecordId;
+              }
+              if (req.originalStartTime != null) {
+                requestItem.originalDate = req.originalStartTime;
+                requestItem.originalStartTime = req.originalStartTime;
+              }
+              if (req.originalEndTime != null) {
+                requestItem.originalEndTime = req.originalEndTime;
+              }
+
+              allRequests.push(requestItem);
             });
           } catch (error) {
             console.error(`근무지 ${workplace.id} 요청 조회 실패:`, error);
@@ -92,69 +106,52 @@ export default function ReceivedRequestsTab(): JSX.Element {
     setExpandedCardId(expandedCardId === cardId ? null : cardId);
   };
 
-  const handleApprove = async (request: RequestItem, e: MouseEvent<HTMLButtonElement>): Promise<void> => {
+  const handleRequestAction = async (
+    request: RequestItem,
+    action: RequestAction,
+    e: MouseEvent<HTMLButtonElement>
+  ): Promise<void> => {
     e.stopPropagation();
 
+    const isCorrectionRequest = request.type === "correction";
+    const isApprove = action === "approve";
+    const actionLabel = isApprove ? "승인" : "거절";
+    const requestTypeLabel = isCorrectionRequest ? "정정" : "근무";
+
     const displayDate = new Date(request.date).toLocaleDateString("ko-KR");
-    const confirmText = request.type === "correction"
+    const confirmText = isCorrectionRequest
       ? `${displayDate} ${request.originalStartTime} ~ ${request.originalEndTime}\n→ ${request.startTime} ~ ${request.endTime}`
       : `${displayDate} ${request.startTime} ~ ${request.endTime}`;
 
     const result = await Swal.fire({
-      icon: "question",
-      title: `${request.workerName}님의 ${request.type === "correction" ? "정정" : "근무"} 요청을 승인하시겠습니까?`,
-      text: `${request.workplace}\n${confirmText}`,
+      icon: isApprove ? "question" : "warning",
+      title: `${request.workerName}님의 ${requestTypeLabel} 요청을 ${actionLabel}하시겠습니까?`,
+      text: isApprove ? `${request.workplace}\n${confirmText}` : "거절된 요청은 복구할 수 없습니다.",
       showCancelButton: true,
-      confirmButtonText: "승인",
+      confirmButtonText: actionLabel,
       cancelButtonText: "취소",
-      confirmButtonColor: "var(--color-green)",
+      confirmButtonColor: isApprove ? "var(--color-green)" : "var(--color-red)",
     });
 
     if (result.isConfirmed) {
       try {
-        if (request.type === "correction") {
-          await approveCorrectionRequest(request.originalId);
+        if (isCorrectionRequest) {
+          isApprove
+            ? await approveCorrectionRequest(request.originalId)
+            : await rejectCorrectionRequest(request.originalId);
         } else {
-          await approveWorkRecord(request.originalId);
+          isApprove
+            ? await approveWorkRecord(request.originalId)
+            : await rejectWorkRecord(request.originalId);
         }
 
         setRequests((prev) => prev.filter((req) => req.id !== request.id));
         setExpandedCardId(null);
 
-        Swal.fire("승인 완료", `${request.type === "correction" ? "정정" : "근무"} 요청이 승인되었습니다.`, "success");
-      } catch (error: any) {
-        Swal.fire("승인 실패", error?.message || "승인 처리 중 오류가 발생했습니다.", "error");
-      }
-    }
-  };
-
-  const handleReject = async (request: RequestItem, e: MouseEvent<HTMLButtonElement>): Promise<void> => {
-    e.stopPropagation();
-
-    const result = await Swal.fire({
-      icon: "warning",
-      title: `${request.workerName}님의 ${request.type === "correction" ? "정정" : "근무"} 요청을 거절하시겠습니까?`,
-      text: "거절된 요청은 복구할 수 없습니다.",
-      showCancelButton: true,
-      confirmButtonText: "거절",
-      cancelButtonText: "취소",
-      confirmButtonColor: "var(--color-red)",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        if (request.type === "correction") {
-          await rejectCorrectionRequest(request.originalId);
-        } else {
-          await rejectWorkRecord(request.originalId);
-        }
-
-        setRequests((prev) => prev.filter((req) => req.id !== request.id));
-        setExpandedCardId(null);
-
-        Swal.fire("거절 완료", `${request.type === "correction" ? "정정" : "근무"} 요청이 거절되었습니다.`, "success");
-      } catch (error: any) {
-        Swal.fire("거절 실패", error?.message || "거절 처리 중 오류가 발생했습니다.", "error");
+        Swal.fire(`${actionLabel} 완료`, `${requestTypeLabel} 요청이 ${actionLabel}되었습니다.`, "success");
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : `${actionLabel} 처리 중 오류가 발생했습니다.`;
+        Swal.fire(`${actionLabel} 실패`, errorMessage, "error");
       }
     }
   };
@@ -179,6 +176,7 @@ export default function ReceivedRequestsTab(): JSX.Element {
             const requestDate = new Date(request.date);
             const month = requestDate.getMonth() + 1;
             const date = requestDate.getDate();
+            const isCorrectionRequest = request.type === "correction";
 
             return (
               <div key={request.id}>
@@ -194,14 +192,14 @@ export default function ReceivedRequestsTab(): JSX.Element {
                   <div className="mypage-receive-info">
                     <div className="mypage-receive-worker">
                       {request.workerName}({request.workplace})
-                      {request.type === "correction" && (
+                      {isCorrectionRequest && (
                         <span style={{ marginLeft: "8px", color: "var(--color-orange)", fontSize: "0.9em" }}>
                           [정정 요청]
                         </span>
                       )}
                     </div>
                     <div className="mypage-receive-time">
-                      {request.type === "correction" ? (
+                      {isCorrectionRequest ? (
                         <>
                           <span style={{ textDecoration: "line-through", color: "#999" }}>
                             {request.originalStartTime} ~ {request.originalEndTime}
@@ -231,14 +229,14 @@ export default function ReceivedRequestsTab(): JSX.Element {
                       <button
                         type="button"
                         className="detail-save-button"
-                        onClick={(e) => handleApprove(request, e)}
+                        onClick={(e) => handleRequestAction(request, "approve", e)}
                       >
                         승인
                       </button>
                       <button
                         type="button"
                         className="detail-delete-button"
-                        onClick={(e) => handleReject(request, e)}
+                        onClick={(e) => handleRequestAction(request, "reject", e)}
                       >
                         거절
                       </button>
@@ -258,14 +256,14 @@ export default function ReceivedRequestsTab(): JSX.Element {
                     <div>
                       <p className="detail-label">요청 타입</p>
                       <p className="detail-value">
-                        {request.type === "correction" ? "정정 요청" : "근무 생성 요청"}
+                        {isCorrectionRequest ? "정정 요청" : "근무 생성 요청"}
                       </p>
                     </div>
                     <div>
                       <p className="detail-label">근무 날짜</p>
                       <p className="detail-value">{requestDate.toLocaleDateString("ko-KR")}</p>
                     </div>
-                    {request.type === "correction" && (
+                    {isCorrectionRequest && (
                       <>
                         <div>
                           <p className="detail-label">기존 근무 시간</p>
@@ -281,7 +279,7 @@ export default function ReceivedRequestsTab(): JSX.Element {
                         </div>
                       </>
                     )}
-                    {request.type === "creation" && (
+                    {!isCorrectionRequest && (
                       <div>
                         <p className="detail-label">근무 시간</p>
                         <p className="detail-value">

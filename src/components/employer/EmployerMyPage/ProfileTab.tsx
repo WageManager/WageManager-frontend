@@ -40,17 +40,14 @@ export default function ProfileTab({ user, onUserUpdate }: ProfileTabProps): JSX
     }
   };
 
-  const toggleEdit = (field: EditableField): void => {
-    setEditableSections((prev) => {
-      const wasEditing = prev[field];
-      const nextState = { ...prev, [field]: !prev[field] };
+  const handleEditButtonClick = (field: EditableField): void => {
+    const isCurrentlyEditing = editableSections[field];
 
-      if (wasEditing) {
-        void handleSave(field);
-      }
+    if (isCurrentlyEditing) {
+      void handleSave(field);
+    }
 
-      return nextState;
-    });
+    setEditableSections((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   const handleWithdraw = async (): Promise<void> => {
@@ -91,7 +88,7 @@ export default function ProfileTab({ user, onUserUpdate }: ProfileTabProps): JSX
             onChange={(e) => handleChange("name", e.target.value)}
           />
         </div>
-        <button className="mypage-edit-button" onClick={() => toggleEdit("name")}>
+        <button className="mypage-edit-button" onClick={() => handleEditButtonClick("name")}>
           {editableSections.name ? "완료" : "수정"}
         </button>
       </div>
@@ -105,7 +102,7 @@ export default function ProfileTab({ user, onUserUpdate }: ProfileTabProps): JSX
           onChange={(e) => handleChange("phone", e.target.value)}
           placeholder="010-1234-5678"
         />
-        <button className="mypage-edit-button" onClick={() => toggleEdit("phone")}>
+        <button className="mypage-edit-button" onClick={() => handleEditButtonClick("phone")}>
           {editableSections.phone ? "완료" : "수정"}
         </button>
       </div>
