@@ -646,12 +646,16 @@ describe("Error Handling", () => {
     };
     mockApi.onGet("/api/employer/workplaces/999").reply(404, mockErrorResponse);
 
-    try {
-      await getWorkplace(999);
-    } catch (error: any) {
-      expect(error.response.status).toBe(404);
-      expect(error.response.data.error.code).toBe("NOT_FOUND");
-    }
+    await expect(getWorkplace(999)).rejects.toMatchObject({
+      response: {
+        status: 404,
+        data: {
+          error: {
+            code: "NOT_FOUND",
+          },
+        },
+      },
+    });
   });
 
   it("네트워크 에러 시 예외를 throw한다", async () => {
