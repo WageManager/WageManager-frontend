@@ -1,4 +1,3 @@
-// src/constants/navItems.js
 import {
   FiCalendar,
   FiServer,
@@ -6,9 +5,15 @@ import {
   FiBriefcase,
   FiUser,
 } from "react-icons/fi";
-import { IoMdPerson } from "react-icons/io";
+import type { IconType } from "react-icons";
 
-export const workerNavItems = [
+interface NavItem {
+  id: string;
+  label: string;
+  icon: IconType;
+}
+
+export const workerNavItems: NavItem[] = [
   {
     id: "monthly-calendar",
     label: "월간 캘린더",
@@ -31,7 +36,7 @@ export const workerNavItems = [
   },
 ];
 
-export const employerNavItems = [
+export const employerNavItems: NavItem[] = [
   {
     id: "daily-calendar",
     label: "일간 캘린더",

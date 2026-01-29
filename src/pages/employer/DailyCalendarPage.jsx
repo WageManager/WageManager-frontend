@@ -10,16 +10,12 @@ import {
 } from "../../api/employerApi";
 import { getDateKey, isSameDate, buildCalendarCells } from "./utils/dateUtils";
 import {
-  allowanceDefinitions,
   cloneShiftWithDefaults,
   generateShiftId,
 } from "./utils/shiftUtils";
-import {
-  formatCurrency,
-  formatBreakTime,
-  formatDuration,
-  timeStringToDecimal,
-} from "./utils/formatUtils";
+import { extraPayTypes } from "../../constants/extraPay";
+import { formatKRW, formatBreakTime } from "../../utils/formatUtils";
+import { formatDuration, timeStringToDecimal } from "./utils/formatUtils";
 import { hours } from "./constants";
 import TimeInput from "./components/TimeInput";
 import Swal from "sweetalert2";
@@ -1046,7 +1042,7 @@ export default function DailyCalendarPage() {
                   />
                 ) : (
                   <p className="detail-value">
-                    {formatCurrency(shiftForDisplay?.hourlyWage)}
+                    {formatKRW(shiftForDisplay?.hourlyWage)}
                   </p>
                 )}
               </div>
@@ -1054,7 +1050,7 @@ export default function DailyCalendarPage() {
             <div className="detail-section">
               <p className="detail-label">수당 정보</p>
               <ul className="allowance-list">
-                {allowanceDefinitions.map(({ key, label }) => {
+                {extraPayTypes.map(({ key, label }) => {
                   const allowance = (isEditing ? editedShift : activeShift)
                     ?.allowances?.[key] || {
                     enabled: false,

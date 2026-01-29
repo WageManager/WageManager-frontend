@@ -1,5 +1,18 @@
+// ============ 공통 API 응답 래퍼 ============
+
+/** 백엔드 공통 응답 구조 */
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  error: { code: string; message: string } | null;
+}
+
 // ============ 계약 관련 타입 ============
 
+/** 급여 공제 유형 */
+export type PayrollDeductionType = 'INCOME_TAX_3_3' | 'FOUR_MAJOR_INSURANCES';
+
+/** 계약 목록 조회 응답 아이템 (/api/worker/contracts) */
 export interface Contract {
   id: number;
   workerName: string;
@@ -7,10 +20,28 @@ export interface Contract {
   workerPhone: string;
   hourlyWage: number;
   contractStartDate: string;
-  contractEndDate: string;
+  contractEndDate: string | null;
   isActive: boolean;
-  // UI에서 사용하는 속성 추가 (API 응답에는 없지만, 로직에서 참조하는 경우를 대비해 optional로 추가하거나, API 응답이 확실하다면 제외해야 함)
   workplaceName?: string;
+}
+
+/** 계약 상세 조회 응답 (/api/worker/contracts/{id}) */
+export interface ContractDetailResponse {
+  id: number;
+  workplaceId: number;
+  workplaceName: string;
+  workerId: number;
+  workerName: string;
+  workerCode: string;
+  workerPhone: string;
+  hourlyWage: number;
+  /** JSON 문자열 형태의 근무 시간표 */
+  workSchedules: string;
+  contractStartDate: string;
+  contractEndDate: string | null;
+  paymentDay: number;
+  isActive: boolean;
+  payrollDeductionType: PayrollDeductionType;
 }
 
 // ============ 정정 요청 관련 타입 ============
@@ -18,7 +49,22 @@ export interface Contract {
 /** 정정 요청 상태 */
 export type CorrectionStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
-/**getWorkRecords(/api/worker/work-records) */
+/** 정정 요청 목록 조회 응답 아이템 (/api/worker/correction-requests) */
+export interface CorrectionRequestResponse {
+  id: number;
+  workplaceName: string;
+  /** YYYY-MM-DD */
+  workDate: string;
+  /** HH:mm:ss */
+  requestedStartTime: string;
+  /** HH:mm:ss */
+  requestedEndTime: string;
+  status: CorrectionStatus;
+  /** ISO-8601 */
+  createdAt: string;
+}
+
+/** 근무 기록 조회 응답 (/api/worker/work-records) */
 export interface WorkRecordsResponse {
   id: number;
   contractId: number;
@@ -33,4 +79,62 @@ export interface WorkRecordsResponse {
   isModified: boolean;
   wage?: number;
   memo?: string;
+}
+
+// ============ 급여 관련 타입 ============
+
+/** 급여 목록 조회 응답 아이템 (/api/worker/salaries) */
+export interface SalaryListItem {
+  id: number;
+  contractId: number;
+  workerName: string;
+  year: number;
+  month: number;
+  totalGrossPay: number;
+  netPay: number;
+  paymentDueDate: string;
+}
+
+/** 급여 상세 조회 응답 (/api/worker/salaries/{id}) */
+export interface SalaryDetailResponse {
+  id: number;
+  contractId: number;
+  workerId: number;
+  workerName: string;
+  workplaceId: number;
+  workplaceName: string;
+  year: number;
+  month: number;
+  totalWorkHours: number;
+  basePay: number;
+  overtimePay: number;
+  nightPay: number;
+  holidayPay: number;
+  totalGrossPay: number;
+  fourMajorInsurance: number;
+  incomeTax: number;
+  localIncomeTax: number;
+  totalDeduction: number;
+  netPay: number;
+  paymentDueDate: string;
+}
+
+// ============ 송금 관련 타입 ============
+
+/** 송금 상태 */
+export type PaymentStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+/** 송금 내역 조회 응답 아이템 (/api/worker/payments) */
+export interface PaymentResponse {
+  id: number;
+  salaryId: number;
+  workerName: string;
+  year: number;
+  month: number;
+  netPay: number;
+  status: PaymentStatus;
+  /** 송금 완료 시각 (ISO-8601). 미완료 시 null */
+  paymentDate: string | null;
+  /** status === 'COMPLETED'이면 true */
+  isPaid: boolean;
 }

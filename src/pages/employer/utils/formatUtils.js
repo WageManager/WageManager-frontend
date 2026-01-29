@@ -1,12 +1,5 @@
-// 포맷 관련 유틸리티 함수
-
-// 통화 포맷
-export const formatCurrency = (value) =>
-  typeof value === "number" ? `${value.toLocaleString("ko-KR")}원` : "-";
-
-// 휴게 시간 포맷
-export const formatBreakTime = (minutes) =>
-  typeof minutes === "number" ? `${minutes}분` : "-";
+// employer 전용 포맷 유틸리티 함수
+// ※ formatKRW(구 formatCurrency), formatBreakTime → src/utils/formatUtils.ts로 이동
 
 // 근무 시간 포맷 (소수점 시간을 "X시간 Y분" 형식으로)
 export const formatDuration = (hours) => {

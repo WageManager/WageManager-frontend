@@ -1,15 +1,9 @@
 // 근무 관련 유틸리티 함수
-
-// 수당 유형 정의
-export const allowanceDefinitions = [
-  { key: "overtime", label: "연장수당" },
-  { key: "night", label: "야간수당" },
-  { key: "holiday", label: "휴일수당" },
-];
+import { extraPayTypes } from "../../../constants/extraPay";
 
 // 수당 정보를 편집하기 쉬운 형태로 정규화
 export const normalizeAllowances = (allowances = {}) => {
-  return allowanceDefinitions.reduce((acc, { key }) => {
+  return extraPayTypes.reduce((acc, { key }) => {
     const base = allowances[key] || {};
     acc[key] = {
       enabled: base.enabled ?? false,
