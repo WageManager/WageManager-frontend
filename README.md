@@ -97,7 +97,7 @@ src/
 ### 테스트 커버리지
 
 | 분류 | 테스트 파일 |
-|------|------------|
+| ------ | ------------ |
 | **API** | `axios.test.ts`, `employerApi.test.ts` |
 | **인증 페이지** | `LoginPage.test.tsx`, `SignupPage.test.tsx`, `KakaoRedirect.test.tsx` |
 | **고용주 페이지** | `EmployerMyPage.test.tsx` |
