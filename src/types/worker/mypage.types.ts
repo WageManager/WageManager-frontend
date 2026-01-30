@@ -25,7 +25,7 @@ export type { ContractDetailResponse, CorrectionRequestResponse, CorrectionStatu
 /** 마이페이지 활성 탭 */
 export type ActiveTab = 'profile' | 'workplace' | 'editRequest';
 
-/** 프로필 편집 섹션 (kakaoPay → account로 변경) */
+/** 프로필 편집 섹션 */
 export type EditSection = 'basic' | 'phone' | 'account';
 
 /**
