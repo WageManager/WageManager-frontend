@@ -78,70 +78,16 @@ Notion: [click](https://www.notion.so/GOAT-27b6550d6d4480019236d1a9d4c9ef54?sour
 
 ```
 src/
-├── main.jsx                 # 앱 엔트리 포인트
-├── App.jsx                  # 라우팅 설정 및 메인 컴포넌트
-├── index.css                # 전역 스타일
-│
-├── api/                     # TypeScript API 통신 모듈
-│   ├── axios.ts             # HTTP 클라이언트 설정 (토큰 자동 갱신)
-│   ├── authApi.ts           # 인증 관련 API
-│   ├── userApi.ts           # 사용자 정보 API
-│   ├── employerApi.ts       # 고용주 API
-│   ├── workerApi.ts         # 근로자 API
-│   ├── notificationApi.ts   # 알림 API
-│   └── commonApi.ts         # 공통 API
-│
-├── components/              # 재사용 가능한 UI 컴포넌트
-│   ├── common/              # 공통 컴포넌트 (Button, Card, Modal 등)
-│   ├── layout/              # 레이아웃 컴포넌트 (Header, Nav)
-│   ├── employer/            # 고용주 전용 컴포넌트
-│   └── worker/              # 근로자 전용 컴포넌트 (페이지별 하위 폴더)
-│       ├── MonthlyCalendarPage/  # 월간 캘린더 컴포넌트
-│       ├── WeeklyCalendarPage/   # 주간 캘린더 컴포넌트
-│       ├── RemittancePage/       # 급여 내역 컴포넌트
-│       └── MyPage/               # 마이페이지 컴포넌트
-│
-├── pages/                   # 페이지 컴포넌트
-│   ├── auth/                # 인증 페이지 (로그인, 회원가입)
-│   ├── employer/            # 고용주 페이지
-│   │   ├── DailyCalendarPage.jsx      # 일일 스케줄 관리
-│   │   ├── WorkerManagePage.jsx       # 근로자 관리
-│   │   ├── EmployerMyPage.tsx         # 마이페이지
-│   │   └── RemittanceManagePage.jsx   # 급여 정산
-│   └── workers/             # 근로자 페이지 (TypeScript)
-│       ├── WorkerMonthlyCalendarPage.tsx  # 월간 캘린더
-│       ├── WorkerWeeklyCalendarPage.tsx   # 주간 캘린더
-│       ├── WorkerRemittancePage.tsx       # 급여 내역
-│       └── WorkerMyPage.tsx               # 마이페이지
-│
-├── hooks/                   # 커스텀 훅
-│   └── worker/              # 근로자 전용 훅 (페이지별 분리)
-│       ├── useMonthlyCalendar/  # 월간 캘린더 훅
-│       ├── useWeeklyCalendar/   # 주간 캘린더 훅
-│       ├── useRemittancePage/   # 급여 내역 훅
-│       └── useMyPage/           # 마이페이지 훅
-│
-├── types/                   # TypeScript 타입 정의
-│   ├── auth.ts              # 인증 관련 타입
-│   └── worker/              # 근로자 관련 타입
-│       ├── workerMonthlyCalendar.types.ts
-│       ├── workerWeeklyCalendar.types.ts
-│       ├── workerRemittancePage.types.ts
-│       └── workerMypage.types.ts
-│
-├── utils/                   # 유틸리티 함수
-│   ├── dateUtils.ts         # 날짜 관련 유틸리티
-│   └── formatUtils.ts       # 포맷팅 유틸리티
-│
-├── constants/               # 상수 정의
-│   ├── auth.ts              # 인증 관련 상수
-│   ├── calendar.ts          # 캘린더 옵션
-│   ├── extraPay.ts          # 수당 관련 상수
-│   ├── validation.ts        # 검증 메시지
-│   └── navItems.ts          # 네비게이션 아이템
-│
-├── layouts/                 # 페이지 레이아웃
-└── styles/                  # 스타일 파일 (CSS)
+├── api/          # API 통신 모듈 (Axios 인스턴스, 토큰 자동 갱신)
+├── components/   # 재사용 UI 컴포넌트 (common, layout, employer, worker)
+├── pages/        # 라우트 페이지 (auth, employer, workers)
+├── hooks/        # 커스텀 훅 (페이지별 비즈니스 로직 분리)
+├── types/        # TypeScript 타입 정의
+├── utils/        # 유틸리티 함수 (날짜, 포맷팅)
+├── constants/    # 상수 정의 (검증 메시지, 옵션 등)
+├── layouts/      # 페이지 레이아웃 래퍼
+├── styles/       # CSS 스타일 파일
+└── assets/       # 정적 리소스 (이미지 등)
 ```
 
 ## 🧪 테스트
