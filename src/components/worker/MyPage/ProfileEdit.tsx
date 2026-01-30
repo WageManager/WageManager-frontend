@@ -285,12 +285,11 @@ export default function ProfileEdit({ user, worker, onUserUpdate }: ProfileEditP
       {/* 근무자 코드 (읽기 전용) */}
       <div className="worker-mypage-field">
         <span className="worker-mypage-label">근무자 코드</span>
-        <input
-          type="text"
-          value={localUser.workerCode}
-          readOnly
-          className="worker-mypage-readonly"
-        />
+        <div className="worker-mypage-input-wrapper">
+          <span className="worker-mypage-field-value">
+            {localUser.workerCode || '코드 없음'}
+          </span>
+        </div>
       </div>
       <hr />
 
