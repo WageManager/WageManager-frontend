@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import "../../../pages/workers/WorkerMyPage.css";
+import { getCorrectionStatusLabel } from "../../../constants/status";
 
 export default function WorkEditRequestList({ requests, isLoading }) {
   if (isLoading) {
@@ -42,11 +43,7 @@ export default function WorkEditRequestList({ requests, isLoading }) {
                   <span
                     className={`worker-mypage-request-status worker-mypage-request-status-${request.status}`}
                   >
-                    {request.status === "pending"
-                      ? "대기중"
-                      : request.status === "approved"
-                        ? "승인됨"
-                        : "거절됨"}
+                    {getCorrectionStatusLabel(request.status)}
                   </span>
                 </div>
               </div>
