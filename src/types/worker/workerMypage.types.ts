@@ -77,7 +77,6 @@ export interface ValidationResult {
 
 export interface ProfileBoxProps {
   user: UserResponse;
-  worker: WorkerResponse | null;
   activeTab: ActiveTab;
   onTabChange: (tab: ActiveTab) => void;
 }
