@@ -1,0 +1,111 @@
+/**
+ * LoadingDots 컴포넌트 스타일
+ * - 3개 점 순차 깜빡임 애니메이션
+ * - 크기/색상 변형 지원
+ */
+
+/* 기본 컨테이너 */
+.loading-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px 0;
+}
+
+/* 중앙 정렬 (수직/수평) */
+.loading-dots--centered {
+  width: 100%;
+  flex: 1;
+  min-height: 300px;
+}
+
+/* 전체 화면 오버레이 */
+.loading-dots--fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: 100vh;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+}
+
+/* 크기 변형 */
+.loading-dots--small {
+  gap: 4px;
+  padding: 10px 0;
+}
+
+.loading-dots--small.loading-dots--centered {
+  min-height: 100px;
+}
+
+.loading-dots--small .loading-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.loading-dots--medium .loading-dot {
+  width: 10px;
+  height: 10px;
+}
+
+.loading-dots--large {
+  gap: 8px;
+  padding: 30px 0;
+}
+
+.loading-dots--large .loading-dot {
+  width: 14px;
+  height: 14px;
+}
+
+/* 개별 점 */
+.loading-dot {
+  border-radius: 50%;
+  animation: loading-dot-pulse 1.4s ease-in-out infinite;
+}
+
+/* 순차 딜레이 */
+.loading-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* 색상 변형 */
+.loading-dot--main {
+  background-color: #769fcd;
+}
+
+.loading-dot--green {
+  background-color: #27c840;
+}
+
+.loading-dot--mint {
+  background-color: #95e1d3;
+}
+
+.loading-dot--grey {
+  background-color: #d9d9d9;
+}
+
+/* 펄스 애니메이션 */
+@keyframes loading-dot-pulse {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
