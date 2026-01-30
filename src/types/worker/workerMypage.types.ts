@@ -11,6 +11,8 @@ import type { UserResponse, WorkerResponse } from '../../api/userApiResponse.typ
 import type {
   ContractDetailResponse,
   CorrectionRequestResponse,
+  CorrectionRequestType,
+  CorrectionRequester,
   CorrectionStatus,
 } from '../../api/workerApiResponse.type';
 
@@ -18,7 +20,13 @@ import type {
 // 마이페이지에서 사용하는 API 타입들을 한 곳에서 import할 수 있도록 re-export
 
 export type { UserResponse, WorkerResponse };
-export type { ContractDetailResponse, CorrectionRequestResponse, CorrectionStatus };
+export type {
+  ContractDetailResponse,
+  CorrectionRequestResponse,
+  CorrectionRequestType,
+  CorrectionRequester,
+  CorrectionStatus,
+};
 
 // ============ UI 전용 타입 ============
 
