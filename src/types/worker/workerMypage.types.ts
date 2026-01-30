@@ -84,7 +84,7 @@ export interface ProfileBoxProps {
 export interface ProfileEditProps {
   user: UserResponse;
   worker: WorkerResponse | null;
-  onUserUpdate: (section: EditSection, data: Record<string, string>) => Promise<void>;
+  onUserUpdate: (section: EditSection, data: Record<string, string>) => Promise<boolean>;
 }
 
 export interface WorkplaceManageProps {

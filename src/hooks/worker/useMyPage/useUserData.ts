@@ -9,7 +9,7 @@ interface UseUserDataReturn {
   user: UserResponse | null;
   worker: WorkerResponse | null;
   isLoading: boolean;
-  updateUser: (section: EditSection, data: Record<string, string>) => Promise<void>;
+  updateUser: (section: EditSection, data: Record<string, string>) => Promise<boolean>;
 }
 
 /**
@@ -74,7 +74,7 @@ export function useUserData(): UseUserDataReturn {
     fetchUserData();
   }, []);
 
-  const updateUser = useCallback(async (section: EditSection, data: Record<string, string>) => {
+  const updateUser = useCallback(async (section: EditSection, data: Record<string, string>): Promise<boolean> => {
     try {
       if (section === 'account') {
         // 계좌 정보 수정
@@ -89,7 +89,9 @@ export function useUserData(): UseUserDataReturn {
             position: 'top-right',
             autoClose: 2000,
           });
+          return true;
         }
+        return false;
       } else {
         // 이름 또는 전화번호 수정
         const response = await updateUserProfile(data);
@@ -106,7 +108,9 @@ export function useUserData(): UseUserDataReturn {
             position: 'top-right',
             autoClose: 2000,
           });
+          return true;
         }
+        return false;
       }
     } catch (error) {
       console.error('사용자 정보 수정 실패:', error);
@@ -118,6 +122,7 @@ export function useUserData(): UseUserDataReturn {
         position: 'top-right',
         autoClose: 3000,
       });
+      return false;
     }
   }, []);
 

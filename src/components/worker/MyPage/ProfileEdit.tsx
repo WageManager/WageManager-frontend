@@ -206,9 +206,14 @@ export default function ProfileEdit({ user, worker, onUserUpdate }: ProfileEditP
 
       // 에러 초기화 및 API 호출
       setErrors({});
-      await onUserUpdate(section, data);
-      setOriginalUser(localUser);
-      setEditableSections((prev) => ({ ...prev, [section]: false }));
+      const success = await onUserUpdate(section, data);
+
+      if (success) {
+        // 성공 시에만 상태 업데이트
+        setOriginalUser(localUser);
+        setEditableSections((prev) => ({ ...prev, [section]: false }));
+      }
+      // 실패 시 편집 모드 유지 (toast는 훅에서 표시됨)
     },
     [localUser, onUserUpdate]
   );
