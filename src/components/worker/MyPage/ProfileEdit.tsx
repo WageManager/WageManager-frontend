@@ -110,8 +110,8 @@ export default function ProfileEdit({ user, worker, onUserUpdate }: ProfileEditP
     phone: false,
     account: false,
   });
-  const [localUser, setLocalUser] = useState<LocalUserData>(() => mergeUserData(user, worker));
-  const [originalUser, setOriginalUser] = useState<LocalUserData>(() => mergeUserData(user, worker));
+  const [localUser, setLocalUser] = useState<LocalUserData>(() => mergeUserData(user, worker)); // 현재 편집 중인 데이터
+  const [originalUser, setOriginalUser] = useState<LocalUserData>(() => mergeUserData(user, worker)); // 원본 데이터 (취소 시 복원용)
   const [errors, setErrors] = useState<FormErrors>({});
 
   // user/worker prop이 변경될 때 동기화 (수정 중이 아닐 때만)
@@ -393,15 +393,20 @@ function PhoneSection({
     <div className="worker-mypage-field">
       <span className="worker-mypage-label">전화 번호</span>
       <div className="worker-mypage-input-wrapper">
-        <input
-          type="tel"
-          value={phone}
-          disabled={!isEditing}
-          onChange={onChange}
-          placeholder="010-1234-5678"
-          maxLength={COMMON_VALIDATION.PHONE_MAX_LENGTH}
-          className={error ? 'worker-mypage-input-error' : ''}
-        />
+        {isEditing ? (
+          <input
+            type="tel"
+            value={phone}
+            onChange={onChange}
+            placeholder="010-1234-5678"
+            maxLength={COMMON_VALIDATION.PHONE_MAX_LENGTH}
+            className={error ? 'worker-mypage-input-error' : ''}
+          />
+        ) : (
+          <span className="worker-mypage-field-value">
+            {phone || '전화번호를 입력해주세요'}
+          </span>
+        )}
         {error && <span className="worker-mypage-error-message">{error}</span>}
       </div>
       <EditButton
@@ -471,12 +476,9 @@ function AccountSection({
             />
           </div>
         ) : (
-          <input
-            type="text"
-            value={displayText}
-            disabled
-            placeholder="계좌 정보를 입력해주세요"
-          />
+          <span className="worker-mypage-field-value">
+            {displayText || '계좌 정보를 입력해주세요'}
+          </span>
         )}
         {error && <span className="worker-mypage-error-message">{error}</span>}
       </div>

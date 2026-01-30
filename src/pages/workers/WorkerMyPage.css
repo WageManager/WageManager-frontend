@@ -344,6 +344,20 @@
   margin-top: 4px;
 }
 
+.worker-mypage-field-value {
+  font-size: 1em;
+  color: #333333;
+  padding: 7px 0;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.worker-mypage-field-value:empty::before {
+  content: attr(data-placeholder);
+  color: #848484;
+}
+
 .worker-mypage-label {
   display: inline-block;
   width: 200px;
