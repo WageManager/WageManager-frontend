@@ -17,7 +17,21 @@ export interface WeeklySchedule {
 
 // 주간 스케줄 그리드 타입
 export interface WeeklyScheduleGrid {
-  [key: string]: boolean[];
+  [key: string]: Array<{
+    start: number;
+    end: number;
+    startTime: string;
+    endTime: string;
+    startHour: number;
+    startMin: number;
+    endHour: number;
+    endMin: number;
+    groupId: string;
+    crossesMidnight: boolean;
+    isFirstPart?: boolean;
+    isSecondPart?: boolean;
+    originalDay?: string;
+  }>;
 }
 
 // 근로자 기본 정보
@@ -53,11 +67,12 @@ export interface EditedWorkInfo extends WorkerWorkInfo {
 
 // 추가 중인 근로자 정보
 export interface AddedWorkerInfo {
-  workerId: number;
-  workerName: string;
-  workerCode: string;
+  workerId?: number;
+  workerName?: string;
+  workerCode?: string;
   hourlyWage: number;
   weeklySchedule: WeeklySchedule;
+  breakTime: number | { [key: string]: number };
   payday: number;
   socialInsurance: boolean;
   withholdingTax: boolean;

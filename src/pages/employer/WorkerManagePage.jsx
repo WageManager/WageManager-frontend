@@ -7,7 +7,7 @@ import { formatKRW } from "../../utils/formatUtils";
 import EmployerTimeInput from "./components/EmployerTimeInput";
 import EmployerBasicInfoCard from "./components/EmployerBasicInfoCard";
 import EmployerWorkplaceForm from "./components/EmployerWorkplaceForm";
-import ScheduleGrid from "./components/ScheduleGrid";
+import EmployerScheduleGrid from "./components/EmployerScheduleGrid";
 import {
   getWorkplaces,
   createWorkplace,
@@ -2013,7 +2013,7 @@ export default function WorkerManagePage() {
 
       {/* 오른쪽 스케줄 그리드 */}
       {!isAddingWorkplace && !isManagingWorkplaces && (
-        <ScheduleGrid
+        <EmployerScheduleGrid
           weeklyScheduleGrid={weeklyScheduleGrid}
           hoveredBlockGroup={hoveredBlockGroup}
           onHoverBlock={setHoveredBlockGroup}
