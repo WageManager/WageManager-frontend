@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUser, FaTimes } from "react-icons/fa";
 import Swal from "sweetalert2";
 import "../../styles/workerManagePage.css";
 import EmployerBasicInfoCard from "./components/EmployerBasicInfoCard";
