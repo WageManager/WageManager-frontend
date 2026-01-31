@@ -6,7 +6,7 @@ import "../../styles/workerManagePage.css";
 import { formatKRW } from "../../utils/formatUtils";
 import EmployerTimeInput from "./components/EmployerTimeInput";
 import EmployerBasicInfoCard from "./components/EmployerBasicInfoCard";
-import WorkplaceForm from "./components/WorkplaceForm";
+import EmployerWorkplaceForm from "./components/EmployerWorkplaceForm";
 import ScheduleGrid from "./components/ScheduleGrid";
 import {
   getWorkplaces,
@@ -1153,7 +1153,7 @@ export default function WorkerManagePage() {
             </div>
 
             {editingWorkplace && (
-              <WorkplaceForm
+              <EmployerWorkplaceForm
                 title="근무지 수정"
                 formData={editingWorkplace}
                 onFormDataChange={setEditingWorkplace}
@@ -1165,7 +1165,7 @@ export default function WorkerManagePage() {
             )}
           </div>
         ) : isAddingWorkplace ? (
-          <WorkplaceForm
+          <EmployerWorkplaceForm
             title="근무지 추가"
             formData={{
               name: newWorkplaceName,

@@ -78,11 +78,13 @@ export interface WorkplaceFormProps {
     name?: string;
     address?: string;
     businessNumber?: string;
+    isSmallBusiness?: boolean;
   };
   onFormDataChange: (data: {
     name?: string;
     address?: string;
     businessNumber?: string;
+    isSmallBusiness?: boolean;
   }) => void;
   onCancel: () => void;
   onSave: () => void;
