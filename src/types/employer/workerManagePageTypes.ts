@@ -135,3 +135,34 @@ export interface WorkInfoCardProps {
   onCancelEdit: () => void;
   onUpdateWorkInfo: (updates: Partial<EditedWorkInfo>) => void;
 }
+
+// 검색된 근무자 정보
+export interface SearchedWorker {
+  id: number;
+  name: string;
+  phone: string;
+  workerCode: string;
+  bankName?: string;
+  accountNumber?: string;
+  kakaoPayLink?: string;
+}
+
+// WorkerSearchCard Props
+export interface WorkerSearchCardProps {
+  workerCode: string;
+  onWorkerCodeChange: (code: string) => void;
+  onSearch: () => void;
+  searchedWorker: SearchedWorker | null;
+  onConfirm: () => void;
+  isSearching: boolean;
+}
+
+// NewWorkerWorkInfoCard Props
+export interface NewWorkerWorkInfoCardProps {
+  confirmedWorker: SearchedWorker;
+  workInfo: AddedWorkerInfo;
+  onWorkInfoChange: (info: AddedWorkerInfo) => void;
+  onCancel: () => void;
+  onSave: () => void;
+  selectedWorkplace: string;
+}
