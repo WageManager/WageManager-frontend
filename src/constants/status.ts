@@ -17,13 +17,6 @@ export const CORRECTION_STATUS_LABELS: Record<CorrectionStatus, string> = {
   REJECTED: '거절됨',
 };
 
-/** 소문자 상태값을 UI 레이블로 변환 (기존 호환용) */
-export const CORRECTION_STATUS_LABELS_LOWERCASE: Record<Lowercase<CorrectionStatus>, string> = {
-  pending: '대기중',
-  approved: '승인됨',
-  rejected: '거절됨',
-};
-
 /**
  * 상태값을 UI 레이블로 변환하는 함수
  * 대소문자 구분 없이 사용 가능
