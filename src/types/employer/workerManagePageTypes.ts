@@ -70,6 +70,7 @@ export interface AddedWorkerInfo {
   workerId?: number;
   workerName?: string;
   workerCode?: string;
+  workplace?: string;
   hourlyWage: number;
   weeklySchedule: WeeklySchedule;
   breakTime: number | { [key: string]: number };
