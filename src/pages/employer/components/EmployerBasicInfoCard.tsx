@@ -1,8 +1,17 @@
-import PropTypes from "prop-types";
+import type { FC } from "react";
 import { FaUser } from "react-icons/fa";
+import type { BasicInfoCardProps } from "../../../types/employer/workerManagePageTypes";
 
-export default function BasicInfoCard({ workerData, onDismiss }) {
-  const basicInfo = workerData?.basicInfo ?? {};
+/**
+ * EmployerBasicInfoCard
+ * 근로자 기본 정보 표시 컴포넌트
+ * - 이름, 생년월일, 전화번호, 이메일 표시
+ * - 퇴사 버튼 제공
+ */
+const EmployerBasicInfoCard: FC<BasicInfoCardProps> = ({
+  workerData,
+  onDismiss,
+}) => {
   return (
     <div className="info-card">
       <div className="info-card-header">
@@ -17,35 +26,25 @@ export default function BasicInfoCard({ workerData, onDismiss }) {
             <FaUser />
           </div>
           <div>
-            <div className="worker-name">{basicInfo.name ?? "-"}</div>
+            <div className="worker-name">{workerData?.basicInfo?.name ?? "-"}</div>
             <div className="worker-birthdate">
-              {workerData.basicInfo.birthDate}
+              {workerData?.basicInfo?.birthDate ?? "-"}
             </div>
           </div>
         </div>
         <div className="info-field-row">
           <div className="info-field">
             <label className="info-label">전화 번호</label>
-            <div className="info-value">{basicInfo.phone ?? "-"}</div>
+            <div className="info-value">{workerData?.basicInfo?.phone ?? "-"}</div>
           </div>
           <div className="info-field">
             <label className="info-label">이메일</label>
-            <div className="info-value">{basicInfo.email ?? "-"}</div>
+            <div className="info-value">{workerData?.basicInfo?.email ?? "-"}</div>
           </div>
         </div>
       </div>
     </div>
   );
-}
-
-BasicInfoCard.propTypes = {
-  workerData: PropTypes.shape({
-    basicInfo: PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      birthDate: PropTypes.string.isRequired,
-      phone: PropTypes.string.isRequired,
-      email: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
-  onDismiss: PropTypes.func.isRequired,
 };
+
+export default EmployerBasicInfoCard;

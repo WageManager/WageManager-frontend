@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import "../../styles/workerManagePage.css";
 import { formatKRW } from "../../utils/formatUtils";
 import EmployerTimeInput from "./components/EmployerTimeInput";
+import EmployerBasicInfoCard from "./components/EmployerBasicInfoCard";
 import WorkplaceForm from "./components/WorkplaceForm";
 import ScheduleGrid from "./components/ScheduleGrid";
 import {
@@ -1288,7 +1289,7 @@ export default function WorkerManagePage() {
                             <div className="time-wheel-wrapper">
                               {schedule ? (
                                 <>
-                                  <TimeInput
+                                  <EmployerTimeInput
                                     value={schedule.start || "00:00"}
                                     onChange={(val) => {
                                       setNewWorkerWorkInfo({
@@ -1304,7 +1305,7 @@ export default function WorkerManagePage() {
                                     }}
                                   />
                                   <span className="time-separator">~</span>
-                                  <TimeInput
+                                  <EmployerTimeInput
                                     value={schedule.end || "00:00"}
                                     onChange={(val) => {
                                       setNewWorkerWorkInfo({
@@ -1575,47 +1576,10 @@ export default function WorkerManagePage() {
         ) : workerData ? (
           <>
             {/* 기본 정보 카드 */}
-            <div className="info-card">
-              <div className="info-card-header">
-                <h3 className="info-card-title">기본 정보</h3>
-                <button
-                  type="button"
-                  className="dismiss-button"
-                  onClick={handleDismissWorker}
-                >
-                  퇴사
-                </button>
-              </div>
-              <div className="info-card-content">
-                <div className="basic-info-header">
-                  <div className="profile-icon">
-                    <FaUser />
-                  </div>
-                  <div>
-                    <div className="worker-name">
-                      {workerData.basicInfo.name}
-                    </div>
-                    <div className="worker-birthdate">
-                      {workerData.basicInfo.birthDate}
-                    </div>
-                  </div>
-                </div>
-                <div className="info-field-row">
-                  <div className="info-field">
-                    <label className="info-label">전화 번호</label>
-                    <div className="info-value">
-                      {workerData.basicInfo.phone}
-                    </div>
-                  </div>
-                  <div className="info-field">
-                    <label className="info-label">이메일</label>
-                    <div className="info-value">
-                      {workerData.basicInfo.email}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <EmployerBasicInfoCard
+              workerData={workerData}
+              onDismiss={handleDismissWorker}
+            />
 
             {/* 근무 정보 카드 */}
             <div className="info-card">
@@ -1673,7 +1637,7 @@ export default function WorkerManagePage() {
                             <div className="time-wheel-wrapper">
                               {schedule ? (
                                 <>
-                                  <TimeInput
+                                  <EmployerTimeInput
                                     value={schedule.start || "00:00"}
                                     onChange={(val) => {
                                       setEditedWorkInfo({
@@ -1689,7 +1653,7 @@ export default function WorkerManagePage() {
                                     }}
                                   />
                                   <span className="time-separator">~</span>
-                                  <TimeInput
+                                  <EmployerTimeInput
                                     value={schedule.end || "00:00"}
                                     onChange={(val) => {
                                       setEditedWorkInfo({
