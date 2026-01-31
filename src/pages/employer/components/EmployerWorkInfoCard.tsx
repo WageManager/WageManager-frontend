@@ -1,11 +1,12 @@
-import PropTypes from "prop-types";
+import type { FC, ChangeEvent, MouseEvent } from "react";
 import { FaTimes } from "react-icons/fa";
 import EmployerTimeInput from "./EmployerTimeInput";
 import { formatKRW } from "../../../utils/formatUtils";
+import type { WorkInfoCardProps } from "../../../types/employer/workerManagePageTypes";
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
 
-export default function WorkInfoCard({
+const EmployerWorkInfoCard: FC<WorkInfoCardProps> = ({
   workerData,
   currentWorkInfo,
   isEditingWork,
@@ -13,7 +14,11 @@ export default function WorkInfoCard({
   onSaveEdit,
   onCancelEdit,
   onUpdateWorkInfo,
-}) {
+}) => {
+  if (!workerData) {
+    return null;
+  }
+
   return (
     <div className="info-card">
       <div className="info-card-header">
@@ -47,10 +52,12 @@ export default function WorkInfoCard({
           <label className="info-label">근무 시간</label>
           <div className="weekly-schedule-inputs">
             {daysOfWeek.map((day) => {
-              // currentWorkInfo가 있으면 항상 우선 사용
-              const schedule =
-                currentWorkInfo?.weeklySchedule?.[day] ??
-                workerData.workInfo.weeklySchedule[day];
+                // currentWorkInfo가 있으면 항상 우선 사용
+                // 삭제된 요일은 undefined이므로, currentWorkInfo.weeklySchedule이 존재하면 그 안에서 찾고, 없으면 원본 사용
+                const schedule =
+                currentWorkInfo?.weeklySchedule !== undefined
+                    ? currentWorkInfo.weeklySchedule[day]
+                    : workerData.workInfo.weeklySchedule[day];
               return (
                 <div key={day} className="day-schedule-row">
                   <span className="day-label-small">{day}요일</span>
@@ -91,12 +98,12 @@ export default function WorkInfoCard({
                             allowMidnight
                           />
                           {(() => {
-                            const [startHour, startMin] = (
+                            const [startHour = 0, startMin = 0] = (
                               schedule.start || "00:00"
                             )
                               .split(":")
                               .map(Number);
-                            const [endHour, endMin] = (schedule.end || "00:00")
+                            const [endHour = 0, endMin = 0] = (schedule.end || "00:00")
                               .split(":")
                               .map(Number);
                             const startDecimal = startHour + startMin / 60;
@@ -146,25 +153,25 @@ export default function WorkInfoCard({
                     <div className="time-display">
                       {schedule ? (
                         <>
-                          <div className="time-start">{schedule.start}</div>
-                          <div className="time-end">
+                          <span className="time-start">{schedule.start}</span>
+                          <span className="time-separator"> - </span>
+                          <span className="time-end">
                             {schedule.end}
                             {(() => {
-                              const [startHour, startMin] = schedule.start
+                              const [startHour = 0, startMin = 0] = schedule.start
                                 .split(":")
                                 .map(Number);
-                              const [endHour, endMin] = schedule.end
+                              const [endHour = 0, endMin = 0] = schedule.end
                                 .split(":")
                                 .map(Number);
                               const startDecimal = startHour + startMin / 60;
                               const endDecimal = endHour + endMin / 60;
-                              const crossesMidnight =
-                                endDecimal <= startDecimal;
+                              const crossesMidnight = endDecimal <= startDecimal;
                               return crossesMidnight ? (
                                 <span className="overnight-label"> (익일)</span>
                               ) : null;
                             })()}
-                          </div>
+                          </span>
                         </>
                       ) : (
                         "휴무"
@@ -198,20 +205,27 @@ export default function WorkInfoCard({
                           className="break-time-input-field"
                           value={breakTime === 0 ? "" : breakTime}
                           min="0"
-                          onFocus={(e) => {
+                          onFocus={(e: ChangeEvent<HTMLInputElement>) => {
                             if (breakTime !== 0) {
                               e.target.select();
                             }
                           }}
-                          onBlur={(e) => {
+                          onBlur={(e: ChangeEvent<HTMLInputElement>) => {
                             if (e.target.value === "") {
+                              const baseBreakTime =
+                                typeof currentWorkInfo.breakTime === "number"
+                                  ? currentWorkInfo.breakTime
+                                  : 0;
                               const newBreakTime =
                                 typeof currentWorkInfo.breakTime === "object"
                                   ? { ...currentWorkInfo.breakTime }
-                                  : daysOfWeek.reduce((acc, d) => {
-                                      acc[d] = currentWorkInfo.breakTime || 0;
-                                      return acc;
-                                    }, {});
+                                  : daysOfWeek.reduce(
+                                      (acc: Record<string, number>, d) => {
+                                        acc[d] = baseBreakTime;
+                                        return acc;
+                                      },
+                                      {}
+                                    );
                               newBreakTime[day] = 0;
                               onUpdateWorkInfo({
                                 ...currentWorkInfo,
@@ -219,24 +233,29 @@ export default function WorkInfoCard({
                               });
                             }
                           }}
-                          onClick={(e) => {
+                          onClick={(e: MouseEvent<HTMLInputElement>) => {
                             if (breakTime !== 0) {
-                              e.target.select();
+                              e.currentTarget.select();
                             }
                           }}
-                          onChange={(e) => {
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            const baseBreakTime =
+                              typeof currentWorkInfo.breakTime === "number"
+                                ? currentWorkInfo.breakTime
+                                : 0;
                             const newBreakTime =
                               typeof currentWorkInfo.breakTime === "object"
                                 ? { ...currentWorkInfo.breakTime }
-                                : daysOfWeek.reduce((acc, d) => {
-                                    acc[d] = currentWorkInfo.breakTime || 0;
-                                    return acc;
-                                  }, {});
+                                : daysOfWeek.reduce(
+                                    (acc: Record<string, number>, d) => {
+                                      acc[d] = baseBreakTime;
+                                      return acc;
+                                    },
+                                    {}
+                                  );
                             const inputValue = e.target.value;
                             newBreakTime[day] =
-                              inputValue === ""
-                                ? 0
-                                : parseInt(inputValue, 10) || 0;
+                              inputValue === "" ? 0 : parseInt(inputValue, 10) || 0;
                             onUpdateWorkInfo({
                               ...currentWorkInfo,
                               breakTime: newBreakTime,
@@ -255,7 +274,6 @@ export default function WorkInfoCard({
           ) : (
             <div className="break-time-display">
               {(() => {
-                // currentWorkInfo가 있으면 항상 우선 사용
                 const breakTime =
                   currentWorkInfo?.breakTime ?? workerData.workInfo.breakTime;
                 if (typeof breakTime === "object") {
@@ -266,10 +284,11 @@ export default function WorkInfoCard({
                     .filter((day) => scheduleToUse[day])
                     .map((day) => breakTime[day] || 0);
                   const uniqueValues = [...new Set(breakTimeValues)];
-                  if (uniqueValues.length === 1 && uniqueValues[0] > 0) {
+                  const firstValue = uniqueValues[0] ?? 0;
+                  if (uniqueValues.length === 1 && firstValue > 0) {
                     return (
                       <div className="info-value">
-                        {uniqueValues[0]} 분 (요일별 동일)
+                        {firstValue} 분 (요일별 동일)
                       </div>
                     );
                   }
@@ -309,7 +328,7 @@ export default function WorkInfoCard({
                   type="number"
                   className="info-input"
                   value={currentWorkInfo.hourlyWage || 0}
-                  onChange={(e) =>
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     onUpdateWorkInfo({
                       ...currentWorkInfo,
                       hourlyWage: parseInt(e.target.value) || 0,
@@ -338,7 +357,7 @@ export default function WorkInfoCard({
                   value={currentWorkInfo.payday || 1}
                   min="1"
                   max="31"
-                  onChange={(e) =>
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     onUpdateWorkInfo({
                       ...currentWorkInfo,
                       payday: parseInt(e.target.value) || 1,
@@ -354,71 +373,9 @@ export default function WorkInfoCard({
             )}
           </div>
         </div>
-
-        {/* <div className="toggle-row">
-          <div className="toggle-item">
-            <label className="toggle-label">4대 보험</label>
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={
-                  currentWorkInfo?.socialInsurance ??
-                  workerData.workInfo.socialInsurance
-                }
-                disabled={!isEditingWork}
-                onChange={(e) =>
-                  onUpdateWorkInfo({
-                    ...currentWorkInfo,
-                    socialInsurance: e.target.checked,
-                  })
-                }
-              />
-              <span className="toggle-slider"></span>
-            </label>
-          </div>
-          <div className="toggle-item">
-            <label className="toggle-label">소득세</label>
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={
-                  currentWorkInfo?.withholdingTax ??
-                  workerData.workInfo.withholdingTax
-                }
-                disabled={!isEditingWork}
-                onChange={(e) =>
-                  onUpdateWorkInfo({
-                    ...currentWorkInfo,
-                    withholdingTax: e.target.checked,
-                  })
-                }
-              />
-              <span className="toggle-slider"></span>
-            </label>
-          </div>
-        </div> */}
       </div>
     </div>
   );
-}
-
-WorkInfoCard.propTypes = {
-  workerData: PropTypes.shape({
-    workInfo: PropTypes.shape({
-      workplace: PropTypes.string.isRequired,
-      weeklySchedule: PropTypes.object.isRequired,
-      breakTime: PropTypes.oneOfType([PropTypes.number, PropTypes.object])
-        .isRequired,
-      hourlyWage: PropTypes.number.isRequired,
-      payday: PropTypes.number.isRequired,
-      socialInsurance: PropTypes.bool.isRequired,
-      withholdingTax: PropTypes.bool.isRequired,
-    }).isRequired,
-  }).isRequired,
-  currentWorkInfo: PropTypes.object,
-  isEditingWork: PropTypes.bool.isRequired,
-  onStartEdit: PropTypes.func.isRequired,
-  onSaveEdit: PropTypes.func.isRequired,
-  onCancelEdit: PropTypes.func.isRequired,
-  onUpdateWorkInfo: PropTypes.func.isRequired,
 };
+
+export default EmployerWorkInfoCard;
