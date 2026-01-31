@@ -49,17 +49,36 @@ export interface ContractDetailResponse {
 /** 정정 요청 상태 */
 export type CorrectionStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
+/** 정정 요청 유형 */
+export type CorrectionRequestType = 'CREATE' | 'UPDATE' | 'DELETE';
+
+/** 정정 요청자 정보 */
+export interface CorrectionRequester {
+  id: number;
+  name: string;
+}
+
 /** 정정 요청 목록 조회 응답 아이템 (/api/worker/correction-requests) */
 export interface CorrectionRequestResponse {
   id: number;
   workplaceName: string;
+  /** 정정 요청 유형: CREATE(신규 생성), UPDATE(수정), DELETE(삭제) */
+  type: CorrectionRequestType;
+  /** 기존 근무 기록 ID (UPDATE/DELETE 시 존재, CREATE 시 null) */
+  workRecordId: number | null;
   /** YYYY-MM-DD */
   workDate: string;
-  /** HH:mm:ss */
+  /** HH:mm:ss - 기존 출근 시간 (UPDATE/DELETE 시 존재) */
+  originalStartTime: string | null;
+  /** HH:mm:ss - 기존 퇴근 시간 (UPDATE/DELETE 시 존재) */
+  originalEndTime: string | null;
+  /** HH:mm:ss - 요청 출근 시간 */
   requestedStartTime: string;
-  /** HH:mm:ss */
+  /** HH:mm:ss - 요청 퇴근 시간 */
   requestedEndTime: string;
   status: CorrectionStatus;
+  /** 요청자 정보 */
+  requester: CorrectionRequester;
   /** ISO-8601 */
   createdAt: string;
 }

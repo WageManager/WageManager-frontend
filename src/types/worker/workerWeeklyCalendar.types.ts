@@ -2,7 +2,7 @@
  * 주간 캘린더 관련 타입 정의
  */
 
-import type { EditForm } from './monthlyCalendar.types';
+import type { EditForm } from './workerMonthlyCalendar.types';
 
 export type WorkRecordStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'DELETED';
 
@@ -23,7 +23,7 @@ export interface WorkRecordsByDate {
   [dateKey: string]: WorkRecord[];
 }
 
-export type { EditForm } from './monthlyCalendar.types';
+export type { EditForm } from './workerMonthlyCalendar.types';
 
 export interface WeeklyCalendarProps {
   workRecords: WorkRecordsByDate;

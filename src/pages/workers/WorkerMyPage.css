@@ -287,7 +287,7 @@
   display: flex;
   gap: 15px;
   margin: 20px 0;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .worker-mypage-field > input {
@@ -344,6 +344,20 @@
   margin-top: 4px;
 }
 
+.worker-mypage-field-value {
+  font-size: 1em;
+  color: #333333;
+  padding: 0;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.worker-mypage-field-value:empty::before {
+  content: attr(data-placeholder);
+  color: #848484;
+}
+
 .worker-mypage-label {
   display: inline-block;
   width: 200px;
@@ -380,20 +394,37 @@
   font-weight: bold;
   font-style: normal;
   font-size: 1em;
-  padding: 7px;
+  padding: 10px 12px;
   border: 1px solid #d9d9d9;
   border-radius: 8px;
   flex: 1;
   max-width: 500px;
-  height: 40px;
+  min-height: 44px;
   box-sizing: border-box;
-  line-height: 1.5;
+  line-height: normal;
   vertical-align: middle;
 }
 
 .worker-mypage-readonly {
   background-color: #f5f5f5;
   cursor: not-allowed;
+}
+
+/* 계좌 정보 편집 영역 */
+.worker-mypage-account-edit {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.worker-mypage-account-edit select {
+  flex: 0 0 auto;
+  width: 180px;
+  max-width: 180px;
+}
+
+.worker-mypage-account-edit input {
+  flex: 1;
 }
 
 .worker-mypage-password-input-wrapper {
