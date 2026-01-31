@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { FaTimes } from "react-icons/fa";
-import TimeInput from "./TimeInput";
+import EmployerTimeInput from "./EmployerTimeInput";
 import { formatKRW } from "../../../utils/formatUtils";
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
@@ -58,7 +58,7 @@ export default function WorkInfoCard({
                     <div className="time-wheel-wrapper">
                       {schedule ? (
                         <>
-                          <TimeInput
+                          <EmployerTimeInput
                             value={schedule.start || "00:00"}
                             onChange={(val) => {
                               onUpdateWorkInfo({
@@ -74,7 +74,7 @@ export default function WorkInfoCard({
                             }}
                           />
                           <span className="time-separator">~</span>
-                          <TimeInput
+                          <EmployerTimeInput
                             value={schedule.end || "00:00"}
                             onChange={(val) => {
                               onUpdateWorkInfo({

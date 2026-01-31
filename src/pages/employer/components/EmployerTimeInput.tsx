@@ -1,11 +1,22 @@
-import PropTypes from "prop-types";
+import type { FC, ChangeEvent } from "react";
+import type { TimeInputProps } from "../../../types/employer/workerManagePageTypes";
 import "../../../styles/dailyCalendarPage.css";
 
-// 정보수정 - 시간 입력 컴포넌트
-function TimeInput({ label, value, onChange, allowMidnight = false } = {}) {
-  const [hour = "00", minute = "00"] = (value || "00:00").split(":");
+/**
+ * EmployerTimeInput
+ * 근로자 근무 정보 수정 시 시간 입력 컴포넌트
+ * - 시간(00-23 또는 00-24)과 분(00-59) 입력 가능
+ * - allowMidnight 옵션으로 자정(24:00) 입력 가능
+ */
+const EmployerTimeInput: FC<TimeInputProps> = ({
+  label,
+  value = "00:00",
+  onChange,
+  allowMidnight = false,
+}) => {
+  const [hour = "00", minute = "00"] = value.split(":");
 
-  const handleHourChange = (e) => {
+  const handleHourChange = (e: ChangeEvent<HTMLInputElement>) => {
     const nextHour = String(
       Math.max(
         0,
@@ -15,7 +26,7 @@ function TimeInput({ label, value, onChange, allowMidnight = false } = {}) {
     onChange(`${nextHour}:${nextHour === "24" ? "00" : minute}`);
   };
 
-  const handleMinuteChange = (e) => {
+  const handleMinuteChange = (e: ChangeEvent<HTMLInputElement>) => {
     const nextMinute = String(
       Math.max(0, Math.min(59, Number(e.target.value) || 0))
     ).padStart(2, "0");
@@ -47,13 +58,6 @@ function TimeInput({ label, value, onChange, allowMidnight = false } = {}) {
       </div>
     </div>
   );
-}
-
-TimeInput.propTypes = {
-  label: PropTypes.string,
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  allowMidnight: PropTypes.bool,
 };
 
-export default TimeInput;
+export default EmployerTimeInput;

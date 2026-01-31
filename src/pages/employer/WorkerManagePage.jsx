@@ -4,7 +4,7 @@ import { FaUser, FaTimes } from "react-icons/fa";
 import Swal from "sweetalert2";
 import "../../styles/workerManagePage.css";
 import { formatKRW } from "../../utils/formatUtils";
-import TimeInput from "./components/TimeInput";
+import EmployerTimeInput from "./components/EmployerTimeInput";
 import WorkplaceForm from "./components/WorkplaceForm";
 import ScheduleGrid from "./components/ScheduleGrid";
 import {

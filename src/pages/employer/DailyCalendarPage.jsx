@@ -17,7 +17,7 @@ import { extraPayTypes } from "../../constants/extraPay";
 import { formatKRW, formatBreakTime } from "../../utils/formatUtils";
 import { formatDuration, timeStringToDecimal } from "./utils/formatUtils";
 import { hours } from "./constants";
-import TimeInput from "./components/TimeInput";
+import EmployerTimeInput from "./components/EmployerTimeInput";
 import Swal from "sweetalert2";
 
 export default function DailyCalendarPage() {
@@ -927,12 +927,12 @@ export default function DailyCalendarPage() {
                 <p className="detail-label">근무 시간</p>
                 {isEditing ? (
                   <div className="time-wheel-wrapper">
-                    <TimeInput
+                    <EmployerTimeInput
                       label="시작"
                       value={editedShift?.start || "00:00"}
                       onChange={(val) => handleTimeChange("start", val)}
                     />
-                    <TimeInput
+                    <EmployerTimeInput
                       label="종료"
                       value={editedShift?.end || "00:00"}
                       onChange={(val) => handleTimeChange("end", val)}
