@@ -42,7 +42,7 @@ type WorkplaceDetails = Workplace & {
   isSmallBusiness?: boolean;
 };
 
-export default function WorkerManagePage() {
+export default function EmployerWorkerManagePage() {
   const [workplaces, setWorkplaces] = useState<WorkplaceDetails[]>([]);
   const [selectedWorkplaceId, setSelectedWorkplaceId] = useState<number | null>(
     null
