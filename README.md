@@ -1,4 +1,4 @@
-# WageManager
+# PayCheck (WageManager)
 <img src="./src/assets/wagemanager.png">
 
 ## 🎯 목표
@@ -43,6 +43,7 @@
 | **✏️ 근무 정정 요청** | 잘못된 근무 기록 정정 요청 |
 | **💵 급여 내역** | 월별 급여 및 입금 상태 확인 |
 | **📝 메모** | 일자별 메모 작성 |
+| **👤 마이페이지** | 프로필 관리, 근무지 관리, 보낸 근무 요청 조회 |
 
 ### 🔔 공통 기능
 
@@ -53,11 +54,11 @@
 
 | 분류 | 기술 |
 |------|------|
-| **Frontend** | React 19, Vite 7 |
-| **상태관리** | Redux Toolkit, React-Redux |
-| **라우팅** | React Router DOM v7 |
-| **스타일링** | TailwindCSS, CSS |
-| **HTTP 클라이언트** | Axios |
+| **Frontend** | React 19.2, Vite 5.2, TypeScript 5.9 |
+| **라우팅** | React Router DOM v7.9 |
+| **스타일링** | TailwindCSS 4.1, 커스텀 CSS |
+| **HTTP 클라이언트** | Axios 1.13 |
+| **테스트** | Vitest 1.6, React Testing Library 16 |
 | **UI 컴포넌트** | React-Icons, SweetAlert2, React-Toastify |
 
 ## 👥 기여자
@@ -77,47 +78,43 @@ Notion: [click](https://www.notion.so/GOAT-27b6550d6d4480019236d1a9d4c9ef54?sour
 
 ```
 src/
-├── main.jsx                 # 앱 엔트리 포인트
-├── App.jsx                  # 라우팅 설정 및 메인 컴포넌트
-├── index.css                # 전역 스타일
-│
-├── api/                     # API 통신 모듈
-│   ├── authApi.ts           # 인증 관련 API
-│   ├── employerApi.ts       # 고용주 API
-│   ├── workerApi.ts         # 근로자 API
-│   ├── notificationApi.ts   # 알림 API
-│   └── axios.ts             # HTTP 클라이언트 설정
-│
-├── components/              # 재사용 가능한 UI 컴포넌트
-│   ├── common/              # 공통 컴포넌트 (Button, Card, Modal 등)
-│   ├── layout/              # 레이아웃 컴포넌트 (Header, Nav)
-│   ├── employer/            # 고용주 전용 컴포넌트
-│   └── worker/              # 근로자 전용 컴포넌트
-│
-├── pages/                   # 페이지 컴포넌트
-│   ├── auth/                # 인증 페이지 (로그인, 회원가입)
-│   ├── employer/            # 고용주 페이지
-│   │   ├── DailyCalendarPage.jsx      # 일일 스케줄 관리
-│   │   ├── WorkerManagePage.jsx       # 근로자 관리
-│   │   └── RemittanceManagePage.jsx   # 급여 정산
-│   └── workers/             # 근로자 페이지
-│       ├── WorkerMonthlyCalendarPage.jsx  # 월간 캘린더
-│       ├── WorkerWeeklyCalendarPage.jsx   # 주간 캘린더
-│       └── WorkerRemittancePage.jsx       # 급여 내역
-│
-├── features/                # Redux 슬라이스 (상태 관리)
-│   ├── auth/                # 인증 상태
-│   ├── employer/            # 고용주 상태
-│   ├── worker/              # 근로자 상태
-│   └── notification/        # 알림 상태
-│
-├── services/                # 비즈니스 로직 서비스
-├── layouts/                 # 페이지 레이아웃
-├── hooks/                   # 커스텀 훅
-├── utils/                   # 유틸리티 함수
-├── constants/               # 상수 정의
-├── styles/                  # 스타일 파일 (CSS)
-└── assets/                  # 정적 리소스 (이미지 등)
+├── api/          # API 통신 모듈 (Axios 인스턴스, 토큰 자동 갱신)
+├── components/   # 재사용 UI 컴포넌트 (common, layout, employer, worker)
+├── pages/        # 라우트 페이지 (auth, employer, workers)
+├── hooks/        # 커스텀 훅 (페이지별 비즈니스 로직 분리)
+├── types/        # TypeScript 타입 정의
+├── utils/        # 유틸리티 함수 (날짜, 포맷팅)
+├── constants/    # 상수 정의 (검증 메시지, 옵션 등)
+├── layouts/      # 페이지 레이아웃 래퍼
+├── styles/       # CSS 스타일 파일
+└── assets/       # 정적 리소스 (이미지 등)
+```
+
+## 🧪 테스트
+
+프로젝트는 Vitest와 React Testing Library를 사용하여 테스트합니다.
+
+### 테스트 커버리지
+
+| 분류 | 테스트 파일 |
+| ------ | ------------ |
+| **API** | `axios.test.ts`, `employerApi.test.ts` |
+| **인증 페이지** | `LoginPage.test.tsx`, `SignupPage.test.tsx`, `KakaoRedirect.test.tsx` |
+| **고용주 페이지** | `EmployerMyPage.test.tsx` |
+| **근로자 페이지** | `WorkerMonthlyCalendarPage.test.tsx`, `WorkerRemittancePage.test.tsx`, `WorkerMyPage.test.tsx` |
+| **근로자 컴포넌트** | `ProfileBox.test.tsx`, `ProfileEdit.test.tsx`, `WorkplaceManage.test.tsx`, `WorkEditRequestList.test.tsx` |
+
+### 테스트 실행
+
+```bash
+# 테스트 실행 (watch 모드)
+npm run test
+
+# 단일 실행
+npm run test:run
+
+# 커버리지 리포트
+npm run test:coverage
 ```
 
 ## 🚀 시작하기
@@ -131,8 +128,8 @@ src/
 
 ```bash
 # 저장소 클론
-git clone https://github.com/your-org/wagemanager-frontend.git
-cd wagemanager-frontend
+git clone https://github.com/Team-PayCheck/PayCheck-frontend.git
+cd PayCheck-frontend
 
 # 의존성 설치
 npm install
@@ -149,8 +146,6 @@ cp .env.example .env
 | react | ^19.2.0 | UI 라이브러리 |
 | react-dom | ^19.2.0 | React DOM 렌더링 |
 | react-router-dom | ^7.9.6 | 클라이언트 사이드 라우팅 |
-| @reduxjs/toolkit | ^2.11.0 | 상태 관리 |
-| react-redux | ^9.2.0 | React-Redux 바인딩 |
 | axios | ^1.13.2 | HTTP 클라이언트 |
 | react-icons | ^5.5.0 | 아이콘 컴포넌트 |
 | react-toastify | ^11.0.5 | 토스트 알림 |
@@ -159,10 +154,12 @@ cp .env.example .env
 **DevDependencies**
 | 패키지 | 버전 | 설명 |
 |--------|------|------|
-| vite | ^7.2.2 | 빌드 도구 |
+| vite | ^5.2.0 | 빌드 도구 |
+| typescript | ^5.9.0 | 정적 타입 |
 | tailwindcss | ^4.1.17 | CSS 프레임워크 |
+| vitest | ^1.6.0 | 테스트 프레임워크 |
+| @testing-library/react | ^16.0.0 | React 테스팅 유틸리티 |
 | eslint | ^9.39.1 | 코드 린터 |
-| @vitejs/plugin-react | ^5.1.0 | Vite React 플러그인 |
 
 ### 3. 실행
 
@@ -175,13 +172,16 @@ npm run build
 
 # 린트 검사
 npm run lint
+
+# 빌드된 앱 미리보기
+npm run preview
 ```
 
 ## 🧑‍💻 기여 방법
 
 1. **이 저장소를 Fork 합니다**
    ```bash
-   https://github.com/WageManager/WageManager-frontend.git
+   https://github.com/Team-PayCheck/PayCheck-frontend.git
    ```
 2. **새 브랜치를 생성합니다**
    ```bash
