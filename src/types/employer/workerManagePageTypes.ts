@@ -79,6 +79,37 @@ export interface AddedWorkerInfo {
   withholdingTax: boolean;
 }
 
+// WorkplaceDetails 타입 (Workplace 확장)
+export interface WorkplaceDetails {
+  id: number;
+  businessName?: string;
+  name: string;
+  colorCode?: string;
+  workerCount?: number;
+  isActive?: boolean;
+  address?: string;
+  businessNumber?: string;
+  isSmallBusiness?: boolean;
+}
+
+// WorkplaceManageCard 컴포넌트 Props
+export interface WorkplaceManageCardProps {
+  workplaces: WorkplaceDetails[];
+  selectedWorkplaceForEdit: number | null;
+  editingWorkplace: WorkplaceDetails | null;
+  onEditWorkplace: (workplace: WorkplaceDetails) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => Promise<void>;
+  onAddWorkplace: () => void;
+  onClose: () => void;
+  onEditingWorkplaceChange: (data: {
+    name?: string;
+    address?: string;
+    businessNumber?: string;
+    isSmallBusiness?: boolean;
+  }) => void;
+}
+
 // TimeInput Props
 export interface TimeInputProps {
   label?: string;

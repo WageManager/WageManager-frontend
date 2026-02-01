@@ -8,6 +8,7 @@ import EmployerWorkInfoCard from "./components/EmployerWorkInfoCard";
 import EmployerScheduleGrid from "./components/EmployerScheduleGrid";
 import EmployerWorkerSearchCard from "./components/EmployerWorkerSearchCard";
 import EmployerNewWorkerWorkInfoCard from "./components/EmployerNewWorkerWorkInfoCard";
+import EmployerWorkplaceManageCard from "./components/EmployerWorkplaceManageCard";
 import type {
   Workplace,
   ContractWorker,
@@ -20,6 +21,7 @@ import type {
   AddedWorkerInfo,
   SearchedWorker,
   PayrollDeductionType,
+  WorkplaceDetails,
 } from "../../types/employer/workerManagePageTypes";
 import {
   getWorkplaces,
@@ -35,12 +37,6 @@ import {
 } from "../../api/employerApi";
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
-
-type WorkplaceDetails = Workplace & {
-  address?: string;
-  businessNumber?: string;
-  isSmallBusiness?: boolean;
-};
 
 export default function EmployerWorkerManagePage() {
   const [workplaces, setWorkplaces] = useState<WorkplaceDetails[]>([]);
@@ -1175,86 +1171,17 @@ export default function EmployerWorkerManagePage() {
         }`}
       >
         {isManagingWorkplaces ? (
-          <div className="workplace-manage-container">
-            <div className="info-card">
-              <div className="info-card-header">
-                <h3 className="info-card-title">근무지 목록</h3>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <button
-                    type="button"
-                    className="add-button-large"
-                    onClick={handleAddWorkplaceFromManage}
-                  >
-                    근무지 추가
-                  </button>
-                  <button
-                    type="button"
-                    className="cancel-button"
-                    onClick={handleCancelManageWorkplaces}
-                  >
-                    닫기
-                  </button>
-                </div>
-              </div>
-              <div className="info-card-content">
-                <div className="workplace-list">
-                  {workplaces.map((workplace) => (
-                    <div
-                      key={workplace.id}
-                      className={`workplace-list-item ${
-                        selectedWorkplaceForEdit === workplace.id
-                          ? "selected"
-                          : ""
-                      }`}
-                      onClick={() => handleEditWorkplace(workplace)}
-                    >
-                      <div className="workplace-list-name">
-                        {workplace.name}
-                      </div>
-                      {selectedWorkplaceForEdit === workplace.id && (
-                        <div className="workplace-list-details">
-                          <div className="info-field">
-                            <label className="info-label">주소</label>
-                            <div className="info-value">
-                              {workplace.address || "-"}
-                            </div>
-                          </div>
-                          <div className="info-field">
-                            <label className="info-label">
-                              사업자 등록 번호
-                            </label>
-                            <div className="info-value">
-                              {workplace.businessNumber || "-"}
-                            </div>
-                          </div>
-                          <div className="info-field">
-                            <label className="info-label">
-                              5인 미만 사업장
-                            </label>
-                            <div className="info-value">
-                              {workplace.isSmallBusiness ? "예" : "아니오"}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {editingWorkplace && (
-              <EmployerWorkplaceForm
-                title="근무지 수정"
-                formData={editingWorkplace}
-                onFormDataChange={handleEditingWorkplaceChange}
-                onCancel={handleCancelWorkplaceEdit}
-                onSave={handleSaveWorkplaceEdit}
-                cancelButtonText="취소"
-                saveButtonText="저장"
-              />
-            )}
-          </div>
+          <EmployerWorkplaceManageCard
+            workplaces={workplaces}
+            selectedWorkplaceForEdit={selectedWorkplaceForEdit}
+            editingWorkplace={editingWorkplace}
+            onEditWorkplace={handleEditWorkplace}
+            onCancelEdit={handleCancelWorkplaceEdit}
+            onSaveEdit={handleSaveWorkplaceEdit}
+            onAddWorkplace={handleAddWorkplaceFromManage}
+            onClose={handleCancelManageWorkplaces}
+            onEditingWorkplaceChange={handleEditingWorkplaceChange}
+          />
         ) : isAddingWorkplace ? (
           <EmployerWorkplaceForm
             title="근무지 추가"
