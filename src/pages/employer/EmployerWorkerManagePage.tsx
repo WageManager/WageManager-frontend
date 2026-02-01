@@ -30,10 +30,6 @@ import type {
   WorkplaceDetails,
 } from "../../types/employer/workerManagePageTypes";
 import {
-  getWorkplaces,
-  createWorkplace,
-  updateWorkplace,
-  deleteWorkplace,
   getContractsByWorkplace,
   getContract,
   createContract,
