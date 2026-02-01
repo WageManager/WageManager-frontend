@@ -616,7 +616,11 @@ export default function EmployerWorkerManagePage() {
       // 계약 시작일 (오늘 날짜)
       const today = new Date();
       const contractStartDate =
-        today.toISOString().split("T")[0] ?? today.toISOString();
+        new Date(
+          today.getTime() - today.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .split("T")[0] ?? today.toISOString();
 
       // 백엔드 API 요청 데이터
       const requestData = {

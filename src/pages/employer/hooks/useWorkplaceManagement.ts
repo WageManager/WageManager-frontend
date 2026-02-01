@@ -163,14 +163,16 @@ export function useWorkplaceManagement({
   };
 
   const handleAddWorkplace = async () => {
+    const workplaceName = newWorkplaceName.trim();
+
     // 근무지 이름 검증
-    if (!newWorkplaceName.trim()) {
+    if (!workplaceName) {
       Swal.fire("입력 오류", "근무지 이름을 입력해주세요.", "error");
       return;
     }
 
     // 중복 확인
-    if (workplaces.some((wp) => wp.name === newWorkplaceName.trim())) {
+    if (workplaces.some((wp) => wp.name === workplaceName)) {
       Swal.fire("입력 오류", "이미 존재하는 근무지입니다.", "error");
       return;
     }
@@ -178,8 +180,8 @@ export function useWorkplaceManagement({
     try {
       // 백엔드에 근무지 생성 요청
       const response = await createWorkplace({
-        businessName: newWorkplaceName.trim(),
-        workplaceName: newWorkplaceName.trim(),
+        businessName: workplaceName,
+        workplaceName: workplaceName,
         address: newWorkplaceAddress.trim(),
         businessNumber: newWorkplaceBusinessNumber.trim(),
         isLessThanFiveEmployees: newWorkplaceIsSmallBusiness,
@@ -203,7 +205,7 @@ export function useWorkplaceManagement({
 
       Swal.fire(
         "추가 완료",
-        `${newWorkplaceName.trim()}이(가) 추가되었습니다.`,
+        `${workplaceName}이(가) 추가되었습니다.`,
         "success"
       );
     } catch (error) {

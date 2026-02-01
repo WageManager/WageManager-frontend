@@ -153,8 +153,9 @@ export const buildWeeklyScheduleGrid = (
       });
 
       // 익일 블록
-      const nextDayIndex = daysOfWeek.indexOf(day) + 1;
-      const nextDay = nextDayIndex < daysOfWeek.length ? daysOfWeek[nextDayIndex] : null;
+      const currentDayIndex = daysOfWeek.indexOf(day);
+      const nextDayIndex = (currentDayIndex + 1) % daysOfWeek.length;
+      const nextDay = daysOfWeek[nextDayIndex];
 
       if (nextDay) {
         const { hour: endHour2, min: endMin2 } = parseTimeString(end);
