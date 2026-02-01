@@ -1,9 +1,18 @@
-import PropTypes from "prop-types";
+import type { FC } from "react";
+import type { ScheduleGridProps } from "../../../types/employer/workerManagePageTypes";
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
 const hours = Array.from({ length: 24 }, (_, i) => i);
 
-export default function ScheduleGrid({
+/**
+ * EmployerScheduleGrid
+ * 근로자 주간 스케줄 시각화 그리드 컴포넌트
+ * - 24시간 x 7일 그리드 표시
+ * - 근무 시간 블록 렌더링
+ * - 마우스 호버 시 상세 정보 툴팁 표시
+ * - 익일 근무 지원
+ */
+const EmployerScheduleGrid: FC<ScheduleGridProps> = ({
   weeklyScheduleGrid,
   hoveredBlockGroup,
   onHoverBlock,
@@ -11,7 +20,11 @@ export default function ScheduleGrid({
   workerData,
   isAddingWorker = false,
   newWorkerWorkInfo = null,
-}) {
+}) => {
+  const handleHoverBlock = (blockGroupId: string | null): void => {
+    onHoverBlock(blockGroupId, null);
+  };
+
   return (
     <div className="worker-manage-right-panel">
       <div className="schedule-grid-container">
@@ -32,7 +45,7 @@ export default function ScheduleGrid({
             ))}
           </div>
           {daysOfWeek.map((day) => {
-            const blocks = weeklyScheduleGrid[day] || [];
+            const blocks = (weeklyScheduleGrid[day] as any[]) || [];
 
             // hover된 블록 찾기
             const hoveredBlock = blocks.find(
@@ -41,14 +54,13 @@ export default function ScheduleGrid({
 
             // 툴팁 표시 여부 결정
             let shouldShowTooltip = false;
-            let tooltipBlock = null;
+            let tooltipBlock: any = null;
 
             if (hoveredBlock) {
-              if (hoveredBlock.isSecondPart && hoveredBlock.originalDay) {
-                if (day === hoveredBlock.originalDay) {
-                  const originalDayBlocks =
-                    weeklyScheduleGrid[hoveredBlock.originalDay] || [];
-                  tooltipBlock = originalDayBlocks.find((b) => b.isFirstPart);
+              if ((hoveredBlock as any).isSecondPart && (hoveredBlock as any).originalDay) {
+                if (day === (hoveredBlock as any).originalDay) {
+                  const originalDayBlocks = (weeklyScheduleGrid[(hoveredBlock as any).originalDay] as any[]) || [];
+                  tooltipBlock = originalDayBlocks.find((b) => (b as any).isFirstPart);
                   shouldShowTooltip = tooltipBlock !== undefined;
                 }
               } else {
@@ -61,32 +73,28 @@ export default function ScheduleGrid({
             const startHour = tooltipBlock ? tooltipBlock.startHour : null;
             const startMin = tooltipBlock ? tooltipBlock.startMin : 0;
             const startBlockTop =
-              startHour !== null
-                ? startHour * 40 + startHour * 1 + (startMin / 60) * 40
-                : 0;
+              startHour !== null ? startHour * 40 + startHour * 1 + (startMin / 60) * 40 : 0;
 
             // 익일 근무인 경우 전체 시간 표시
-            let displayStartTime = tooltipBlock?.startTime || "";
-            let displayEndTime = tooltipBlock?.endTime || "";
-            if (tooltipBlock?.crossesMidnight && tooltipBlock?.isFirstPart) {
+            let displayStartTime = (tooltipBlock as any)?.startTime || "";
+            let displayEndTime = (tooltipBlock as any)?.endTime || "";
+            if ((tooltipBlock as any)?.crossesMidnight && (tooltipBlock as any)?.isFirstPart) {
               const nextDayIndex = (daysOfWeek.indexOf(day) + 1) % 7;
               const nextDay = daysOfWeek[nextDayIndex];
-              const nextDayBlocks = weeklyScheduleGrid[nextDay] || [];
+              const nextDayBlocks = nextDay
+                ? ((weeklyScheduleGrid[nextDay] as any[]) || [])
+                : [];
               const secondPart = nextDayBlocks.find(
-                (b) => b.groupId === tooltipBlock.groupId && b.isSecondPart
+                (b) => b.groupId === (tooltipBlock as any).groupId && (b as any).isSecondPart
               );
               if (secondPart) {
-                displayEndTime = secondPart.endTime;
+                displayEndTime = (secondPart as any).endTime;
               }
-            } else if (
-              tooltipBlock?.isSecondPart &&
-              tooltipBlock?.originalDay
-            ) {
-              const originalDayBlocks =
-                weeklyScheduleGrid[tooltipBlock.originalDay] || [];
-              const firstPart = originalDayBlocks.find((b) => b.isFirstPart);
+            } else if ((tooltipBlock as any)?.isSecondPart && (tooltipBlock as any)?.originalDay) {
+              const originalDayBlocks = (weeklyScheduleGrid[(tooltipBlock as any).originalDay] as any[]) || [];
+              const firstPart = originalDayBlocks.find((b) => (b as any).isFirstPart);
               if (firstPart) {
-                displayStartTime = firstPart.startTime;
+                displayStartTime = (firstPart as any).startTime;
               }
             }
 
@@ -103,7 +111,7 @@ export default function ScheduleGrid({
                       <div className="tooltip-label">근무 시간</div>
                       <div className="tooltip-time">
                         {displayStartTime} - {displayEndTime}
-                        {tooltipBlock?.crossesMidnight && " (익일)"}
+                        {(tooltipBlock as any)?.crossesMidnight && " (익일)"}
                       </div>
                       <div className="tooltip-label">휴게 시간</div>
                       <div className="tooltip-break">
@@ -111,14 +119,14 @@ export default function ScheduleGrid({
                           // 우선순위: newWorkerWorkInfo > currentWorkInfo > workerData
                           const rawBreakSource =
                             isAddingWorker && newWorkerWorkInfo
-                              ? newWorkerWorkInfo.breakTime
+                              ? (newWorkerWorkInfo as any).breakTime
                               : currentWorkInfo?.breakTime ??
                                 workerData?.workInfo?.breakTime ??
                                 0;
                           if (typeof rawBreakSource === "object") {
                             // 익일 근무인 경우 원래 요일의 휴게 시간 사용
-                            const dayToUse = tooltipBlock?.originalDay || day;
-                            return rawBreakSource[dayToUse] || 0;
+                            const dayToUse = (tooltipBlock as any)?.originalDay || day;
+                            return (rawBreakSource as Record<string, number>)[dayToUse] || 0;
                           }
                           return rawBreakSource;
                         })()}{" "}
@@ -158,15 +166,13 @@ export default function ScheduleGrid({
                         return (
                           <div
                             key={`${block.groupId}-${blockIndex}`}
-                            className={`schedule-block ${
-                              isHovered ? "hovered" : ""
-                            }`}
+                            className={`schedule-block ${isHovered ? "hovered" : ""}`}
                             style={{
                               top: `${blockTop}%`,
                               height: `${blockHeight}%`,
                             }}
-                            onMouseEnter={() => onHoverBlock(block.groupId)}
-                            onMouseLeave={() => onHoverBlock(null)}
+                            onMouseEnter={() => handleHoverBlock(block.groupId)}
+                            onMouseLeave={() => handleHoverBlock(null)}
                           />
                         );
                       })}
@@ -180,18 +186,6 @@ export default function ScheduleGrid({
       </div>
     </div>
   );
-}
-
-ScheduleGrid.propTypes = {
-  weeklyScheduleGrid: PropTypes.object.isRequired,
-  hoveredBlockGroup: PropTypes.string,
-  onHoverBlock: PropTypes.func.isRequired,
-  currentWorkInfo: PropTypes.object,
-  workerData: PropTypes.shape({
-    workInfo: PropTypes.shape({
-      breakTime: PropTypes.oneOfType([PropTypes.number, PropTypes.object]),
-    }),
-  }),
-  isAddingWorker: PropTypes.bool,
-  newWorkerWorkInfo: PropTypes.object,
 };
+
+export default EmployerScheduleGrid;

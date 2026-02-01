@@ -1,7 +1,15 @@
-import PropTypes from "prop-types";
+import type { FC, ChangeEvent } from "react";
 import Swal from "sweetalert2";
+import type { WorkplaceFormProps } from "../../../types/employer/workerManagePageTypes";
 
-export default function WorkplaceForm({
+/**
+ * EmployerWorkplaceForm
+ * 근무지 정보 입력 폼 컴포넌트
+ * - 근무지 이름, 주소, 사업자 등록 번호 입력
+ * - 5인 미만 사업장 여부 선택
+ * - 자동 형식화 및 검증
+ */
+const EmployerWorkplaceForm: FC<WorkplaceFormProps> = ({
   title,
   formData,
   onFormDataChange,
@@ -10,8 +18,8 @@ export default function WorkplaceForm({
   cancelButtonText = "취소",
   saveButtonText = "저장",
   autoFocus = false,
-}) {
-  const validateForm = () => {
+}) => {
+  const validateForm = (): boolean => {
     if (!formData.name?.trim()) {
       Swal.fire("입력 오류", "근무지 이름을 입력해주세요.", "error");
       return false;
@@ -41,13 +49,13 @@ export default function WorkplaceForm({
     return true;
   };
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     if (validateForm()) {
       onSave();
     }
   };
 
-  const handleBusinessNumberChange = (e) => {
+  const handleBusinessNumberChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value.replace(/[^0-9-]/g, "");
     // 자동으로 하이픈 추가 (123-45-67890 형식)
     let formatted = value.replace(/-/g, "");
@@ -148,20 +156,6 @@ export default function WorkplaceForm({
       </div>
     </div>
   );
-}
-
-WorkplaceForm.propTypes = {
-  title: PropTypes.string.isRequired,
-  formData: PropTypes.shape({
-    name: PropTypes.string,
-    address: PropTypes.string,
-    businessNumber: PropTypes.string,
-    isSmallBusiness: PropTypes.bool,
-  }).isRequired,
-  onFormDataChange: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired,
-  cancelButtonText: PropTypes.string,
-  saveButtonText: PropTypes.string,
-  autoFocus: PropTypes.bool,
 };
+
+export default EmployerWorkplaceForm;

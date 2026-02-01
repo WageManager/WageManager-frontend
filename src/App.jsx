@@ -17,8 +17,7 @@ import WorkerMyPage from "./pages/workers/WorkerMyPage";
 // Employer Components
 import DailyCalendarPage from "./pages/employer/DailyCalendarPage";
 import RemittanceManagePage from "./pages/employer/RemittanceManagePage";
-import WorkerManagePage from "./pages/employer/WorkerManagePage";
-import AddWorkplacePage from "./pages/employer/AddWorkplacePage";
+import EmployerWorkerManagePage from "./pages/employer/EmployerWorkerManagePage";
 import EmployerMyPage from "./pages/employer/EmployerMyPage";
 
 // Layouts
@@ -52,8 +51,7 @@ function App() {
           />
           <Route path="daily-calendar" element={<DailyCalendarPage />} />
           <Route path="remittance-manage" element={<RemittanceManagePage />} />
-          <Route path="worker-manage" element={<WorkerManagePage />} />
-          <Route path="add-workplace" element={<AddWorkplacePage />} />
+          <Route path="worker-manage" element={<EmployerWorkerManagePage />} />
           <Route path="employer-mypage" element={<EmployerMyPage />} />
           <Route path="employer-mypage-receive" element={<EmployerMyPage />} />
         </Route>
