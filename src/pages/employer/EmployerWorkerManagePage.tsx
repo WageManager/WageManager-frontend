@@ -10,7 +10,6 @@ import EmployerWorkerSearchCard from "./components/EmployerWorkerSearchCard";
 import EmployerNewWorkerWorkInfoCard from "./components/EmployerNewWorkerWorkInfoCard";
 import EmployerWorkplaceManageCard from "./components/EmployerWorkplaceManageCard";
 import { useWorkplaceManagement } from "./hooks/useWorkplaceManagement";
-import { useWorkInfoEdit } from "./hooks/useWorkInfoEdit";
 import {
   parseWorkSchedules,
   parsePayrollDeduction,
