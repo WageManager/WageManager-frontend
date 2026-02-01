@@ -10,6 +10,12 @@ import EmployerWorkerSearchCard from "./components/EmployerWorkerSearchCard";
 import EmployerNewWorkerWorkInfoCard from "./components/EmployerNewWorkerWorkInfoCard";
 import EmployerWorkplaceManageCard from "./components/EmployerWorkplaceManageCard";
 import { useWorkplaceManagement } from "./hooks/useWorkplaceManagement";
+import { useWorkInfoEdit } from "./hooks/useWorkInfoEdit";
+import {
+  parseWorkSchedules,
+  parsePayrollDeduction,
+  buildWeeklyScheduleGrid,
+} from "./utils/workerManageUtils";
 import type {
   Workplace,
   ContractWorker,
@@ -198,58 +204,15 @@ export default function EmployerWorkerManagePage() {
       return null;
     }
 
-    // fullContractData에 전체 계약 정보가 있음
     const contract = fullContractData;
 
-    // workSchedules JSON 파싱
-    const weeklySchedule: WeeklySchedule = {};
-    try {
-      if (contract.workSchedules) {
-        const rawSchedules = contract.workSchedules as unknown;
-        const schedules =
-          typeof rawSchedules === "string"
-            ? (JSON.parse(rawSchedules) as Array<{
-                dayOfWeek: number;
-                startTime: string;
-                endTime: string;
-              }>)
-            : (rawSchedules as Array<{
-                dayOfWeek: number;
-                startTime: string;
-                endTime: string;
-              }>);
+    // 백엔드 workSchedules 파싱 및 변환
+    const weeklySchedule = parseWorkSchedules(contract.workSchedules);
 
-        // dayOfWeek(1-7, 1=월요일, 7=일요일) -> 한글 요일로 변환
-        const dayMapping = {
-          1: "월",
-          2: "화",
-          3: "수",
-          4: "목",
-          5: "금",
-          6: "토",
-          7: "일",
-        };
-
-        if (Array.isArray(schedules)) {
-          schedules.forEach((schedule) => {
-            const dayName = dayMapping[schedule.dayOfWeek as 1 | 2 | 3 | 4 | 5 | 6 | 7];
-            if (dayName) {
-              weeklySchedule[dayName] = {
-                start: schedule.startTime,
-                end: schedule.endTime,
-              };
-            }
-          });
-        }
-      }
-    } catch (error) {
-      // workSchedules 파싱 실패 무시
-    }
-
-    // payrollDeductionType에서 보험/세금 정보 추출
-    const deductionType = contract.payrollDeductionType || "PART_TIME_NONE";
-    const socialInsurance = deductionType.includes("INSURANCE");
-    const withholdingTax = deductionType.includes("TAX");
+    // payrollDeductionType 파싱
+    const { socialInsurance, withholdingTax } = parsePayrollDeduction(
+      contract.payrollDeductionType
+    );
 
     return {
       basicInfo: {
@@ -704,98 +667,14 @@ export default function EmployerWorkerManagePage() {
   // 주간 스케줄 그리드 데이터 생성 (수정된 정보 반영)
   const weeklyScheduleGrid = useMemo<WeeklyScheduleGrid>(() => {
     // 근무자 추가 모드일 때는 newWorkerWorkInfo 사용
-    let workInfoToUse: AddedWorkerInfo | WorkerWorkInfo | null | undefined;
+    let workInfoToUse: WorkerWorkInfo | null | undefined;
     if (isAddingWorker && newWorkerWorkInfo) {
-      workInfoToUse = newWorkerWorkInfo;
+      workInfoToUse = newWorkerWorkInfo as WorkerWorkInfo;
     } else {
-      workInfoToUse = currentWorkInfo || workerData?.workInfo;
+      workInfoToUse = currentWorkInfo as WorkerWorkInfo | null;
     }
 
-    if (!workInfoToUse?.weeklySchedule) {
-      return {} as WeeklyScheduleGrid;
-    }
-
-    const schedule = workInfoToUse.weeklySchedule;
-    const grid: WeeklyScheduleGrid = {};
-
-    // 먼저 모든 요일을 초기화
-    daysOfWeek.forEach((day) => {
-      grid[day] = [];
-    });
-
-    // 각 요일의 스케줄 처리
-    daysOfWeek.forEach((day, dayIndex) => {
-      if (schedule[day] && schedule[day].start && schedule[day].end) {
-        const { start, end } = schedule[day];
-        const [startHour = 0, startMin = 0] = start.split(":").map(Number);
-        const [endHour = 0, endMin = 0] = end.split(":").map(Number);
-        const startDecimal = startHour + startMin / 60;
-        let endDecimal = endHour + endMin / 60;
-
-        // 익일 근무인지 확인 (end가 start보다 작거나 같으면 익일)
-        const crossesMidnight = endDecimal <= startDecimal;
-
-        if (crossesMidnight) {
-          // 익일 근무인 경우
-          // 1. 당일 블록: start부터 24:00까지
-          const groupId = `${day}-0`;
-          const dayBlocks = grid[day] ?? (grid[day] = []);
-          dayBlocks.push({
-            start: startDecimal,
-            end: 24,
-            startTime: start,
-            endTime: "24:00",
-            startHour,
-            startMin,
-            endHour: 24,
-            endMin: 0,
-            groupId,
-            crossesMidnight: true,
-            isFirstPart: true,
-          });
-
-          // 2. 다음 날 블록: 00:00부터 end까지
-          const nextDayIndex = (dayIndex + 1) % 7;
-          const nextDay = daysOfWeek[nextDayIndex];
-          const nextDayGroupId = `${day}-0`; // 같은 그룹 ID 사용 (연속된 블록)
-          if (nextDay) {
-            const nextDayBlocks = grid[nextDay] ?? (grid[nextDay] = []);
-            nextDayBlocks.push({
-            start: 0,
-            end: endDecimal,
-            startTime: "00:00",
-            endTime: end,
-            startHour: 0,
-            startMin: 0,
-            endHour,
-            endMin,
-            groupId: nextDayGroupId,
-            crossesMidnight: true,
-            isSecondPart: true,
-            originalDay: day, // 원래 시작한 요일 저장
-            });
-          }
-        } else {
-          // 일반 근무인 경우
-          const groupId = `${day}-0`;
-          const dayBlocks = grid[day] ?? (grid[day] = []);
-          dayBlocks.push({
-            start: startDecimal,
-            end: endDecimal,
-            startTime: start,
-            endTime: end,
-            startHour,
-            startMin,
-            endHour,
-            endMin,
-            groupId,
-            crossesMidnight: false,
-          });
-        }
-      }
-    });
-
-    return grid;
+    return buildWeeklyScheduleGrid(workInfoToUse);
   }, [workerData, currentWorkInfo, isAddingWorker, newWorkerWorkInfo]);
 
   const handleHoverBlock = (blockGroupId: string | null, _hour: number | null) => {
