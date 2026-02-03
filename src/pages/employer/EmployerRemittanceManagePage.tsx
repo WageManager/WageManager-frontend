@@ -14,6 +14,11 @@ import {
 } from "../../components/employer/RemittanceManagePage";
 import MonthNav from "../../components/common/MonthNav";
 
+/** 날짜를 "YYYY.MM.DD" 형식으로 포맷 */
+const formatWorkDate = (year: number, month: number, date: number): string => {
+  return `${year}.${String(month).padStart(2, "0")}.${String(date).padStart(2, "0")}`;
+};
+
 export default function EmployerRemittanceManagePage() {
   const {
     // 근무지
@@ -97,8 +102,7 @@ export default function EmployerRemittanceManagePage() {
                   record={record}
                   workerName={currentSelectedWorker?.workerName || "-"}
                   workplaceName={selectedWorkplaceName}
-                  currentYear={currentYear}
-                  currentMonth={currentMonth}
+                  formattedDate={formatWorkDate(currentYear, currentMonth, record.date)}
                   isOpen={expandedRecordIndex === index}
                 />
               </div>

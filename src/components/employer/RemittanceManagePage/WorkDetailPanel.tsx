@@ -10,8 +10,7 @@ export default function WorkDetailPanel({
   record,
   workerName,
   workplaceName,
-  currentYear,
-  currentMonth,
+  formattedDate,
   isOpen,
 }: WorkDetailPanelProps) {
   return (
@@ -30,8 +29,7 @@ export default function WorkDetailPanel({
         <div>
           <p className="detail-label">근무 날짜</p>
           <p className="detail-value">
-            {currentYear}.{String(currentMonth).padStart(2, "0")}.
-            {String(record.date).padStart(2, "0")} ({record.day})
+            {formattedDate} ({record.day})
           </p>
         </div>
         <div>

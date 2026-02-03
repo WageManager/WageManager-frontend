@@ -72,8 +72,8 @@ export interface WorkDetailPanelProps {
   record: EmployerWorkRecord;
   workerName: string;
   workplaceName: string;
-  currentYear: number;
-  currentMonth: number;
+  /** 날짜 표시용 문자열 ("YYYY.MM.DD" 형식) */
+  formattedDate: string;
   isOpen: boolean;
 }
 

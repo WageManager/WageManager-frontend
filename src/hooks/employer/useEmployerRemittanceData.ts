@@ -10,6 +10,7 @@ import type {
   WorkRecord,
 } from "../../api/employerApiResponse.type";
 import { formatTime, parseWorkDate } from "../../utils/dateUtils";
+import { calculateWage, calculateTotalWage } from "../../utils/salaryCalculator";
 import type {
   EmployerWorkRecord,
   WorkerListMap,
@@ -17,6 +18,7 @@ import type {
   UseEmployerRemittanceDataReturn,
 } from "../../types/employer/employerRemittancePage.types";
 import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 
 /**
  * 고용주 송금 관리 페이지 데이터 훅
@@ -76,8 +78,9 @@ export function useEmployerRemittanceData(): UseEmployerRemittanceDataReturn {
         if (workplacesData.length > 0 && !selectedWorkplaceId) {
           setSelectedWorkplaceId(workplacesData[0].id);
         }
-      } catch (error) {
-        console.error("[useEmployerRemittanceData] 근무지 목록 조회 실패:", error);
+      } catch (err) {
+        console.error("[useEmployerRemittanceData] 근무지 목록 조회 실패:", err);
+        toast.error("근무지 목록을 불러오는데 실패했습니다.");
         setWorkplaces([]);
       }
     };
@@ -97,8 +100,9 @@ export function useEmployerRemittanceData(): UseEmployerRemittanceDataReturn {
           ...prev,
           [selectedWorkplaceId]: workersData,
         }));
-      } catch (error) {
-        console.error("[useEmployerRemittanceData] 근로자 목록 조회 실패:", error);
+      } catch (err) {
+        console.error("[useEmployerRemittanceData] 근로자 목록 조회 실패:", err);
+        toast.error("근로자 목록을 불러오는데 실패했습니다.");
         setWorkersList((prev) => ({
           ...prev,
           [selectedWorkplaceId]: [],
@@ -126,8 +130,9 @@ export function useEmployerRemittanceData(): UseEmployerRemittanceDataReturn {
         );
 
         setWorkRecords(response.data || []);
-      } catch (error) {
-        console.error("[useEmployerRemittanceData] 근무 기록 조회 실패:", error);
+      } catch (err) {
+        console.error("[useEmployerRemittanceData] 근무 기록 조회 실패:", err);
+        toast.error("근무 기록을 불러오는데 실패했습니다.");
         setWorkRecords([]);
       } finally {
         setIsLoading(false);
@@ -157,20 +162,14 @@ export function useEmployerRemittanceData(): UseEmployerRemittanceDataReturn {
       .map((record) => {
         const { date, day } = parseWorkDate(record.workDate);
 
-        // 근무 시간 계산 (시급 * 근무시간)
         const startTime = formatTimeValue(record.startTime);
         const endTime = formatTimeValue(record.endTime);
-        const startParts = startTime.split(":").map(Number);
-        const endParts = endTime.split(":").map(Number);
-        const startH = startParts[0] ?? 0;
-        const startM = startParts[1] ?? 0;
-        const endH = endParts[0] ?? 0;
-        const endM = endParts[1] ?? 0;
-        const startDecimal = startH + startM / 60;
-        const endDecimal = endH + endM / 60;
-        const workHours =
-          endDecimal - startDecimal - (record.breakMinutes || 0) / 60;
-        const wage = Math.floor(workHours * (record.hourlyWage || 0));
+        const wage = calculateWage(
+          startTime,
+          endTime,
+          record.breakMinutes || 0,
+          record.hourlyWage || 0
+        );
 
         return {
           date,
@@ -194,10 +193,7 @@ export function useEmployerRemittanceData(): UseEmployerRemittanceDataReturn {
 
   // ── 총 급여 (workerData wage 합산) ──────────
   const totalWage = useMemo(() => {
-    if (!workerData || workerData.length === 0) {
-      return 0;
-    }
-    return workerData.reduce((sum, record) => sum + (record.wage ?? 0), 0);
+    return calculateTotalWage(workerData);
   }, [workerData]);
 
   // ── 월 이동 ────────────────────────────────
