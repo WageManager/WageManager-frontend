@@ -14,8 +14,8 @@ import {
   generateShiftId,
 } from "./utils/shiftUtils";
 import { extraPayTypes } from "../../constants/extraPay";
-import { formatKRW, formatBreakTime } from "../../utils/formatUtils";
-import { formatDuration, timeStringToDecimal } from "./utils/formatUtils";
+import { formatKRW, formatBreakTime, timeStringToDecimal } from "../../utils/formatUtils";
+import { formatDuration } from "./utils/formatUtils";
 import { hours } from "./constants";
 import EmployerTimeInput from "./components/EmployerTimeInput";
 import Swal from "sweetalert2";

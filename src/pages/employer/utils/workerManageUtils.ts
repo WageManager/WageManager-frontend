@@ -8,6 +8,7 @@ import type {
   WeeklyScheduleGrid,
   WorkerWorkInfo,
 } from "../../../types/employer/workerManagePageTypes";
+import { timeStringToDecimal } from "../../../utils/formatUtils";
 
 /**
  * 백엔드 workSchedules JSON을 한글 요일 기반 WeeklySchedule으로 변환
@@ -71,18 +72,6 @@ export const parsePayrollDeduction = (
     socialInsurance: type.includes("INSURANCE"),
     withholdingTax: type.includes("TAX"),
   };
-};
-
-/**
- * 시간 문자열 "HH:MM"을 시간(decimal) 숫자로 변환
- * 예: "14:30" -> 14.5, "09:15" -> 9.25
- */
-export const timeStringToDecimal = (timeString: string): number => {
-  if (!timeString) return 0;
-  const [hourStr, minStr] = timeString.split(":");
-  const hour = parseInt(hourStr || "0", 10) || 0;
-  const min = parseInt(minStr || "0", 10) || 0;
-  return hour + min / 60;
 };
 
 /**
