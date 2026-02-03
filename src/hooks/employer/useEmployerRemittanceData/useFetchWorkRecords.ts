@@ -73,7 +73,7 @@ export function useFetchWorkRecords(
 
     // 선택된 근로자의 근무 기록만 필터링
     const filtered = workRecords.filter((record) => {
-      return record.workerName === currentSelectedWorker.workerName;
+      return record.contractId === currentSelectedWorker.id;
     });
 
     return filtered
