@@ -18,8 +18,13 @@ export const calculateWorkHours = (
   breakMinutes: number
 ): number => {
   const startDecimal = timeStringToDecimal(startTime);
-  const endDecimal = timeStringToDecimal(endTime);
+  let endDecimal = timeStringToDecimal(endTime);
   const breakHours = (breakMinutes || 0) / 60;
+
+  // 자정 넘김 처리 (예: 22:00 ~ 06:00)
+  if (endDecimal < startDecimal) {
+    endDecimal += 24;
+  }
 
   return endDecimal - startDecimal - breakHours;
 };
