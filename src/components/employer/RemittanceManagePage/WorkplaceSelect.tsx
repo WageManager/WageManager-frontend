@@ -18,6 +18,9 @@ export default function WorkplaceSelect({
   return (
     <div className="remittance-workplace-select">
       <select value={selectedWorkplaceId ?? ""} onChange={handleChange}>
+        <option value="" disabled>
+          근무지를 선택하세요
+        </option>
         {workplaces.map((wp) => (
           <option key={wp.id} value={wp.id}>
             {wp.name}
