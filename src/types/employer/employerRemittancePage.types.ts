@@ -1,4 +1,4 @@
-// ============ Employer Remittance 페이지 UI 전용 타입 ============
+// ============ Employer Remittance 페이지 UI 전용 타입 ==============
 
 import type {
   Workplace,
@@ -11,17 +11,15 @@ export type { Allowance, AllowanceKey, AllowanceMap } from "../common/allowance.
 
 import type { AllowanceMap } from "../common/allowance.types";
 
-// API 타입 re-export (컴포넌트에서 쉽게 import 하도록)
+// API 타입 re-export
 export type { Workplace, ContractWorker, WorkRecord };
 
 // ============ 근무 기록 타입 ============
 
 /** UI에서 사용하는 가공된 근무 기록 (API WorkRecord를 매핑한 결과) */
 export interface EmployerWorkRecord {
-  /** 일(day of month) */
-  date: number;
-  /** 요일 ("월", "화" 등) */
-  day: string;
+  date: number; // 일
+  day: string; // 요일
   startTime: string;
   endTime: string;
   hourlyWage: number;
