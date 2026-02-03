@@ -118,7 +118,7 @@ export interface UseEmployerRemittanceDataReturn {
   totalWage: number;
 
   // 액션
-  handleRemittance: () => Promise<void>;
+  handleRemittance: () => void;
 
   // 확장 패널
   expandedRecordIndex: number | null;
