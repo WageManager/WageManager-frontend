@@ -40,9 +40,7 @@ export default function WorkDetailPanel({
         </div>
         <div>
           <p className="detail-label">시급</p>
-          <p className="detail-value">
-            {record.hourlyWage ? formatKRW(record.hourlyWage) : "-"}
-          </p>
+          <p className="detail-value">{formatKRW(record.hourlyWage)}</p>
         </div>
         <div>
           <p className="detail-label">휴게 시간</p>
