@@ -4,7 +4,6 @@ import Swal from 'sweetalert2';
 import { kakaoRegister } from '../../api/authApi';
 import type { UserType } from '../../types/auth';
 import { AUTH_CONSTANTS } from '../../constants/auth';
-import { wageManagerApi } from '../../api/axios';
 
 interface UseSignupFormProps {
   kakaoAccessToken?: string;
