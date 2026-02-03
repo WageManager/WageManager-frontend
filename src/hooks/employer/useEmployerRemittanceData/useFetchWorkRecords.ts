@@ -7,6 +7,7 @@ import type {
 } from "../../../types/employer/employerRemittancePage.types";
 import { formatTime, parseWorkDate } from "../../../utils/dateUtils";
 import { calculateWage, calculateTotalWage } from "../../../utils/salaryCalculator";
+import { createDefaultAllowances } from "../../../constants/extraPay";
 import { toast } from "react-toastify";
 
 export interface UseFetchWorkRecordsReturn {
@@ -96,11 +97,7 @@ export function useFetchWorkRecords(
           hourlyWage: record.hourlyWage,
           breakMinutes: record.breakMinutes,
           wage,
-          allowances: {
-            overtime: { enabled: false, rate: 0 },
-            night: { enabled: false, rate: 0 },
-            holiday: { enabled: false, rate: 0 },
-          },
+          allowances: createDefaultAllowances(),
           socialInsurance: true,
           withholdingTax: true,
         };

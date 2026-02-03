@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { getContracts, getContractDetail, getWorkRecords, getSalaries, getPayments } from "../../api/workerApi";
 import type { SalaryListItem, PaymentResponse } from "../../api/workerApi";
 import { formatTime, parseWorkDate, pad2 } from "../../utils/dateUtils";
+import { createDefaultAllowances } from "../../constants/extraPay";
 import type {
   Workplace,
   RemittanceWorkRecord,
@@ -110,11 +111,7 @@ export function useRemittanceData() {
             breakMinutes: record.breakMinutes || 0,
             hourlyWage,
             wage: baseWage,
-            allowances: {
-              overtime: { enabled: false, rate: 0 },
-              night: { enabled: false, rate: 0 },
-              holiday: { enabled: false, rate: 0 },
-            },
+            allowances: createDefaultAllowances(),
             socialInsurance: hasSocialInsurance,
             withholdingTax: hasWithholdingTax,
           };
