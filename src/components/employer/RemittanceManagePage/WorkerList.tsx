@@ -12,7 +12,8 @@ export default function WorkerList({
   return (
     <div className="remittance-worker-list">
       {workers.map((worker) => (
-        <div
+        <button
+          type="button"
           key={worker.id}
           className={`worker-item ${
             selectedWorkerId === worker.id ? "selected" : ""
@@ -20,7 +21,7 @@ export default function WorkerList({
           onClick={() => onWorkerClick(worker)}
         >
           {worker.workerName}
-        </div>
+        </button>
       ))}
     </div>
   );
