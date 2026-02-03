@@ -57,13 +57,7 @@ export interface WorkerListProps {
   onWorkerClick: (worker: ContractWorker) => void;
 }
 
-/** MonthNav 컴포넌트 Props */
-export interface MonthNavProps {
-  currentYear: number;
-  currentMonth: number;
-  onPrevMonth: () => void;
-  onNextMonth: () => void;
-}
+// MonthNav Props는 common/MonthNav.tsx에서 직접 export
 
 /** WorkDetailCard 컴포넌트 Props */
 export interface WorkDetailCardProps {

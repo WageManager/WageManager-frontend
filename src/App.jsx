@@ -16,7 +16,7 @@ import WorkerMyPage from "./pages/workers/WorkerMyPage";
 
 // Employer Components
 import DailyCalendarPage from "./pages/employer/DailyCalendarPage";
-import RemittanceManagePage from "./pages/employer/RemittanceManagePage";
+import EmployerRemittanceManagePage from "./pages/employer/EmployerRemittanceManagePage";
 import EmployerWorkerManagePage from "./pages/employer/EmployerWorkerManagePage";
 import EmployerMyPage from "./pages/employer/EmployerMyPage";
 
@@ -50,7 +50,7 @@ function App() {
             element={<Navigate to="/employer/daily-calendar" replace />}
           />
           <Route path="daily-calendar" element={<DailyCalendarPage />} />
-          <Route path="remittance-manage" element={<RemittanceManagePage />} />
+          <Route path="remittance-manage" element={<EmployerRemittanceManagePage />} />
           <Route path="worker-manage" element={<EmployerWorkerManagePage />} />
           <Route path="employer-mypage" element={<EmployerMyPage />} />
           <Route path="employer-mypage-receive" element={<EmployerMyPage />} />
