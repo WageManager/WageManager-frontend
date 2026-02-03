@@ -33,7 +33,7 @@ export function useFetchWorkRecords(
 
   // 근무 기록 조회
   useEffect(() => {
-    if (!selectedWorkplaceId) return;
+    if (selectedWorkplaceId == null) return;
 
     const fetchWorkRecords = async () => {
       try {

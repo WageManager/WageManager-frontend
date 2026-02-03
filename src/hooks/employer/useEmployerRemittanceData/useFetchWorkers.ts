@@ -30,7 +30,7 @@ export function useFetchWorkers(
 
   // 선택된 근무지의 근로자 목록 조회
   useEffect(() => {
-    if (!selectedWorkplaceId) return;
+    if (selectedWorkplaceId == null) return;
 
     const fetchWorkers = async () => {
       try {
@@ -60,7 +60,7 @@ export function useFetchWorkers(
 
   // 현재 근무지의 근로자 목록
   const workers = useMemo<ContractWorker[]>(() => {
-    if (!selectedWorkplaceId) return [];
+    if (selectedWorkplaceId == null) return [];
     return workersList[selectedWorkplaceId] || [];
   }, [selectedWorkplaceId, workersList]);
 
