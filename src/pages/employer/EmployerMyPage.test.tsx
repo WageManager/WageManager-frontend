@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import EmployerMyPage from '../EmployerMyPage';
-import { getMyInfo, updateMyInfo, deleteMyAccount } from '../../../api/commonApi';
-import { logout } from '../../../api/authApi';
+import EmployerMyPage from './EmployerMyPage';
+import { getMyInfo, updateMyInfo, deleteMyAccount } from '../../api/commonApi';
+import { logout } from '../../api/authApi';
 import Swal from 'sweetalert2';
 
 /*
@@ -39,13 +39,13 @@ const localStorageMock = (() => {
 })();
 
 // API 모킹
-vi.mock('../../../api/commonApi', () => ({
+vi.mock('../../api/commonApi', () => ({
   getMyInfo: vi.fn(),
   updateMyInfo: vi.fn(),
   deleteMyAccount: vi.fn(),
 }));
 
-vi.mock('../../../api/authApi', () => ({
+vi.mock('../../api/authApi', () => ({
   logout: vi.fn(),
 }));
 
@@ -67,9 +67,13 @@ vi.mock('react-router-dom', async () => {
 });
 
 // ReceivedRequestsTab 모킹 (복잡한 API 호출 분리)
-vi.mock('../../../components/employer/EmployerMyPage/ReceivedRequestsTab', () => ({
+vi.mock('../../components/employer/EmployerMyPage/ReceivedRequestsTab', () => ({
   default: () => <div data-testid="received-requests-tab">받은 근무 요청 탭</div>,
 }));
+
+// CSS 모킹
+vi.mock('../../styles/employerMyPage.css', () => ({}));
+vi.mock('../../styles/employerMyPageReceive.css', () => ({}));
 
 const mockUser = {
   id: 1,
@@ -99,7 +103,7 @@ describe('EmployerMyPage', () => {
   describe('렌더링', () => {
     it('로딩 중일 때 로딩 메시지를 표시한다', async () => {
       vi.mocked(getMyInfo).mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve({ data: mockUser }), 100))
+        () => new Promise((resolve) => setTimeout(() => resolve({ success: true, data: mockUser }), 100))
       );
 
       render(
@@ -112,7 +116,7 @@ describe('EmployerMyPage', () => {
     });
 
     it('사용자 정보 로드 성공 시 프로필을 표시한다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
 
       render(
         <MemoryRouter initialEntries={['/employer/employer-mypage']}>
@@ -140,7 +144,7 @@ describe('EmployerMyPage', () => {
     });
 
     it('프로필 탭에서 기본정보 섹션을 표시한다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
 
       render(
         <MemoryRouter initialEntries={['/employer/employer-mypage']}>
@@ -160,7 +164,7 @@ describe('EmployerMyPage', () => {
 
   describe('탭 전환', () => {
     it('내 프로필 수정 탭이 기본으로 선택되어 있다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
 
       render(
         <MemoryRouter initialEntries={['/employer/employer-mypage']}>
@@ -175,7 +179,7 @@ describe('EmployerMyPage', () => {
     });
 
     it('받은 근무 요청 탭 클릭 시 해당 경로로 이동한다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
 
       render(
         <MemoryRouter initialEntries={['/employer/employer-mypage']}>
@@ -195,7 +199,7 @@ describe('EmployerMyPage', () => {
     });
 
     it('받은 근무 요청 경로에서 해당 탭이 선택되어 있다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
 
       render(
         <MemoryRouter initialEntries={['/employer/employer-mypage-receive']}>
@@ -214,7 +218,7 @@ describe('EmployerMyPage', () => {
 
   describe('프로필 수정', () => {
     it('수정 버튼 클릭 시 입력 필드가 활성화된다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
 
       render(
         <MemoryRouter initialEntries={['/employer/employer-mypage']}>
@@ -238,7 +242,7 @@ describe('EmployerMyPage', () => {
     });
 
     it('이름 수정 후 완료 버튼 클릭 시 API가 호출된다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
       vi.mocked(updateMyInfo).mockResolvedValue({ success: true });
 
       render(
@@ -269,7 +273,7 @@ describe('EmployerMyPage', () => {
     });
 
     it('취소 버튼 클릭 시 수정 모드가 종료된다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
 
       render(
         <MemoryRouter initialEntries={['/employer/employer-mypage']}>
@@ -299,7 +303,7 @@ describe('EmployerMyPage', () => {
     });
 
     it('값 변경 후 수정 버튼 클릭 시 원래 값으로 복원된다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
 
       render(
         <MemoryRouter initialEntries={['/employer/employer-mypage']}>
@@ -330,7 +334,7 @@ describe('EmployerMyPage', () => {
     });
 
     it('수정 API 실패 시 에러 알림을 표시한다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
       vi.mocked(updateMyInfo).mockRejectedValue(new Error('수정 실패'));
 
       render(
@@ -365,7 +369,7 @@ describe('EmployerMyPage', () => {
 
   describe('회원 탈퇴', () => {
     it('회원 탈퇴 버튼이 표시된다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
 
       render(
         <MemoryRouter initialEntries={['/employer/employer-mypage']}>
@@ -379,7 +383,7 @@ describe('EmployerMyPage', () => {
     });
 
     it('회원 탈퇴 확인 시 탈퇴 처리 후 홈으로 이동한다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
       vi.mocked(deleteMyAccount).mockResolvedValue({ success: true });
       vi.mocked(logout).mockResolvedValue({ success: true });
       vi.mocked(Swal.fire)
@@ -409,7 +413,7 @@ describe('EmployerMyPage', () => {
     });
 
     it('회원 탈퇴 취소 시 탈퇴되지 않는다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
       vi.mocked(Swal.fire).mockResolvedValue({ isConfirmed: false } as any);
 
       render(
@@ -433,7 +437,7 @@ describe('EmployerMyPage', () => {
     });
 
     it('회원 탈퇴 API 실패 시 에러 알림을 표시한다', async () => {
-      vi.mocked(getMyInfo).mockResolvedValue({ data: mockUser });
+      vi.mocked(getMyInfo).mockResolvedValue({ success: true, data: mockUser });
       vi.mocked(deleteMyAccount).mockRejectedValue(new Error('탈퇴 실패'));
       vi.mocked(Swal.fire)
         .mockResolvedValueOnce({ isConfirmed: true } as any)
