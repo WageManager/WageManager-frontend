@@ -13,6 +13,7 @@ import {
   SalarySummaryBox,
 } from "../../components/employer/RemittanceManagePage";
 import MonthNav from "../../components/common/MonthNav";
+import LoadingDots from "../../components/common/LoadingDots";
 
 /** 날짜를 "YYYY.MM.DD" 형식으로 포맷 */
 const formatWorkDate = (year: number, month: number, date: number): string => {
@@ -40,6 +41,7 @@ export default function EmployerRemittanceManagePage() {
 
     // 근무 기록
     workerData,
+    isLoading,
 
     // 급여
     totalWage,
@@ -63,6 +65,7 @@ export default function EmployerRemittanceManagePage() {
 
   return (
     <div className="remittance-manage-page">
+      {isLoading && <LoadingDots />}
       {/* 왼쪽 패널: 근무지/근로자 선택 */}
       <div className="remittance-left-panel">
         <WorkplaceSelect
