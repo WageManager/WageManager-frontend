@@ -5,13 +5,13 @@ import type {
   WorkerWorkInfo,
   AddedWorkerInfo,
   ContractWorker,
-} from "../../../types/employer/workerManagePageTypes";
+} from "../../types/employer/workerManagePageTypes";
 import {
   getWorkplaces,
   createWorkplace,
   updateWorkplace,
   deleteWorkplace,
-} from "../../../api/employerApi";
+} from "../../api/employerApi";
 
 interface UseWorkplaceManagementProps {
   onWorkplaceDeleted?: (workplaceId: number) => void;

@@ -1,6 +1,6 @@
 import type { FC, ChangeEvent, MouseEvent } from "react";
 import { FaTimes } from "react-icons/fa";
-import EmployerTimeInput from "./EmployerTimeInput";
+import EmployerTimeInput from "../DailyCalendarPage/EmployerTimeInput";
 import { formatKRW } from "../../../utils/formatUtils";
 import type { WorkInfoCardProps } from "../../../types/employer/workerManagePageTypes";
 

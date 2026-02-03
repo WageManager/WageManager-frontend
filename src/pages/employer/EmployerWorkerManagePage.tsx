@@ -2,19 +2,19 @@ import { useState, useMemo, useEffect } from "react";
 import type { ChangeEvent } from "react";
 import Swal from "sweetalert2";
 import "../../styles/workerManagePage.css";
-import EmployerBasicInfoCard from "./components/EmployerBasicInfoCard";
-import EmployerWorkplaceForm from "./components/EmployerWorkplaceForm";
-import EmployerWorkInfoCard from "./components/EmployerWorkInfoCard";
-import EmployerScheduleGrid from "./components/EmployerScheduleGrid";
-import EmployerWorkerSearchCard from "./components/EmployerWorkerSearchCard";
-import EmployerNewWorkerWorkInfoCard from "./components/EmployerNewWorkerWorkInfoCard";
-import EmployerWorkplaceManageCard from "./components/EmployerWorkplaceManageCard";
-import { useWorkplaceManagement } from "./hooks/useWorkplaceManagement";
+import EmployerBasicInfoCard from "../../components/employer/WorkerManagePage/EmployerBasicInfoCard";
+import EmployerWorkplaceForm from "../../components/employer/WorkerManagePage/EmployerWorkplaceForm";
+import EmployerWorkInfoCard from "../../components/employer/WorkerManagePage/EmployerWorkInfoCard";
+import EmployerScheduleGrid from "../../components/employer/WorkerManagePage/EmployerScheduleGrid";
+import EmployerWorkerSearchCard from "../../components/employer/WorkerManagePage/EmployerWorkerSearchCard";
+import EmployerNewWorkerWorkInfoCard from "../../components/employer/WorkerManagePage/EmployerNewWorkerWorkInfoCard";
+import EmployerWorkplaceManageCard from "../../components/employer/WorkerManagePage/EmployerWorkplaceManageCard";
+import { useWorkplaceManagement } from "../../hooks/employer/useWorkplaceManagement";
 import {
   parseWorkSchedules,
   parsePayrollDeduction,
   buildWeeklyScheduleGrid,
-} from "./utils/workerManageUtils";
+} from "../../utils/employer/workerManageUtils";
 import type {
   Workplace,
   ContractWorker,

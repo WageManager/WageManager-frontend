@@ -7,8 +7,8 @@ import type {
   WeeklySchedule,
   WeeklyScheduleGrid,
   WorkerWorkInfo,
-} from "../../../types/employer/workerManagePageTypes";
-import { timeStringToDecimal } from "../../../utils/formatUtils";
+} from "../../types/employer/workerManagePageTypes";
+import { timeStringToDecimal } from "../formatUtils";
 
 /**
  * 백엔드 workSchedules JSON을 한글 요일 기반 WeeklySchedule으로 변환

@@ -8,16 +8,16 @@ import {
   deleteWorkRecord,
   getContractsByWorkplace,
 } from "../../api/employerApi";
-import { getDateKey, isSameDate, buildCalendarCells } from "./utils/dateUtils";
+import { getDateKey, isSameDate, buildCalendarCells } from "../../utils/employer/dateUtils";
 import {
   cloneShiftWithDefaults,
   generateShiftId,
-} from "./utils/shiftUtils";
+} from "../../utils/employer/shiftUtils";
 import { extraPayTypes } from "../../constants/extraPay";
 import { formatKRW, formatBreakTime, timeStringToDecimal } from "../../utils/formatUtils";
-import { formatDuration } from "./utils/formatUtils";
-import { hours } from "./constants";
-import EmployerTimeInput from "./components/EmployerTimeInput";
+import { formatDuration } from "../../utils/employer/formatUtils";
+import { hours } from "../../constants/employerCalendar";
+import EmployerTimeInput from "../../components/employer/DailyCalendarPage/EmployerTimeInput";
 import Swal from "sweetalert2";
 
 export default function DailyCalendarPage() {

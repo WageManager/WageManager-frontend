@@ -1,6 +1,6 @@
 import React from "react";
 import { FaTimes } from "react-icons/fa";
-import EmployerTimeInput from "./EmployerTimeInput";
+import EmployerTimeInput from "../DailyCalendarPage/EmployerTimeInput";
 import type { NewWorkerWorkInfoCardProps } from "../../../types/employer/workerManagePageTypes";
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
