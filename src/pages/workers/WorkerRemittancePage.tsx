@@ -8,7 +8,7 @@
 import { useState, useMemo } from "react";
 import "./WorkerRemittancePage.css";
 import { formatKRW } from "../../utils/formatUtils";
-import MonthNav from "../../components/worker/MonthlyCalendarPage/MonthNav";
+import MonthNav from "../../components/common/MonthNav";
 import WorkDetailList from "../../components/worker/RemittancePage/WorkDetailList";
 import WorkplaceDropdown from "../../components/worker/RemittancePage/WorkplaceDropdown";
 import { useRemittanceData } from "../../hooks/worker/useRemittanceData";
