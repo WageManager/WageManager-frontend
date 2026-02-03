@@ -2,6 +2,7 @@
  * 근무지 선택 드롭다운 컴포넌트
  */
 
+import type { ChangeEvent } from "react";
 import type { WorkplaceSelectProps } from "../../../types/employer/employerRemittancePage.types";
 
 export default function WorkplaceSelect({
@@ -9,7 +10,7 @@ export default function WorkplaceSelect({
   selectedWorkplaceId,
   onChange,
 }: WorkplaceSelectProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const newWorkplaceId = Number(e.target.value);
     onChange(newWorkplaceId);
   };
