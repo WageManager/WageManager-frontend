@@ -91,7 +91,7 @@ export default function EmployerRemittanceManagePage() {
         <div className="remittance-detail-list">
           {workerData && workerData.length > 0 ? (
             workerData.map((record, index) => (
-              <div key={`${record.date}-${record.startTime}`}>
+              <div key={`${record.date}-${record.startTime}-${record.endTime}-${index}`}>
                 <WorkDetailCard
                   record={record}
                   index={index}
