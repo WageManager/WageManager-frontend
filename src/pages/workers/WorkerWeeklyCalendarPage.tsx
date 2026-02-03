@@ -3,7 +3,8 @@ import WeeklyCalendar from "../../components/worker/WeeklyCalendar/WeeklyCalenda
 import { getContracts, getContractDetail, getWorkRecords, createCorrectionRequest} from "../../api/workerApi";
 import { toast } from "react-toastify";
 import { pad2, getWeekStart, formatTime } from "../../utils/dateUtils";
-import type { WorkRecord, WorkRecordsByDate, EditForm, WorkRecordStatus } from "../../types/worker/weeklyCalendar.types";
+import type { WorkRecord, WorkRecordsByDate, EditForm, WorkRecordStatus } from "../../types/worker/workerWeeklyCalendar.types";
+import LoadingDots from "../../components/common/LoadingDots";
 
 // API 응답 데이터 구조 타입 정의
 interface ApiWorkRecord {
@@ -230,9 +231,11 @@ export default function WorkerWeeklyCalendarPage() {
     getWeekStart(today)
   );
   const [workRecords, setWorkRecords] = useState<WorkRecordsByDate>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   // 주간 근무 기록 가져오기 함수
   const fetchWorkRecords = useCallback(async (): Promise<void> => {
+    setIsLoading(true);
     try {
       // 1. 계약 목록 가져오기
       const contractsResponse = await getContracts();
@@ -262,6 +265,8 @@ export default function WorkerWeeklyCalendarPage() {
     } catch (error) {
       console.error("[WorkerWeeklyCalendarPage] 근무 기록 조회 실패:", error);
       setWorkRecords({});
+    } finally {
+      setIsLoading(false);
     }
   }, [currentWeekStart]);
 
@@ -287,6 +292,7 @@ export default function WorkerWeeklyCalendarPage() {
 
   return (
     <div className="worker-content-frame weekly-calendar-wrapper">
+      {isLoading && <LoadingDots />}
       <WeeklyCalendar
         workRecords={workRecords}
         onConfirmEdit={handleConfirmEdit}
