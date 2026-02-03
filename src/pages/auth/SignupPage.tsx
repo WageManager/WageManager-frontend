@@ -1,5 +1,5 @@
 import { useLocation, Navigate } from 'react-router-dom';
-import SignupForm from './components/SignupForm';
+import SignupForm from '../../components/auth/SignupForm';
 import './SignupPage.css';
 
 export default function SignupPage() {

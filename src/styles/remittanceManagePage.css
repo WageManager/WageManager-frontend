@@ -58,7 +58,9 @@
 }
 
 .worker-item {
+  width: 100%;
   padding: 16px;
+  border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;

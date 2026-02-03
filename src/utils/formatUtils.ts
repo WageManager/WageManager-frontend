@@ -22,3 +22,15 @@ export function formatPhoneNumber(value: string): string {
   }
   return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3, 7)}-${numbersOnly.slice(7, 11)}`;
 }
+
+/**
+ * 시간 문자열 "HH:MM"을 소수(decimal)로 변환
+ * @example "14:30" → 14.5, "09:15" → 9.25
+ */
+export const timeStringToDecimal = (timeString: string): number => {
+  if (!timeString) return 0;
+  const [hourStr, minStr] = timeString.split(":");
+  const hour = parseInt(hourStr || "0", 10) || 0;
+  const min = parseInt(minStr || "0", 10) || 0;
+  return hour + min / 60;
+};

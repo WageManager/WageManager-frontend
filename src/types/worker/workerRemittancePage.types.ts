@@ -1,24 +1,15 @@
 // ============ Remittance 페이지 UI 전용 타입 ============
 
+// 수당 관련 타입은 common에서 가져와 re-export
+export type { Allowance, AllowanceKey, AllowanceMap } from "../common/allowance.types";
+
+import type { AllowanceMap } from "../common/allowance.types";
+
 /** 근무지 (Contract를 단순화한 UI용 타입) */
 export interface Workplace {
   id: number;
   name: string;
 }
-
-// ============ 수당 관련 타입 ============
-
-/** 개별 수당 정보 */
-export interface Allowance {
-  enabled: boolean;
-  rate: number;
-}
-
-/** 수당 종류 키 */
-export type AllowanceKey = 'overtime' | 'night' | 'holiday';
-
-/** 근무 기록의 수당 정보 */
-export type AllowanceMap = Record<AllowanceKey, Allowance>;
 
 // ============ 근무 기록 타입 ============
 

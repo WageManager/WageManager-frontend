@@ -4,7 +4,7 @@ import './WorkerMonthlyCalendarPage.css';
 import WorkEditRequestBox from '../../components/worker/MonthlyCalendarPage/WorkEditRequestBox';
 import AddWorkModal from '../../components/worker/MonthlyCalendarPage/AddWorkModal';
 import CalendarCard from '../../components/worker/MonthlyCalendarPage/CalendarCard';
-import MonthNav from '../../components/worker/MonthlyCalendarPage/MonthNav';
+import MonthNav from '../../components/common/MonthNav';
 import WorkListItem from '../../components/worker/MonthlyCalendarPage/WorkListItem';
 import MemoCard from '../../components/worker/MonthlyCalendarPage/MemoCard';
 import SummaryRow from '../../components/worker/MonthlyCalendarPage/SummaryRow';

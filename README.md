@@ -82,9 +82,15 @@ src/
 ├── components/   # 재사용 UI 컴포넌트 (common, layout, employer, worker)
 ├── pages/        # 라우트 페이지 (auth, employer, workers)
 ├── hooks/        # 커스텀 훅 (페이지별 비즈니스 로직 분리)
+│   ├── worker/   # 근로자 전용 훅
+│   └── employer/ # 고용주 전용 훅
 ├── types/        # TypeScript 타입 정의
-├── utils/        # 유틸리티 함수 (날짜, 포맷팅)
-├── constants/    # 상수 정의 (검증 메시지, 옵션 등)
+│   ├── common/   # 공통 타입 (수당 등)
+│   ├── worker/   # 근로자 관련 타입
+│   └── employer/ # 고용주 관련 타입
+├── utils/        # 유틸리티 함수 (날짜, 포맷팅, 급여 계산)
+│   └── employer/ # 고용주 전용 유틸리티
+├── constants/    # 상수 정의 (검증 메시지, 수당 설정 등)
 ├── layouts/      # 페이지 레이아웃 래퍼
 ├── styles/       # CSS 스타일 파일
 └── assets/       # 정적 리소스 (이미지 등)
@@ -100,7 +106,7 @@ src/
 | ------ | ------------ |
 | **API** | `axios.test.ts`, `employerApi.test.ts` |
 | **인증 페이지** | `LoginPage.test.tsx`, `SignupPage.test.tsx`, `KakaoRedirect.test.tsx` |
-| **고용주 페이지** | `EmployerMyPage.test.tsx` |
+| **고용주 페이지** | `EmployerMyPage.test.tsx`, `EmployerRemittanceManagePage.test.tsx` |
 | **근로자 페이지** | `WorkerMonthlyCalendarPage.test.tsx`, `WorkerRemittancePage.test.tsx`, `WorkerMyPage.test.tsx` |
 | **근로자 컴포넌트** | `ProfileBox.test.tsx`, `ProfileEdit.test.tsx`, `WorkplaceManage.test.tsx`, `WorkEditRequestList.test.tsx` |
 

@@ -1,5 +1,5 @@
 // 근무 관련 유틸리티 함수
-import { extraPayTypes } from "../../../constants/extraPay";
+import { extraPayTypes } from "../../constants/extraPay";
 
 // 수당 정보를 편집하기 쉬운 형태로 정규화
 export const normalizeAllowances = (allowances = {}) => {
