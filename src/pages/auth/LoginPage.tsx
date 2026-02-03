@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { devLogin } from '../../api/authApi';
-import KakaoLoginButton from './components/KakaoLoginButton';
-import DevLoginPanel from './components/DevLoginPanel';
+import KakaoLoginButton from '../../components/auth/KakaoLoginButton';
+import DevLoginPanel from '../../components/auth/DevLoginPanel';
 import type { UserType } from "../../types/auth";
 
 

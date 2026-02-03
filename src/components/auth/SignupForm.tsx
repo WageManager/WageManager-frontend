@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { FaTimes } from 'react-icons/fa';
-import { useSignupForm } from '../hooks/useSignupForm';
+import { useSignupForm } from '../../hooks/auth/useSignupForm';
 import UserTypeSelector from './UserTypeSelector';
-import '../SignupPage.css'; 
+import '../../pages/auth/SignupPage.css'; 
 
 interface SignupFormProps {
   kakaoAccessToken: string;

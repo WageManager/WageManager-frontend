@@ -1,4 +1,4 @@
-import type { UserType } from "../../../types/auth";
+import type { UserType } from "../../types/auth";
 
 interface DevLoginPanelProps {
   onDevLogin: (userId: number, userName: string, userType: UserType) => void;

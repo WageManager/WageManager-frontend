@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { kakaoRegister } from '../../../api/authApi';
-import type { UserType } from '../../../types/auth';
-import { AUTH_CONSTANTS } from '../../../constants/auth';
-import { wageManagerApi } from '../../../api/axios';
+import { kakaoRegister } from '../../api/authApi';
+import type { UserType } from '../../types/auth';
+import { AUTH_CONSTANTS } from '../../constants/auth';
+import { wageManagerApi } from '../../api/axios';
 
 interface UseSignupFormProps {
   kakaoAccessToken?: string;

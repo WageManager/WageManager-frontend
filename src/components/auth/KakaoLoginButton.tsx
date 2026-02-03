@@ -1,5 +1,5 @@
-import kakaoLoginIcon from "../../../assets/kakao_login_medium_wide.png";
-import { AUTH_CONSTANTS } from "../../../constants/auth";
+import kakaoLoginIcon from "../../assets/kakao_login_medium_wide.png";
+import { AUTH_CONSTANTS } from "../../constants/auth";
 
 const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
 const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
