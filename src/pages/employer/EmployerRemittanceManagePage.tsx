@@ -65,7 +65,7 @@ export default function EmployerRemittanceManagePage() {
 
   return (
     <div className="remittance-manage-page">
-      {isLoading && <LoadingDots />}
+      {isLoading && <LoadingDots fullScreen />}
       {/* 왼쪽 패널: 근무지/근로자 선택 */}
       <div className="remittance-left-panel">
         <WorkplaceSelect

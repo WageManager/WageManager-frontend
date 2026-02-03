@@ -75,13 +75,7 @@ export default function EmployerMyPage(): JSX.Element {
   };
 
   if (loading) {
-    return (
-      <div className="mypage-main">
-        <div className="mypage-content">
-          <LoadingDots />
-        </div>
-      </div>
-    );
+    return <LoadingDots fullScreen />;
   }
 
   if (!user) {

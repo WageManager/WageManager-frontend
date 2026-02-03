@@ -783,7 +783,7 @@ export default function DailyCalendarPage() {
 
   return (
     <div className="daily-page">
-      {isLoading && <LoadingDots />}
+      {isLoading && <LoadingDots fullScreen />}
       <div className="daily-schedule-section">
         <div className="daily-schedule-header">
           <div className="daily-header-left">

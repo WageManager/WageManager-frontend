@@ -697,7 +697,7 @@ export default function EmployerWorkerManagePage() {
 
   return (
     <div className="worker-manage-page">
-      {isLoading && <LoadingDots />}
+      {isLoading && <LoadingDots fullScreen />}
       {/* 왼쪽 사이드바 */}
       {!isManagingWorkplaces && (
         <div className="worker-manage-left-panel">
