@@ -40,11 +40,9 @@ export function useFetchWorkersInWorkplace(
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", fetchWorkers);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", fetchWorkers);
     };
   }, [selectedWorkplaceId]);
 
