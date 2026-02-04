@@ -75,8 +75,13 @@ const transformWorkRecordsToScheduleData = (workRecords: WorkRecord[]): Schedule
 
 /**
  * 스케줄 데이터 조회 훅
- * - 근무 기록 API 조회
+ * - 근무 기록 API 조회 (선택된 날짜 ± 1일, 총 3일)
  * - 데이터 변환
+ *
+ * 3일만 조회하는 이유:
+ * - 당일: 타임라인에 표시
+ * - 전날: 익일 근무(crossesMidnight)의 원본 정보 조회
+ * - 다음날: 당일 익일 근무의 종료 시간 표시
  */
 export function useFetchScheduleData(
   selectedWorkplaceId: number | null,
@@ -85,46 +90,58 @@ export function useFetchScheduleData(
   const [scheduleData, setScheduleData] = useState<ScheduleData>({});
   const [isScheduleLoading, setIsScheduleLoading] = useState<boolean>(true);
 
-  // 근무 기록 조회 (선택된 날짜의 월 전체)
+  // 근무 기록 조회 (선택된 날짜 ± 1일)
   useEffect(() => {
     if (!selectedWorkplaceId || !selectedDate) {
       setIsScheduleLoading(false);
       return;
     }
 
+    const abortController = new AbortController();
+
     const fetchWorkRecords = async () => {
       setIsScheduleLoading(true);
       try {
-        const startDate = new Date(
-          selectedDate.getFullYear(),
-          selectedDate.getMonth(),
-          1
-        );
-        const endDate = new Date(
-          selectedDate.getFullYear(),
-          selectedDate.getMonth() + 1,
-          0
-        );
+        // 전날
+        const startDate = new Date(selectedDate);
+        startDate.setDate(startDate.getDate() - 1);
+
+        // 다음날
+        const endDate = new Date(selectedDate);
+        endDate.setDate(endDate.getDate() + 1);
 
         const response = await getWorkRecords(
           selectedWorkplaceId,
           startDate,
           endDate
         );
+
+        // abort된 경우 상태 업데이트 하지 않음
+        if (abortController.signal.aborted) return;
+
         const recordsData = response.data || [];
 
         // API 응답을 기존 데이터 구조로 변환
         const transformedData = transformWorkRecordsToScheduleData(recordsData);
         setScheduleData(transformedData);
       } catch {
-        // 에러 시 빈 객체 사용
-        setScheduleData({});
+        // abort된 경우 또는 에러 시 빈 객체 사용
+        if (!abortController.signal.aborted) {
+          setScheduleData({});
+        }
       } finally {
-        setIsScheduleLoading(false);
+        if (!abortController.signal.aborted) {
+          setIsScheduleLoading(false);
+        }
       }
     };
 
     fetchWorkRecords();
+
+    // cleanup: 이전 요청 취소
+    return () => {
+      abortController.abort();
+    };
   }, [selectedWorkplaceId, selectedDate]);
 
   return {
