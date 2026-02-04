@@ -696,7 +696,7 @@ export default function EmployerWorkerManagePage() {
   const isLoading = isWorkersLoading || isContractLoading;
 
   if (isLoading) {
-    return <LoadingDots fullScreen />;
+    return <LoadingDots fillParent />;
   }
 
   return (

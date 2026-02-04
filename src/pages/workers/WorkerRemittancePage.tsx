@@ -76,11 +76,7 @@ export default function WorkerRemittancePage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="remittance-page">
-        <LoadingDots />
-      </div>
-    );
+    return <LoadingDots fillParent />;
   }
 
   return (

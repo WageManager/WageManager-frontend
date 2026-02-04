@@ -87,7 +87,7 @@ const EmployerDailyCalendarPage: FC = () => {
   };
 
   if (isLoading) {
-    return <LoadingDots fullScreen />;
+    return <LoadingDots fillParent />;
   }
 
   return (
