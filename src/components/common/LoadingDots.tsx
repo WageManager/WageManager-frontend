@@ -13,8 +13,6 @@ interface LoadingDotsProps {
   size?: 'small' | 'medium' | 'large';
   /** 컨테이너 내 수직/수평 중앙 정렬 (기본: true) */
   centered?: boolean;
-  /** 전체 화면 오버레이 */
-  fullScreen?: boolean;
   /** 부모 요소를 채우는 오버레이 (Layout의 main 영역 내부에서 사용) */
   fillParent?: boolean;
   /** 추가 CSS 클래스 */
@@ -30,9 +28,6 @@ interface LoadingDotsProps {
  * // 인라인 사용 (중앙 정렬 없음)
  * <LoadingDots centered={false} size="small" />
  *
- * // 전체 화면 오버레이
- * <LoadingDots fullScreen />
- *
  * // 부모 영역 채우기 (Layout 내부에서 사용, Header/Nav 클릭 가능)
  * <LoadingDots fillParent />
  */
@@ -40,17 +35,15 @@ export default function LoadingDots({
   color = 'main',
   size = 'medium',
   centered = true,
-  fullScreen = false,
   fillParent = false,
   className = '',
 }: LoadingDotsProps) {
   const sizeClass = `loading-dots--${size}`;
   const centeredClass = centered ? 'loading-dots--centered' : '';
-  const fullScreenClass = fullScreen ? 'loading-dots--fullscreen' : '';
   const fillParentClass = fillParent ? 'loading-dots--fill-parent' : '';
 
   return (
-    <div className={`loading-dots ${sizeClass} ${centeredClass} ${fullScreenClass} ${fillParentClass} ${className}`}>
+    <div className={`loading-dots ${sizeClass} ${centeredClass} ${fillParentClass} ${className}`}>
       <span className={`loading-dot loading-dot--${color}`} />
       <span className={`loading-dot loading-dot--${color}`} />
       <span className={`loading-dot loading-dot--${color}`} />

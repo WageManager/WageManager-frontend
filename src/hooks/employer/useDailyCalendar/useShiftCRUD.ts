@@ -138,7 +138,7 @@ export function useShiftCRUD({
 
         const workRecordData = {
           contractId: contractId,
-          workDate: selectedDate.toISOString().split("T")[0] as string,
+          workDate: getDateKey(selectedDate),
           startTime: "09:00",
           endTime: "18:00",
           breakMinutes: 60,

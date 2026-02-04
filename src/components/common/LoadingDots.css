@@ -20,18 +20,6 @@
   min-height: 300px;
 }
 
-/* 전체 화면 오버레이 */
-.loading-dots--fullscreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  min-height: 100vh;
-  background-color: rgba(255, 255, 255, 0.8);
-  z-index: 9999;
-}
-
 /* 부모 요소 채우기 (Layout의 main 영역 내부에서 사용) */
 .loading-dots--fill-parent {
   position: absolute;
