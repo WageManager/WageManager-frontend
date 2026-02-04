@@ -64,7 +64,7 @@ export default function EmployerRemittanceManagePage() {
   };
 
   if (isLoading) {
-    return <LoadingDots fullScreen />;
+    return <LoadingDots fillParent />;
   }
 
   return (

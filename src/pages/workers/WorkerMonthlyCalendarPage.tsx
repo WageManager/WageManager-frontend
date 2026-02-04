@@ -476,11 +476,7 @@ export default function WorkerMonthlyCalendarPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="monthly-calendar-page">
-        <LoadingDots />
-      </div>
-    );
+    return <LoadingDots fillParent />;
   }
 
   return (

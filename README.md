@@ -83,7 +83,7 @@ src/
 ├── pages/        # 라우트 페이지 (auth, employer, workers)
 ├── hooks/        # 커스텀 훅 (페이지별 비즈니스 로직 분리)
 │   ├── worker/   # 근로자 전용 훅
-│   └── employer/ # 고용주 전용 훅
+│   └── employer/ # 고용주 전용 훅 (useDailyCalendar 등 Hook Composition 패턴)
 ├── types/        # TypeScript 타입 정의
 │   ├── common/   # 공통 타입 (수당 등)
 │   ├── worker/   # 근로자 관련 타입

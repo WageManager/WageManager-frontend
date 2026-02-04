@@ -1,8 +1,10 @@
 // employer 전용 포맷 유틸리티 함수
 // ※ formatKRW, formatBreakTime, timeStringToDecimal → src/utils/formatUtils.ts로 이동
 
-// 근무 시간 포맷 (소수점 시간을 "X시간 Y분" 형식으로)
-export const formatDuration = (hours) => {
+/**
+ * 근무 시간 포맷 (소수점 시간을 "X시간 Y분" 형식으로)
+ */
+export const formatDuration = (hours: number | undefined | null): string => {
   if (typeof hours !== "number") return "-";
   const wholeHours = Math.floor(hours);
   const minutes = Math.round((hours - wholeHours) * 60);

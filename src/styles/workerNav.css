@@ -89,6 +89,7 @@ body {
   flex-direction: column;
   align-items: center; /* 가운데 정렬 */
   box-sizing: border-box;
+  position: relative; /* LoadingDots fillParent 모드의 기준점 */
 }
 
 /* 하얀 카드 프레임 (페이지 내용 감싸기용) */

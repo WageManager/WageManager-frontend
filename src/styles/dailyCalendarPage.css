@@ -554,6 +554,11 @@
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s ease;
+  /* 버튼 기본 스타일 초기화 */
+  border: none;
+  background: transparent;
+  font-size: inherit;
+  color: inherit;
 }
 
 .calendar-day.current {

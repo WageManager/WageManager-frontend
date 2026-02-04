@@ -112,7 +112,7 @@ describe('EmployerMyPage', () => {
         </MemoryRouter>
       );
 
-      expect(screen.getByText('로딩 중...')).toBeInTheDocument();
+      expect(document.querySelector('.loading-dots')).toBeInTheDocument();
     });
 
     it('사용자 정보 로드 성공 시 프로필을 표시한다', async () => {

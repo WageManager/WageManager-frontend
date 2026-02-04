@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import WeeklyCalendar from "../../components/worker/WeeklyCalendar/WeeklyCalendar";
 import { getContracts, getContractDetail, getWorkRecords, createCorrectionRequest} from "../../api/workerApi";
 import { toast } from "react-toastify";
@@ -290,20 +290,36 @@ export default function WorkerWeeklyCalendarPage() {
     }
   };
 
+  // 이전 주로 이동
+  const handlePrevWeek = useCallback((): void => {
+    setCurrentWeekStart((prev) => {
+      const newDate = new Date(prev);
+      newDate.setDate(prev.getDate() - 7);
+      return newDate;
+    });
+  }, []);
+
+  // 다음 주로 이동
+  const handleNextWeek = useCallback((): void => {
+    setCurrentWeekStart((prev) => {
+      const newDate = new Date(prev);
+      newDate.setDate(prev.getDate() + 7);
+      return newDate;
+    });
+  }, []);
+
   if (isLoading) {
-    return (
-      <div className="worker-content-frame weekly-calendar-wrapper">
-        <LoadingDots />
-      </div>
-    );
+    return <LoadingDots fillParent />;
   }
 
   return (
     <div className="worker-content-frame weekly-calendar-wrapper">
       <WeeklyCalendar
         workRecords={workRecords}
+        currentWeekStart={currentWeekStart}
         onConfirmEdit={handleConfirmEdit}
-        onWeekChange={setCurrentWeekStart}
+        onPrevWeek={handlePrevWeek}
+        onNextWeek={handleNextWeek}
       />
     </div>
   );

@@ -545,7 +545,8 @@ describe('초기 데이터 로딩', () => {
     renderPage();
 
     // 로딩 상태가 비동기적으로 나타남 (근무지 설정 후 근무 기록 조회 시)
-    const loadingEl = await screen.findByText('로딩 중...', {}, { timeout: 3000 });
-    expect(loadingEl).toBeInTheDocument();
+    await waitFor(() => {
+      expect(document.querySelector('.loading-dots')).toBeInTheDocument();
+    }, { timeout: 3000 });
   });
 });

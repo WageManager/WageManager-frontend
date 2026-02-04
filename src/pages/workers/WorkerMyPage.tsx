@@ -32,13 +32,7 @@ export default function WorkerMyPage() {
 
   // 초기 로딩 상태
   if (isLoadingUser) {
-    return (
-      <div className="worker-mypage-main">
-        <div className="worker-mypage-content">
-          <LoadingDots />
-        </div>
-      </div>
-    );
+    return <LoadingDots fillParent />;
   }
 
   // 사용자 정보가 없는 경우

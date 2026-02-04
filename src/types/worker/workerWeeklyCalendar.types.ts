@@ -27,8 +27,10 @@ export type { EditForm } from './workerMonthlyCalendar.types';
 
 export interface WeeklyCalendarProps {
   workRecords: WorkRecordsByDate;
+  currentWeekStart: Date;
   onConfirmEdit?: (form: EditForm) => Promise<void>;
-  onWeekChange?: (weekStart: Date) => void;
+  onPrevWeek: () => void;
+  onNextWeek: () => void;
 }
 
 export interface WeeklySummary {
