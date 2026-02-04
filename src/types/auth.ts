@@ -3,6 +3,13 @@
 // 유저 타입 (고용주/근로자)
 export type UserType = 'EMPLOYER' | 'WORKER';
 
+// 인증 상태 (Protected Route용)
+export interface AuthState {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  userType: UserType | null;
+}
+
 // API 응답 공통 인터페이스
 export interface ApiResponse<T> {
   success: boolean;
