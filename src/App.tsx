@@ -26,13 +26,16 @@ import NotificationLayout from "./layouts/NotificationLayout";
 import WorkerLayout from "./layouts/WorkerLayout";
 import EmployerLayout from "./layouts/EmployerLayout";
 
+// Auth Components
+import PublicRoute from "./components/auth/PublicRoute";
+
 const App: FC = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
+        <Route path="/" element={<PublicRoute><LoginPage /></PublicRoute>} />
         <Route path="/auth" element={<KakaoRedirect />} />
-        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
         <Route path="/notifications" element={<NotificationLayout><NotificationPage /></NotificationLayout>} />
         <Route path="/worker" element={<WorkerLayout />}>
           <Route
