@@ -37,7 +37,7 @@ const Header: FC = () => {
 
   // 컴포넌트 마운트 시 사용자 정보 호출
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token) {
       getUserProfile()
         .then((response) => {
@@ -78,7 +78,7 @@ const Header: FC = () => {
   const handleLogout = async (): Promise<void> => {
     try {
       await logout();
-      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
       setUserInfo(null);
       toast.success("로그아웃이 완료되었습니다.");
       navigate("/");
@@ -94,7 +94,7 @@ const Header: FC = () => {
             "로그아웃 처리 중 오류가 발생했습니다."
         );
       }
-      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
       setUserInfo(null);
       navigate("/");
     }

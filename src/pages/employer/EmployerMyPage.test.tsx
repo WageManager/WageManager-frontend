@@ -21,8 +21,8 @@ import Swal from 'sweetalert2';
 9. 회원 탈퇴 - 확인 모달 → 탈퇴 처리
 */
 
-// localStorage 모킹
-const localStorageMock = (() => {
+// sessionStorage 모킹
+const sessionStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: vi.fn((key: string) => (key in store ? store[key] : null)),
@@ -84,18 +84,18 @@ const mockUser = {
 
 describe('EmployerMyPage', () => {
   beforeEach(() => {
-    Object.defineProperty(window, 'localStorage', {
-      value: localStorageMock,
+    Object.defineProperty(window, 'sessionStorage', {
+      value: sessionStorageMock,
       writable: true,
       configurable: true,
     });
     vi.clearAllMocks();
-    localStorageMock.clear();
+    sessionStorageMock.clear();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-    localStorageMock.clear();
+    sessionStorageMock.clear();
   });
 
   // ============ 렌더링 테스트 ============
@@ -407,7 +407,7 @@ describe('EmployerMyPage', () => {
       await waitFor(() => {
         expect(deleteMyAccount).toHaveBeenCalled();
         expect(logout).toHaveBeenCalled();
-        expect(localStorageMock.removeItem).toHaveBeenCalledWith('token');
+        expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('token');
         expect(mockNavigate).toHaveBeenCalledWith('/');
       });
     });

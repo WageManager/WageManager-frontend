@@ -17,7 +17,7 @@ export const wageManagerApi = axios.create({
 
 // 요청 인터셉터 (accessToken이 있으면 추가)
 wageManagerApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -26,15 +26,15 @@ wageManagerApi.interceptors.request.use((config) => {
 
 // accessToken 저장
 const saveNewAccessToken = (newAccessToken: string) => {
-  localStorage.setItem('token', newAccessToken);
+  sessionStorage.setItem('token', newAccessToken);
 };
 
 // 로그아웃 처리
 const handleAuthFailure = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('userId');
-  localStorage.removeItem('name');
-  localStorage.removeItem('userType');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('userId');
+  sessionStorage.removeItem('name');
+  sessionStorage.removeItem('userType');
   window.location.href = '/';
 };
 
