@@ -3,7 +3,7 @@
  * 단일 근무 기록을 표시하고 정정 요청 버튼 제공
  */
 import type { ReactNode } from 'react';
-import type { WorkRecord } from '../../../types/worker/monthlyCalendar.types';
+import type { WorkRecord } from '../../../types/worker/workerMonthlyCalendar.types';
 
 // ============ 로컬 상수 ============
 

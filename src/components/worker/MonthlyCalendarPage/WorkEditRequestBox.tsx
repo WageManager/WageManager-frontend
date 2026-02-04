@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import './WorkEditRequestBox.css';
 import { createUpdateField } from '../../../pages/workers/utils/updateField';
 import { HOUR_OPTIONS, MINUTE_OPTIONS, BREAK_OPTIONS } from '../../../constants/calendar';
-import type { EditForm } from '../../../types/worker/monthlyCalendar.types';
+import type { EditForm } from '../../../types/worker/workerMonthlyCalendar.types';
 
 // ============ 로컬 타입 ============
 

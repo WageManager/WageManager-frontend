@@ -2,7 +2,7 @@ import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import { formatKRW, formatBreakTime } from "../../../utils/formatUtils";
 import { extraPayTypes } from "../../../constants/extraPay";
 import "../../../pages/workers/WorkerRemittancePage.css";
-import type { RemittanceWorkRecord, AllowanceKey, SortOrder } from "../../../types/worker/remittancePage.types";
+import type { RemittanceWorkRecord, AllowanceKey, SortOrder } from "../../../types/worker/workerRemittancePage.types";
 
 interface WorkDetailListProps {
   workRecords: RemittanceWorkRecord[];

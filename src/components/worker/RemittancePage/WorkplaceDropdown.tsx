@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
-import type { Workplace } from "../../../types/worker/remittancePage.types";
+import type { Workplace } from "../../../types/worker/workerRemittancePage.types";
 import "../../../pages/workers/WorkerRemittancePage.css";
 
 interface WorkplaceDropdownProps {

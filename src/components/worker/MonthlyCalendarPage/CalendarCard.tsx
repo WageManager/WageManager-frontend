@@ -2,7 +2,7 @@ import type {
   WorkRecord,
   WorkRecordsByDate,
   ContractColorMap,
-} from '../../../types/worker/monthlyCalendar.types';
+} from '../../../types/worker/workerMonthlyCalendar.types';
 import { COLOR_CLASSES, DEFAULT_COLOR_INDEX } from '../../../constants/calendar';
 import { makeDateKey } from '../../../utils/dateUtils';
 

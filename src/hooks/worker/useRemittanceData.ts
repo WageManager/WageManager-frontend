@@ -7,7 +7,7 @@ import type {
   Workplace,
   RemittanceWorkRecord,
   RemittanceInfo,
-} from "../../types/worker/remittancePage.types";
+} from "../../types/worker/workerRemittancePage.types";
 
 /**
  * 송금 페이지 데이터 관리 훅
