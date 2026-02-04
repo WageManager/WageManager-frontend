@@ -25,7 +25,7 @@ export interface Shift {
   workRecordId?: number; // 백엔드 ID
   workplaceDetail?: string;
   crossesMidnight?: boolean; // 익일 근무 여부
-  nextDayEndHour?: number; // 익일 종료 시간
+  nextDayEndHour?: number | undefined; // 익일 종료 시간
 }
 
 /** 레인 인덱스 포함 근무 (렌더링용) */

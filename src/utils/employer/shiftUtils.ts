@@ -9,11 +9,10 @@ import type { AllowanceMap, AllowanceKey } from "../../types/common/allowance.ty
  */
 export const normalizeAllowances = (allowances: Partial<AllowanceMap> = {}): AllowanceMap => {
   return extraPayTypes.reduce((acc, { key }) => {
-    const base = allowances[key as AllowanceKey] || {};
-    acc[key as AllowanceKey] = {
-      enabled: base.enabled ?? false,
-      rate: typeof base.rate === "number" && base.rate > 0 ? base.rate : 150,
-    };
+    const base = allowances[key as AllowanceKey];
+    const enabled = base?.enabled ?? false;
+    const rate = typeof base?.rate === "number" && base.rate > 0 ? base.rate : 150;
+    acc[key as AllowanceKey] = { enabled, rate };
     return acc;
   }, {} as AllowanceMap);
 };
