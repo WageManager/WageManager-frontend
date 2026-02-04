@@ -37,6 +37,8 @@ interface UseShiftCRUDParams {
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
   setShowWorkerListModal: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedDate: (date: Date) => void;
+  /** 백그라운드 재조회 함수 */
+  refetchScheduleData: () => Promise<void>;
 }
 
 /**
@@ -64,6 +66,7 @@ export function useShiftCRUD({
   setIsEditing,
   setShowWorkerListModal,
   setSelectedDate,
+  refetchScheduleData,
 }: UseShiftCRUDParams): UseShiftCRUDReturn {
   // 근무자 추가 핸들러 - 모달 열기
   const handleAddShift = useCallback(() => {
@@ -166,7 +169,11 @@ export function useShiftCRUD({
         // activeShiftId도 업데이트
         setActiveShiftId(`shift-${createdRecord.id}`);
       } catch {
-        // 실패 시 임시 데이터 유지 (사용자는 계속 편집 가능)
+        // 실패 시에도 알림 표시
+        Swal.fire("추가 실패", "근무 기록 추가 중 오류가 발생했습니다.", "error");
+      } finally {
+        // 백그라운드 재조회로 서버 상태와 동기화
+        await refetchScheduleData();
       }
     },
     [
@@ -178,6 +185,7 @@ export function useShiftCRUD({
       setEditedShift,
       setIsEditing,
       setShowWorkerListModal,
+      refetchScheduleData,
     ]
   );
 
@@ -326,8 +334,12 @@ export function useShiftCRUD({
         };
 
         await updateWorkRecord(shiftToUpdate.workRecordId, updateData);
+        Swal.fire("저장 완료", "근무 정보가 저장되었습니다.", "success");
       } catch {
-        // 실패 시에도 UI는 이미 업데이트된 상태 유지 (낙관적 업데이트)
+        Swal.fire("저장 실패", "근무 정보 저장 중 오류가 발생했습니다.", "error");
+      } finally {
+        // 백그라운드 재조회로 서버 상태와 동기화
+        await refetchScheduleData();
       }
     }
   }, [
@@ -342,6 +354,7 @@ export function useShiftCRUD({
     setIsEditing,
     setSelectedDate,
     setActiveShiftId,
+    refetchScheduleData,
   ]);
 
   // 근무자 삭제 핸들러
@@ -428,7 +441,9 @@ export function useShiftCRUD({
               "근무 기록 삭제 중 오류가 발생했습니다.",
               "error"
             );
-            // 실패 시에도 UI는 이미 업데이트된 상태 유지 (낙관적 업데이트)
+          } finally {
+            // 백그라운드 재조회로 서버 상태와 동기화
+            await refetchScheduleData();
           }
         } else {
           // workRecordId가 없는 경우 (임시 데이터)
@@ -437,6 +452,8 @@ export function useShiftCRUD({
             `${activeShift.name} 근무자가 삭제되었습니다.`,
             "success"
           );
+          // 임시 데이터도 재조회로 정리
+          await refetchScheduleData();
         }
       }
     });
@@ -449,6 +466,7 @@ export function useShiftCRUD({
     setActiveShiftId,
     setIsEditing,
     setEditedShift,
+    refetchScheduleData,
   ]);
 
   return {

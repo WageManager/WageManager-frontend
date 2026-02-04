@@ -90,17 +90,17 @@ export function useFetchScheduleData(
   const [scheduleData, setScheduleData] = useState<ScheduleData>({});
   const [isScheduleLoading, setIsScheduleLoading] = useState<boolean>(true);
 
-  // 근무 기록 조회 (선택된 날짜 ± 1일)
-  useEffect(() => {
-    if (!selectedWorkplaceId || !selectedDate) {
-      setIsScheduleLoading(false);
-      return;
-    }
+  // 공통 데이터 조회 로직 (showLoading: 로딩 상태 표시 여부)
+  const fetchData = useCallback(
+    async (showLoading: boolean) => {
+      if (!selectedWorkplaceId || !selectedDate) {
+        return;
+      }
 
-    const abortController = new AbortController();
+      if (showLoading) {
+        setIsScheduleLoading(true);
+      }
 
-    const fetchWorkRecords = async () => {
-      setIsScheduleLoading(true);
       try {
         // 전날
         const startDate = new Date(selectedDate);
@@ -116,37 +116,50 @@ export function useFetchScheduleData(
           endDate
         );
 
-        // abort된 경우 상태 업데이트 하지 않음
-        if (abortController.signal.aborted) return;
-
         const recordsData = response.data || [];
 
         // API 응답을 기존 데이터 구조로 변환
         const transformedData = transformWorkRecordsToScheduleData(recordsData);
         setScheduleData(transformedData);
       } catch {
-        // abort된 경우 또는 에러 시 빈 객체 사용
-        if (!abortController.signal.aborted) {
+        // 에러 시 빈 객체 사용 (백그라운드 재조회 시에는 기존 데이터 유지)
+        if (showLoading) {
           setScheduleData({});
         }
       } finally {
-        if (!abortController.signal.aborted) {
+        if (showLoading) {
           setIsScheduleLoading(false);
         }
       }
+    },
+    [selectedWorkplaceId, selectedDate]
+  );
+
+  // 초기 로딩 및 의존성 변경 시 조회
+  useEffect(() => {
+    const abortController = new AbortController();
+
+    const initialFetch = async () => {
+      if (abortController.signal.aborted) return;
+      await fetchData(true);
     };
 
-    fetchWorkRecords();
+    initialFetch();
 
-    // cleanup: 이전 요청 취소
     return () => {
       abortController.abort();
     };
-  }, [selectedWorkplaceId, selectedDate]);
+  }, [fetchData]);
+
+  // 백그라운드 재조회 (로딩 상태 변경 없음)
+  const refetchScheduleData = useCallback(async () => {
+    await fetchData(false);
+  }, [fetchData]);
 
   return {
     scheduleData,
     setScheduleData,
     isScheduleLoading,
+    refetchScheduleData,
   };
 }

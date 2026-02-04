@@ -52,7 +52,7 @@ export function useDailyCalendarData(): UseDailyCalendarDataReturn {
   } = useDateNavigation();
 
   // ── 스케줄 데이터 ─────────────────────────────────
-  const { scheduleData, setScheduleData, isScheduleLoading } =
+  const { scheduleData, setScheduleData, isScheduleLoading, refetchScheduleData } =
     useFetchScheduleData(selectedWorkplaceId, selectedDate);
 
   // 근무지별 스케줄 데이터
@@ -149,6 +149,7 @@ export function useDailyCalendarData(): UseDailyCalendarDataReturn {
     setIsEditing,
     setShowWorkerListModal,
     setSelectedDate: baseDateSelectHandler,
+    refetchScheduleData,
   });
 
   // ── 포맷된 날짜 ───────────────────────────────────

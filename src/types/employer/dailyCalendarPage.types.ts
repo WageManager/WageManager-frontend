@@ -72,6 +72,8 @@ export interface UseFetchScheduleDataReturn {
   scheduleData: ScheduleData;
   setScheduleData: React.Dispatch<React.SetStateAction<ScheduleData>>;
   isScheduleLoading: boolean;
+  /** 백그라운드 재조회 (로딩 상태 변경 없음) */
+  refetchScheduleData: () => Promise<void>;
 }
 
 /** useFetchWorkersInWorkplace 훅 반환 타입 */
