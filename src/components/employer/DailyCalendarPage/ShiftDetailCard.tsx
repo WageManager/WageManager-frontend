@@ -48,14 +48,14 @@ const ShiftDetailCard: FC<ShiftDetailCardProps> = ({
       nextDate.setDate(nextDate.getDate() + 1);
       const nextDateKey = getDateKey(nextDate);
       const nextScheduleData = workplaceSchedules[nextDateKey] || [];
-      // workRecordId 또는 name으로 매칭 (동명이인 방지)
-      const matchKey = shiftForDisplay?.workRecordId ?? shiftForDisplay?.id;
-      const nextDayShift = nextScheduleData.find(
-        (shift) =>
-          ((shift.workRecordId ?? shift.id) === matchKey ||
-            shift.name === shiftForDisplay?.name) &&
-          shift.start === "00:00"
-      );
+      // workRecordId로 엄격한 매칭 (동명이인 오매칭 방지)
+      const nextDayShift = shiftForDisplay.workRecordId
+        ? nextScheduleData.find(
+            (shift) =>
+              shift.workRecordId === shiftForDisplay.workRecordId &&
+              shift.start === "00:00"
+          )
+        : null;
       if (nextDayShift) {
         return `${shiftForDisplay?.start}~${nextDayShift.end}(익일)`;
       }
@@ -82,14 +82,14 @@ const ShiftDetailCard: FC<ShiftDetailCardProps> = ({
       nextDate.setDate(nextDate.getDate() + 1);
       const nextDateKey = getDateKey(nextDate);
       const nextScheduleData = workplaceSchedules[nextDateKey] || [];
-      // workRecordId 또는 name으로 매칭 (동명이인 방지)
-      const matchKey = shiftForDisplay?.workRecordId ?? shiftForDisplay?.id;
-      const nextDayShift = nextScheduleData.find(
-        (shift) =>
-          ((shift.workRecordId ?? shift.id) === matchKey ||
-            shift.name === shiftForDisplay?.name) &&
-          shift.start === "00:00"
-      );
+      // workRecordId로 엄격한 매칭 (동명이인 오매칭 방지)
+      const nextDayShift = shiftForDisplay.workRecordId
+        ? nextScheduleData.find(
+            (shift) =>
+              shift.workRecordId === shiftForDisplay.workRecordId &&
+              shift.start === "00:00"
+          )
+        : null;
       if (nextDayShift) {
         const totalHours =
           (shiftForDisplay?.durationHours || 0) + nextDayShift.durationHours;

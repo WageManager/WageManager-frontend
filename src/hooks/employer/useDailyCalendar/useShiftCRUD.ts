@@ -240,9 +240,14 @@ export function useShiftCRUD({
         const nextList = workplace[nextKey] ? [...workplace[nextKey]] : [];
 
         // 익일 근무가 이미 존재하는 경우 (익일 근무를 클릭한 경우)
-        const existingNextDayShift = nextList.find(
-          (shift) => shift.name === shiftToSave.name && shift.start === "00:00"
-        );
+        // workRecordId로 엄격한 매칭 (동명이인 오매칭 방지)
+        const existingNextDayShift = shiftToSave.workRecordId
+          ? nextList.find(
+              (shift) =>
+                shift.workRecordId === shiftToSave.workRecordId &&
+                shift.start === "00:00"
+            )
+          : null;
 
         if (secondPartDuration > 0) {
           if (existingNextDayShift) {
