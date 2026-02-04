@@ -290,9 +290,16 @@ export default function WorkerWeeklyCalendarPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="worker-content-frame weekly-calendar-wrapper">
+        <LoadingDots />
+      </div>
+    );
+  }
+
   return (
     <div className="worker-content-frame weekly-calendar-wrapper">
-      {isLoading && <LoadingDots />}
       <WeeklyCalendar
         workRecords={workRecords}
         onConfirmEdit={handleConfirmEdit}

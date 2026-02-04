@@ -695,9 +695,12 @@ export default function EmployerWorkerManagePage() {
 
   const isLoading = isWorkersLoading || isContractLoading;
 
+  if (isLoading) {
+    return <LoadingDots fullScreen />;
+  }
+
   return (
     <div className="worker-manage-page">
-      {isLoading && <LoadingDots fullScreen />}
       {/* 왼쪽 사이드바 */}
       {!isManagingWorkplaces && (
         <div className="worker-manage-left-panel">

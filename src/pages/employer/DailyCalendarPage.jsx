@@ -781,9 +781,12 @@ export default function DailyCalendarPage() {
 
   const isLoading = isWorkplacesLoading || isScheduleLoading;
 
+  if (isLoading) {
+    return <LoadingDots fullScreen />;
+  }
+
   return (
     <div className="daily-page">
-      {isLoading && <LoadingDots fullScreen />}
       <div className="daily-schedule-section">
         <div className="daily-schedule-header">
           <div className="daily-header-left">
