@@ -400,11 +400,14 @@ export function useShiftCRUD({
             const nextKey = getDateKey(nextDate);
             const nextList = workplace[nextKey] || [];
 
-            // 익일 근무 찾아서 삭제
-            const nextDayShift = nextList.find(
-              (shift) =>
-                shift.name === activeShift.name && shift.start === "00:00"
-            );
+            // workRecordId로 엄격한 매칭 (동명이인 오매칭 방지)
+            const nextDayShift = activeShift.workRecordId
+              ? nextList.find(
+                  (shift) =>
+                    shift.workRecordId === activeShift.workRecordId &&
+                    shift.start === "00:00"
+                )
+              : null;
 
             if (nextDayShift) {
               const updatedNextList = nextList.filter(
