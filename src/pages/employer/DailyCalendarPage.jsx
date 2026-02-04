@@ -19,6 +19,7 @@ import { formatDuration } from "../../utils/employer/formatUtils";
 import { hours } from "../../constants/employerCalendar";
 import EmployerTimeInput from "../../components/employer/DailyCalendarPage/EmployerTimeInput";
 import Swal from "sweetalert2";
+import LoadingDots from "../../components/common/LoadingDots";
 
 export default function DailyCalendarPage() {
   const today = new Date();
@@ -31,10 +32,12 @@ export default function DailyCalendarPage() {
   // 근무지 리스트 (백엔드에서 받아옴)
   const [workplaces, setWorkplaces] = useState([]);
   const [selectedWorkplaceId, setSelectedWorkplaceId] = useState(null);
+  const [isWorkplacesLoading, setIsWorkplacesLoading] = useState(true);
 
   // 근무지 목록 조회
   useEffect(() => {
     const fetchWorkplaces = async () => {
+      setIsWorkplacesLoading(true);
       try {
         const response = await getWorkplaces();
         const workplacesData = response.data || [];
@@ -45,6 +48,8 @@ export default function DailyCalendarPage() {
       } catch (error) {
         // 에러 시 빈 배열 사용
         setWorkplaces([]);
+      } finally {
+        setIsWorkplacesLoading(false);
       }
     };
     fetchWorkplaces();
@@ -60,12 +65,17 @@ export default function DailyCalendarPage() {
   const [editedShift, setEditedShift] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showWorkerListModal, setShowWorkerListModal] = useState(false);
+  const [isScheduleLoading, setIsScheduleLoading] = useState(true);
 
   // 근무 기록 조회 (선택된 날짜의 월 전체)
   useEffect(() => {
-    if (!selectedWorkplaceId || !selectedDate) return;
+    if (!selectedWorkplaceId || !selectedDate) {
+      setIsScheduleLoading(false);
+      return;
+    }
 
     const fetchWorkRecords = async () => {
+      setIsScheduleLoading(true);
       try {
         const startDate = new Date(
           selectedDate.getFullYear(),
@@ -91,6 +101,8 @@ export default function DailyCalendarPage() {
       } catch (error) {
         // 에러 시 빈 객체 사용
         setScheduleData({});
+      } finally {
+        setIsScheduleLoading(false);
       }
     };
 
@@ -766,6 +778,12 @@ export default function DailyCalendarPage() {
 
   // 읽기/편집 모드에 따라 표시할 근무 정보 선택
   const shiftForDisplay = isEditing && editedShift ? editedShift : displayShift;
+
+  const isLoading = isWorkplacesLoading || isScheduleLoading;
+
+  if (isLoading) {
+    return <LoadingDots fullScreen />;
+  }
 
   return (
     <div className="daily-page">

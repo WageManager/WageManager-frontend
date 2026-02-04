@@ -8,6 +8,7 @@ import "../../styles/employerMyPageReceive.css";
 import { getMyInfo } from "../../api/commonApi";
 import ProfileTab from "../../components/employer/EmployerMyPage/ProfileTab";
 import ReceivedRequestsTab from "../../components/employer/EmployerMyPage/ReceivedRequestsTab";
+import LoadingDots from "../../components/common/LoadingDots";
 
 interface User {
   id?: number;
@@ -74,13 +75,7 @@ export default function EmployerMyPage(): JSX.Element {
   };
 
   if (loading) {
-    return (
-      <div className="mypage-main">
-        <div className="mypage-content">
-          <div>로딩 중...</div>
-        </div>
-      </div>
-    );
+    return <LoadingDots fullScreen />;
   }
 
   if (!user) {

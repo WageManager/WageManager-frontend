@@ -9,6 +9,7 @@ import EmployerScheduleGrid from "../../components/employer/WorkerManagePage/Emp
 import EmployerWorkerSearchCard from "../../components/employer/WorkerManagePage/EmployerWorkerSearchCard";
 import EmployerNewWorkerWorkInfoCard from "../../components/employer/WorkerManagePage/EmployerNewWorkerWorkInfoCard";
 import EmployerWorkplaceManageCard from "../../components/employer/WorkerManagePage/EmployerWorkplaceManageCard";
+import LoadingDots from "../../components/common/LoadingDots";
 import { useWorkplaceManagement } from "../../hooks/employer/useWorkplaceManagement";
 import {
   parseWorkSchedules,
@@ -91,6 +92,7 @@ export default function EmployerWorkerManagePage() {
   const [workersList, setWorkersList] = useState<
     Record<number, ContractWorker[]>
   >({});
+  const [isWorkersLoading, setIsWorkersLoading] = useState(true);
   const [isEditingWork, setIsEditingWork] = useState(false);
   const [editedWorkInfo, setEditedWorkInfo] = useState<EditedWorkInfo | null>(
     null
@@ -119,8 +121,12 @@ export default function EmployerWorkerManagePage() {
   const fetchWorkers = async (
     workplaceId: number | null
   ): Promise<ContractWorker[]> => {
-    if (!workplaceId) return [];
+    if (!workplaceId) {
+      setIsWorkersLoading(false);
+      return [];
+    }
 
+    setIsWorkersLoading(true);
     try {
       const response = await getContractsByWorkplace(workplaceId);
       const contracts = (response.data || []) as ContractWorker[];
@@ -136,6 +142,8 @@ export default function EmployerWorkerManagePage() {
         [workplaceId]: [],
       }));
       return [];
+    } finally {
+      setIsWorkersLoading(false);
     }
   };
 
@@ -175,19 +183,24 @@ export default function EmployerWorkerManagePage() {
   const [fullContractData, setFullContractData] = useState<Contract | null>(
     null
   );
+  const [isContractLoading, setIsContractLoading] = useState(false);
 
   useEffect(() => {
     const fetchFullContract = async () => {
       if (!currentWorker?.id) {
         setFullContractData(null);
+        setIsContractLoading(false);
         return;
       }
 
+      setIsContractLoading(true);
       try {
         const response = await getContract(currentWorker.id);
         setFullContractData(response.data as Contract);
       } catch (error) {
         setFullContractData(null);
+      } finally {
+        setIsContractLoading(false);
       }
     };
 
@@ -679,6 +692,12 @@ export default function EmployerWorkerManagePage() {
   const handleHoverBlock = (blockGroupId: string | null, _hour: number | null) => {
     setHoveredBlockGroup(blockGroupId);
   };
+
+  const isLoading = isWorkersLoading || isContractLoading;
+
+  if (isLoading) {
+    return <LoadingDots fullScreen />;
+  }
 
   return (
     <div className="worker-manage-page">

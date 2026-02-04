@@ -4,6 +4,7 @@ import { MdNotificationsNone } from "react-icons/md";
 import { getNotifications, markAllNotificationsAsRead, deleteNotification } from "../api/notificationApi";
 import { formatDateTime } from "../utils/dateUtils";
 import "../styles/notificationPage.css";
+import LoadingDots from "../components/common/LoadingDots";
 
 
 export default function NotificationPage() {
@@ -103,8 +104,7 @@ export default function NotificationPage() {
         <div className="notification-page-list">
           {isLoading ? (
             <div className="notification-page-loading">
-              <div className="notification-page-spinner"></div>
-              <span>알림을 불러오는 중...</span>
+              <LoadingDots />
             </div>
           ) : notifications.length === 0 ? (
             <div className="notification-page-empty">

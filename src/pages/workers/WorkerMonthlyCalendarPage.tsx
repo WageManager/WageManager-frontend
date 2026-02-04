@@ -8,6 +8,7 @@ import MonthNav from '../../components/common/MonthNav';
 import WorkListItem from '../../components/worker/MonthlyCalendarPage/WorkListItem';
 import MemoCard from '../../components/worker/MonthlyCalendarPage/MemoCard';
 import SummaryRow from '../../components/worker/MonthlyCalendarPage/SummaryRow';
+import LoadingDots from '../../components/common/LoadingDots';
 import {
   getContracts,
   getWorkRecords,
@@ -113,10 +114,13 @@ export default function WorkerMonthlyCalendarPage() {
   const [workplaceOptions, setWorkplaceOptions] = useState<WorkplaceOption[]>([]);
   const [contractColorMap, setContractColorMap] = useState<ContractColorMap>({});
   const [contracts, setContracts] = useState<Contract[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isWorkRecordsLoading, setIsWorkRecordsLoading] = useState(true);
 
   // 1. 초기 데이터 로드 (계약 목록, 근무지 옵션, 색상 맵)
   useEffect(() => {
     const fetchInitialData = async () => {
+      setIsInitialLoading(true);
       try {
         const contractsResponse = await getContracts();
         
@@ -147,6 +151,8 @@ export default function WorkerMonthlyCalendarPage() {
         setContracts([]);
         setWorkplaceOptions([]);
         setContractColorMap({});
+      } finally {
+        setIsInitialLoading(false);
       }
     };
     fetchInitialData();
@@ -154,9 +160,11 @@ export default function WorkerMonthlyCalendarPage() {
 
   // 근무 기록 가져오기 함수
   const fetchWorkRecords = useCallback(async () => {
+    setIsWorkRecordsLoading(true);
     if (contracts.length === 0) {
       setWorkRecords({});
       setMemos({});
+      setIsWorkRecordsLoading(false);
       return;
     }
     try {
@@ -174,6 +182,8 @@ export default function WorkerMonthlyCalendarPage() {
       console.error('[WorkerMonthlyCalendarPage] 근무 기록 조회 실패:', error);
       setWorkRecords({});
       setMemos({});
+    } finally {
+      setIsWorkRecordsLoading(false);
     }
   }, [currentYear, currentMonth, contracts]);
 
@@ -196,6 +206,8 @@ export default function WorkerMonthlyCalendarPage() {
   };
 
   const memoForSelected = memos[selectedDateKey] || '';
+
+  const isLoading = isInitialLoading || isWorkRecordsLoading;
 
   const { totalMinutes, totalWage } = useMemo(() => {
     let minutes = 0;
@@ -462,6 +474,14 @@ export default function WorkerMonthlyCalendarPage() {
       });
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="monthly-calendar-page">
+        <LoadingDots />
+      </div>
+    );
+  }
 
   return (
     <div className="monthly-calendar-page">

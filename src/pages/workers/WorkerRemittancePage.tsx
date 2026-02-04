@@ -11,6 +11,7 @@ import { formatKRW } from "../../utils/formatUtils";
 import MonthNav from "../../components/common/MonthNav";
 import WorkDetailList from "../../components/worker/RemittancePage/WorkDetailList";
 import WorkplaceDropdown from "../../components/worker/RemittancePage/WorkplaceDropdown";
+import LoadingDots from "../../components/common/LoadingDots";
 import { useRemittanceData } from "../../hooks/worker/useRemittanceData";
 import type { SortOrder } from "../../types/worker/remittancePage.types";
 
@@ -73,6 +74,14 @@ export default function WorkerRemittancePage() {
     setIsSortDropdownOpen(false);
     setExpandedRecordIndex(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="remittance-page">
+        <LoadingDots />
+      </div>
+    );
+  }
 
   return (
     <div className="remittance-page">
