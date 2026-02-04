@@ -38,15 +38,17 @@ const MonthCalendar: FC<MonthCalendarProps> = ({
         {calendarCells.map(({ date, currentMonth }, idx) => {
           const isSelected = isSameDate(date, selectedDate);
           return (
-            <div
+            <button
+              type="button"
               key={`${date.toISOString()}-${idx}`}
               className={`calendar-day ${isSelected ? "current" : ""} ${
                 currentMonth ? "" : "other"
               }`}
               onClick={() => onSelectDate(date)}
+              aria-pressed={isSelected}
             >
               {date.getDate()}
-            </div>
+            </button>
           );
         })}
       </div>

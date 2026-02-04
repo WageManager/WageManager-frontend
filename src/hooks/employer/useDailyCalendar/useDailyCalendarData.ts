@@ -65,16 +65,7 @@ export function useDailyCalendarData(): UseDailyCalendarDataReturn {
   const { workersInWorkplace, showWorkerListModal, setShowWorkerListModal } =
     useFetchWorkersInWorkplace(selectedWorkplaceId);
 
-  // ── 근무 편집 상태 (선택보다 먼저 정의) ──────────────
-  const [isEditingState, setIsEditingState] = useState(false);
-  const [editedShiftState, setEditedShiftState] = useState<ReturnType<typeof useShiftEdit>["editedShift"]>(null);
-
   // ── 근무 선택 ─────────────────────────────────────
-  const handleSelectionChange = useCallback(() => {
-    setIsEditingState(false);
-    setEditedShiftState(null);
-  }, []);
-
   const {
     activeShiftId,
     activeShift,
@@ -83,12 +74,11 @@ export function useDailyCalendarData(): UseDailyCalendarDataReturn {
     scheduleWithLanes,
     laneCount,
     setActiveShiftId,
-    handleShiftClick,
+    handleShiftClick: baseShiftClickHandler,
   } = useShiftSelection({
     workplaceSchedules,
     dateKey,
     selectedDate,
-    onSelectionChange: handleSelectionChange,
   });
 
   // ── 근무 편집 ─────────────────────────────────────
@@ -106,6 +96,16 @@ export function useDailyCalendarData(): UseDailyCalendarDataReturn {
   } = useShiftEdit({
     displayShift,
   });
+
+  // 근무 클릭 핸들러 확장 (편집 상태 초기화 포함)
+  const handleShiftClick = useCallback(
+    (shiftId: string) => {
+      baseShiftClickHandler(shiftId);
+      setIsEditing(false);
+      setEditedShift(null);
+    },
+    [baseShiftClickHandler, setIsEditing, setEditedShift]
+  );
 
   // 이전 날짜 계산
   const previousDate = useMemo(() => {

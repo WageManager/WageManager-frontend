@@ -45,8 +45,11 @@ const transformWorkRecordsToScheduleData = (workRecords: WorkRecord[]): Schedule
     const startHour = timeStringToDecimal(startTimeStr);
     const endHour = timeStringToDecimal(endTimeStr);
 
-    // 근무 시간 계산 (시간 단위)
-    const durationHours = endHour - startHour;
+    // 익일 근무 여부 판단 및 근무 시간 계산
+    const crossesMidnight = endHour < startHour;
+    const durationHours = crossesMidnight
+      ? (24 - startHour) + endHour
+      : endHour - startHour;
 
     const shift: Shift = {
       id: `shift-${record.id}`,
@@ -65,6 +68,7 @@ const transformWorkRecordsToScheduleData = (workRecords: WorkRecord[]): Schedule
       socialInsurance: true,
       withholdingTax: true,
       workRecordId: record.id,
+      crossesMidnight,
     };
 
     scheduleData[workplaceName][dateKey].push(shift);

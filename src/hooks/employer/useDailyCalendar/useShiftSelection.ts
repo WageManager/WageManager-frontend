@@ -11,7 +11,6 @@ interface UseShiftSelectionParams {
   workplaceSchedules: DateScheduleMap;
   dateKey: string;
   selectedDate: Date;
-  onSelectionChange?: () => void;
 }
 
 /**
@@ -24,7 +23,6 @@ export function useShiftSelection({
   workplaceSchedules,
   dateKey,
   selectedDate,
-  onSelectionChange,
 }: UseShiftSelectionParams): UseShiftSelectionReturn {
   const [activeShiftId, setActiveShiftId] = useState<string | null>(null);
 
@@ -126,24 +124,16 @@ export function useShiftSelection({
         );
 
         if (prevDayShift) {
-          // 이 경우 onSelectionChange를 통해 부모에서 날짜 변경을 처리해야 함
-          // 여기서는 단순히 선택만 처리하고, 날짜 변경은 useDailyCalendarData에서 처리
+          // 익일 근무 선택 (편집 상태 초기화는 useDailyCalendarData에서 처리)
           setActiveShiftId(shiftId);
-          onSelectionChange?.();
           return;
         }
       }
 
-      // 일반적인 경우
-      setActiveShiftId((prev) => {
-        const newId = prev === shiftId ? null : shiftId;
-        if (newId !== prev) {
-          onSelectionChange?.();
-        }
-        return newId;
-      });
+      // 일반적인 경우: 토글 방식으로 선택
+      setActiveShiftId((prev) => (prev === shiftId ? null : shiftId));
     },
-    [currentScheduleData, previousScheduleData, onSelectionChange]
+    [currentScheduleData, previousScheduleData]
   );
 
   return {

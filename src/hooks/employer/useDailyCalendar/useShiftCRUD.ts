@@ -121,7 +121,10 @@ export function useShiftCRUD({
       // 백엔드에 근무 기록 생성 (비동기)
       try {
         // 먼저 근로자의 contractId 조회
-        if (!selectedWorkplaceId) return;
+        if (!selectedWorkplaceId) {
+          Swal.fire("오류", "근무지가 선택되지 않았습니다.", "error");
+          return;
+        }
 
         const contractsResponse = await getContractsByWorkplace(selectedWorkplaceId);
         const contracts: ContractWorker[] = contractsResponse.data || [];
@@ -129,6 +132,7 @@ export function useShiftCRUD({
         const contractId = contract?.id;
 
         if (!contractId) {
+          Swal.fire("오류", "해당 근로자의 계약 정보를 찾을 수 없습니다.", "error");
           return;
         }
 

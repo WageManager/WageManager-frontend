@@ -97,8 +97,11 @@ const EmployerDailyCalendarPage: FC = () => {
           <div className="daily-header-left">
             <select
               className="daily-workplace-select"
-              value={selectedWorkplaceId ?? ""}
-              onChange={(e) => setSelectedWorkplaceId(Number(e.target.value))}
+              value={selectedWorkplaceId?.toString() ?? ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSelectedWorkplaceId(value ? Number(value) : null);
+              }}
             >
               {workplaces.map((workplace) => (
                 <option key={workplace.id} value={workplace.id}>
