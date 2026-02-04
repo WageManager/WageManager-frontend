@@ -1,3 +1,4 @@
+import type { FC } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // Auth Components
@@ -25,7 +26,7 @@ import NotificationLayout from "./layouts/NotificationLayout";
 import WorkerLayout from "./layouts/WorkerLayout";
 import EmployerLayout from "./layouts/EmployerLayout";
 
-function App() {
+const App: FC = () => {
   return (
     <>
       <Routes>
@@ -60,6 +61,6 @@ function App() {
       </Routes>
     </>
   );
-}
+};
 
 export default App;
