@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { MdArrowForwardIos } from "react-icons/md";
 import WorkEditRequestBox from "../MonthlyCalendarPage/WorkEditRequestBox";
 import { pad2, getWeekStart, makeDateKey } from "../../../utils/dateUtils";
@@ -151,27 +151,18 @@ const isRecordSelected = (
 
 function WeeklyCalendar({
   workRecords = {},
+  currentWeekStart,
   onConfirmEdit,
-  onWeekChange,
+  onPrevWeek,
+  onNextWeek,
 }: WeeklyCalendarProps) {
   // ---- State ----
 
-  const today = new Date();
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() =>
-    getWeekStart(today)
-  );
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
   const [selectedRecordId, setSelectedRecordId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<EditForm | null>(null);
 
   // ---- Effects & Memos ----
-
-  // 주 변경 시 부모 컴포넌트에 알림
-  useEffect(() => {
-    if (onWeekChange) {
-      onWeekChange(currentWeekStart);
-    }
-  }, [currentWeekStart, onWeekChange]);
 
   // 현재 주의 일요일~토요일 날짜 배열
   const weekDays = useMemo(
@@ -195,19 +186,17 @@ function WeeklyCalendar({
 
   // 이전 주로 이동
   const handlePrevWeek = (): void => {
-    const prevWeek = new Date(currentWeekStart);
-    prevWeek.setDate(prevWeek.getDate() - 7);
-    setCurrentWeekStart(prevWeek);
+    onPrevWeek();
     setSelectedDateKey(null);
+    setSelectedRecordId(null);
     setEditForm(null);
   };
 
   // 다음 주로 이동
   const handleNextWeek = (): void => {
-    const nextWeek = new Date(currentWeekStart);
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    setCurrentWeekStart(nextWeek);
+    onNextWeek();
     setSelectedDateKey(null);
+    setSelectedRecordId(null);
     setEditForm(null);
   };
 
