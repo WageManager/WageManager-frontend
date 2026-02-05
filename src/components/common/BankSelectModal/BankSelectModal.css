@@ -1,0 +1,189 @@
+/* 모달 오버레이 */
+.bank-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* 모달 컨텐츠 */
+.bank-modal-content {
+  background-color: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 모달 헤더 */
+.bank-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px;
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+.bank-modal-title {
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333333;
+  margin: 0;
+}
+
+.bank-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #848484;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.bank-modal-close:hover {
+  background-color: #f5f5f5;
+}
+
+/* 은행 그리드 */
+.bank-modal-grid {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* 개별 은행 아이템 */
+.bank-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: "Noto Sans KR", sans-serif;
+}
+
+.bank-item:hover {
+  border-color: #4CAF50;
+  background-color: #f9f9f9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.bank-item-selected {
+  border-color: #4CAF50;
+  background-color: #e8f5e9;
+}
+
+.bank-item-logo {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.bank-item-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.bank-item-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333333;
+  text-align: center;
+  word-break: keep-all;
+}
+
+/* 반응형: 태블릿 */
+@media (max-width: 768px) {
+  .bank-modal-content {
+    max-width: 90%;
+  }
+
+  .bank-modal-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .bank-item {
+    padding: 12px 6px;
+  }
+
+  .bank-item-logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .bank-item-name {
+    font-size: 0.85rem;
+  }
+}
+
+/* 반응형: 모바일 */
+@media (max-width: 480px) {
+  .bank-modal-overlay {
+    padding: 12px;
+  }
+
+  .bank-modal-content {
+    max-width: 100%;
+    max-height: 85vh;
+  }
+
+  .bank-modal-header {
+    padding: 20px;
+  }
+
+  .bank-modal-title {
+    font-size: 1.3rem;
+  }
+
+  .bank-modal-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 16px;
+  }
+
+  .bank-item {
+    padding: 10px 6px;
+  }
+
+  .bank-item-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .bank-item-name {
+    font-size: 0.8rem;
+  }
+}
