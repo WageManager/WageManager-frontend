@@ -293,7 +293,6 @@ export default function ProfileEdit({ user, worker, onUserUpdate }: ProfileEditP
         error={errors.account}
         onToggleEdit={() => toggleEdit('account')}
         onSave={() => handleSave('account')}
-        onBankChange={(value) => handleChange('bankName', value)}
         onAccountChange={handleAccountNumberChange}
         onBankButtonClick={() => setIsBankModalOpen(true)}
       />
@@ -452,7 +451,6 @@ interface AccountSectionProps {
   error: string | undefined;
   onToggleEdit: () => void;
   onSave: () => void;
-  onBankChange: (value: string) => void;
   onAccountChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onBankButtonClick: () => void;
 }
@@ -465,7 +463,6 @@ function AccountSection({
   error,
   onToggleEdit,
   onSave,
-  onBankChange,
   onAccountChange,
   onBankButtonClick,
 }: AccountSectionProps) {
@@ -474,7 +471,9 @@ function AccountSection({
     ? `${bankName} ${accountNumber}`
     : accountNumber || bankName || '';
 
-  const bankInfo = bankName ? BANK_INFO[bankName as BankName] : null;
+  const bankInfo = bankName && bankName in BANK_INFO 
+    ? BANK_INFO[bankName as BankName] 
+    : null;
 
   return (
     <div className="worker-mypage-field">
