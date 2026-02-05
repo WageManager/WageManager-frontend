@@ -36,6 +36,21 @@
   flex-shrink: 0;
 }
 
+.bank-modal-search {
+  padding: 16px 28px 0 28px;
+  flex-shrink: 0;
+}
+
+.bank-modal-search input {
+  width: 100%;
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 1rem;
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
 .bank-modal-title {
   font-family: "Noto Sans KR", sans-serif;
   font-size: 1.5rem;
@@ -71,6 +86,14 @@
   gap: 16px;
   overflow-y: auto;
   flex: 1;
+}
+
+.bank-modal-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-family: "Noto Sans KR", sans-serif;
+  color: #848484;
+  padding: 24px 0;
 }
 
 /* 개별 은행 아이템 */

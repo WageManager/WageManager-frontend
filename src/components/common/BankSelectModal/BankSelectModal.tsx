@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { BankName } from '../../../constants/bank';
 import { BANK_NAMES } from '../../../constants/bank';
 import BankItem from './BankItem';
@@ -25,6 +25,7 @@ export default function BankSelectModal({
 }: BankSelectModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const firstButtonRef = useRef<HTMLButtonElement>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // ESC 키로 모달 닫기
   useEffect(() => {
@@ -60,6 +61,12 @@ export default function BankSelectModal({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchQuery('');
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleBankSelect = (bankName: BankName) => {
@@ -72,6 +79,11 @@ export default function BankSelectModal({
       onClose();
     }
   };
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredBanks = normalizedQuery
+    ? BANK_NAMES.filter((bankName) => bankName.toLowerCase().includes(normalizedQuery))
+    : BANK_NAMES;
 
   return (
     <div
@@ -97,15 +109,29 @@ export default function BankSelectModal({
           </button>
         </div>
 
+        <div className="bank-modal-search">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="은행명 검색"
+            aria-label="은행명 검색"
+          />
+        </div>
+
         <div className="bank-modal-grid">
-          {BANK_NAMES.map((bankName) => (
-            <BankItem
-              key={bankName}
-              bankName={bankName}
-              isSelected={selectedBank === bankName}
-              onClick={handleBankSelect}
-            />
-          ))}
+          {filteredBanks.length > 0 ? (
+            filteredBanks.map((bankName) => (
+              <BankItem
+                key={bankName}
+                bankName={bankName}
+                isSelected={selectedBank === bankName}
+                onClick={handleBankSelect}
+              />
+            ))
+          ) : (
+            <div className="bank-modal-empty">검색 결과가 없습니다.</div>
+          )}
         </div>
       </div>
     </div>
