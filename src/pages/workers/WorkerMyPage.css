@@ -448,6 +448,14 @@
   width: 180px;
   max-width: 180px;
   box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.worker-mypage-bank-select-button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .worker-mypage-bank-select-button:hover {
