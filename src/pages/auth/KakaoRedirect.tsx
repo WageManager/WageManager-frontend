@@ -45,8 +45,8 @@ export default function KakaoRedirectPage() {
 
         // 3-1. 기존 회원인 경우 (200 응답 ->로그인 성공)
         if (loginResponse.success && loginResponse.data?.accessToken) {
-          // localStorage에 토큰 저장
-          localStorage.setItem('token', loginResponse.data.accessToken);
+          // sessionStorage에 토큰 저장
+          sessionStorage.setItem('token', loginResponse.data.accessToken);
 
           // userType에 따라 이동
           const targetPath = loginResponse.data.userType === 'EMPLOYER' ? '/employer' : '/worker';

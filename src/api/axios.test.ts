@@ -17,8 +17,8 @@ import { wageManagerApi } from './axios';
 let mockApi: MockAdapter;
 let mockAxios: MockAdapter;
 
-// localStorage 모킹
-const localStorageMock = (() => {
+// sessionStorage 모킹
+const sessionStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: vi.fn((key: string) => store[key] || null),
@@ -36,16 +36,16 @@ const localStorageMock = (() => {
 
 // window.location 모킹
 const originalLocation = window.location;
-const originalLocalStorage = window.localStorage;
+const originalSessionStorage = window.sessionStorage;
 
 beforeEach(() => {
   // Mock 어댑터 초기화
   mockApi = new MockAdapter(wageManagerApi);
   mockAxios = new MockAdapter(axios);
 
-  // localStorage 모킹
-  Object.defineProperty(window, 'localStorage', {
-    value: localStorageMock,
+  // sessionStorage 모킹
+  Object.defineProperty(window, 'sessionStorage', {
+    value: sessionStorageMock,
     writable: true,
     configurable: true,
   });
@@ -58,7 +58,7 @@ beforeEach(() => {
   });
 
   // 각 테스트 전 초기화
-  localStorageMock.clear();
+  sessionStorageMock.clear();
   vi.clearAllMocks();
 });
 
@@ -69,16 +69,16 @@ afterEach(() => {
     value: originalLocation,
     writable: true,
   });
-  Object.defineProperty(window, 'localStorage', {
-    value: originalLocalStorage,
+  Object.defineProperty(window, 'sessionStorage', {
+    value: originalSessionStorage,
     writable: true,
   });
 });
 
 describe('axios 요청 인터셉터', () => {
   it('토큰이 있으면 Authorization 헤더에 포함된다', async () => {
-    // Given: localStorage에 토큰이 있음
-    localStorageMock.setItem('token', 'test-access-token');
+    // Given: sessionStorage에 토큰이 있음
+    sessionStorageMock.setItem('token', 'test-access-token');
 
     // Mock API 응답
     mockApi.onGet('/test').reply(200, { data: 'success' });
@@ -92,7 +92,7 @@ describe('axios 요청 인터셉터', () => {
   });
 
   it('토큰이 없으면 Authorization 헤더가 없다', async () => {
-    // Given: localStorage에 토큰이 없음
+    // Given: sessionStorage에 토큰이 없음
     mockApi.onGet('/test').reply(200, { data: 'success' });
 
     // When: API 요청
@@ -107,7 +107,7 @@ describe('axios 요청 인터셉터', () => {
 describe('axios 응답 인터셉터 - 토큰 갱신', () => {
   it('401 에러 시 토큰 갱신을 시도한다', async () => {
     // Given: 유효한 토큰이 있고, 첫 요청은 401 반환
-    localStorageMock.setItem('token', 'expired-token');
+    sessionStorageMock.setItem('token', 'expired-token');
 
     // 첫 요청: 401 에러
     mockApi.onGet('/protected').replyOnce(401);
@@ -124,7 +124,7 @@ describe('axios 응답 인터셉터 - 토큰 갱신', () => {
 
     // Then: 토큰 갱신 후 재시도 성공
     expect(response.data).toEqual({ data: 'success' });
-    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+    expect(sessionStorageMock.setItem).toHaveBeenCalledWith(
       'token',
       'new-access-token'
     );
@@ -132,7 +132,7 @@ describe('axios 응답 인터셉터 - 토큰 갱신', () => {
 
   it('토큰 갱신 실패 시 handleAuthFailure가 호출된다', async () => {
     // Given: 만료된 토큰이 있고, 갱신도 실패
-    localStorageMock.setItem('token', 'expired-token');
+    sessionStorageMock.setItem('token', 'expired-token');
 
     // 첫 요청: 401 에러
     mockApi.onGet('/protected').replyOnce(401);
@@ -143,11 +143,11 @@ describe('axios 응답 인터셉터 - 토큰 갱신', () => {
     // When & Then: API 요청이 reject됨
     await expect(wageManagerApi.get('/protected')).rejects.toThrow();
 
-    // Then: localStorage가 클리어됨 (handleAuthFailure 호출 확인)
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('token');
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('userId');
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('name');
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('userType');
+    // Then: sessionStorage가 클리어됨 (handleAuthFailure 호출 확인)
+    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('token');
+    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('userId');
+    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('name');
+    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('userType');
 
     // Then: 로그인 페이지로 리다이렉트
     expect(window.location.href).toBe('/');
@@ -166,7 +166,7 @@ describe('axios 응답 인터셉터 - 동시 요청 처리 (버그 #61 수정 �
    */
   it('토큰 갱신 실패 시 대기 중인 모든 요청이 reject된다', async () => {
     // Given: 만료된 토큰
-    localStorageMock.setItem('token', 'expired-token');
+    sessionStorageMock.setItem('token', 'expired-token');
 
     // 모든 요청이 401 반환
     mockApi.onGet('/api/request1').reply(401);
@@ -189,7 +189,7 @@ describe('axios 응답 인터셉터 - 동시 요청 처리 (버그 #61 수정 �
 
   it('토큰 갱신 성공 시 대기 중인 모든 요청이 재시도된다', async () => {
     // Given: 만료된 토큰
-    localStorageMock.setItem('token', 'expired-token');
+    sessionStorageMock.setItem('token', 'expired-token');
 
     // 첫 번째 요청들: 401 에러
     mockApi.onGet('/api/request1').replyOnce(401);
@@ -221,7 +221,7 @@ describe('axios 응답 인터셉터 - 동시 요청 처리 (버그 #61 수정 �
 
   it('토큰 갱신 응답에 accessToken이 없으면 모든 요청이 reject된다', async () => {
     // Given: 만료된 토큰
-    localStorageMock.setItem('token', 'expired-token');
+    sessionStorageMock.setItem('token', 'expired-token');
 
     // 모든 요청이 401 반환
     mockApi.onGet('/api/request1').reply(401);
@@ -241,6 +241,6 @@ describe('axios 응답 인터셉터 - 동시 요청 처리 (버그 #61 수정 �
     await expect(request2).rejects.toThrow();
 
     // Then: handleAuthFailure 호출됨
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('token');
+    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('token');
   });
 });

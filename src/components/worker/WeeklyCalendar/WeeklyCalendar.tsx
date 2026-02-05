@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { MdArrowForwardIos } from "react-icons/md";
 import WorkEditRequestBox from "../MonthlyCalendarPage/WorkEditRequestBox";
 import { pad2, getWeekStart, makeDateKey } from "../../../utils/dateUtils";
-import type { WorkRecord, WorkRecordsByDate, EditForm, WeeklyCalendarProps, WeeklySummary} from "../../../types/worker/weeklyCalendar.types";
+import type { WorkRecord, WorkRecordsByDate, EditForm, WeeklyCalendarProps, WeeklySummary} from "../../../types/worker/workerWeeklyCalendar.types";
 import "./WeeklyCalendar.css";
 
 // ============ 유틸리티 함수 ============

@@ -26,7 +26,7 @@ import type {
   EditForm,
   AddWorkForm,
   WorkplaceOption,
-} from '../../types/worker/monthlyCalendar.types';
+} from '../../types/worker/workerMonthlyCalendar.types';
 
 
 // ============ 로컬 타입 ============

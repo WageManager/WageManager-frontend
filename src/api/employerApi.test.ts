@@ -41,8 +41,8 @@ import {
 
 let mockApi: MockAdapter;
 
-// localStorage 모킹
-const localStorageMock = (() => {
+// sessionStorage 모킹
+const sessionStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: vi.fn((key: string) => store[key] || null),
@@ -58,26 +58,26 @@ const localStorageMock = (() => {
   };
 })();
 
-const originalLocalStorage = window.localStorage;
+const originalSessionStorage = window.sessionStorage;
 
 beforeEach(() => {
   mockApi = new MockAdapter(wageManagerApi);
 
-  Object.defineProperty(window, "localStorage", {
-    value: localStorageMock,
+  Object.defineProperty(window, "sessionStorage", {
+    value: sessionStorageMock,
     writable: true,
     configurable: true,
   });
 
-  localStorageMock.clear();
-  localStorageMock.setItem("token", "test-token");
+  sessionStorageMock.clear();
+  sessionStorageMock.setItem("token", "test-token");
   vi.clearAllMocks();
 });
 
 afterEach(() => {
   mockApi.restore();
-  Object.defineProperty(window, "localStorage", {
-    value: originalLocalStorage,
+  Object.defineProperty(window, "sessionStorage", {
+    value: originalSessionStorage,
     writable: true,
     configurable: true,
   });

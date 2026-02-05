@@ -114,7 +114,7 @@ export default function ProfileTab({ user, onUserUpdate }: ProfileTabProps): JSX
         await deleteMyAccount();
         Swal.fire("탈퇴 완료", "회원 탈퇴가 완료되었습니다.", "success");
         await logout();
-        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
         navigate("/");
       } catch (error) {
         const message = error instanceof Error ? error.message : "회원 탈퇴 중 오류가 발생했습니다.";

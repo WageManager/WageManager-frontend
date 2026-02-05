@@ -5,7 +5,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import Swal from 'sweetalert2';
 import './AddWorkModal.css';
 import { HOUR_OPTIONS, MINUTE_OPTIONS, BREAK_OPTIONS } from '../../../constants/calendar';
-import type { AddWorkForm, WorkplaceOption } from '../../../types/worker/monthlyCalendar.types';
+import type { AddWorkForm, WorkplaceOption } from '../../../types/worker/workerMonthlyCalendar.types';
 
 // ============ 로컬 타입 ============
 

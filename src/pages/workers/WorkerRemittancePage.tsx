@@ -13,7 +13,7 @@ import WorkDetailList from "../../components/worker/RemittancePage/WorkDetailLis
 import WorkplaceDropdown from "../../components/worker/RemittancePage/WorkplaceDropdown";
 import LoadingDots from "../../components/common/LoadingDots";
 import { useRemittanceData } from "../../hooks/worker/useRemittanceData";
-import type { SortOrder } from "../../types/worker/remittancePage.types";
+import type { SortOrder } from "../../types/worker/workerRemittancePage.types";
 
 
 export default function WorkerRemittancePage() {

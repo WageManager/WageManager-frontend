@@ -72,8 +72,8 @@ export const useSignupForm = ({ kakaoAccessToken }: UseSignupFormProps) => {
         throw new Error(registerResponse.error?.message || '회원가입 실패');
       }
 
-      // accessToken을 localStorage에 저장
-      localStorage.setItem('token', registerResponse.data.accessToken);
+      // accessToken을 sessionStorage에 저장
+      sessionStorage.setItem('token', registerResponse.data.accessToken);
 
       Swal.fire({
         icon: 'success',
