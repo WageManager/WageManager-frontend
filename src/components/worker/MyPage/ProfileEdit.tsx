@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
 import '../../../pages/workers/WorkerMyPage.css';
 import EditButton from '../../common/EditButton';
-import { BANK_LIST } from '../../../constants/bank';
+import { BANK_LIST, BANK_INFO } from '../../../constants/bank';
+import type { BankName } from '../../../constants/bank';
+import BankSelectModal from '../../common/BankSelectModal/BankSelectModal';
 import { COMMON_VALIDATION, COMMON_VALIDATION_MESSAGES } from '../../../constants/validation';
 import { formatPhoneNumber } from '../../../utils/formatUtils';
 import type {
@@ -113,6 +115,7 @@ export default function ProfileEdit({ user, worker, onUserUpdate }: ProfileEditP
   const [localUser, setLocalUser] = useState<LocalUserData>(() => mergeUserData(user, worker)); // 현재 편집 중인 데이터
   const [originalUser, setOriginalUser] = useState<LocalUserData>(() => mergeUserData(user, worker)); // 원본 데이터 (취소 시 복원용)
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isBankModalOpen, setIsBankModalOpen] = useState(false);
 
   // user/worker prop이 변경될 때 동기화 (수정 중이 아닐 때만)
   useEffect(() => {
@@ -245,6 +248,14 @@ export default function ProfileEdit({ user, worker, onUserUpdate }: ProfileEditP
     [handleChange]
   );
 
+  // 은행 선택 핸들러
+  const handleBankSelect = useCallback(
+    (bankName: BankName) => {
+      handleChange('bankName', bankName);
+    },
+    [handleChange]
+  );
+
   return (
     <div className="worker-mypage-container">
       <h1 className="worker-mypage-title">기본 정보</h1>
@@ -284,6 +295,15 @@ export default function ProfileEdit({ user, worker, onUserUpdate }: ProfileEditP
         onSave={() => handleSave('account')}
         onBankChange={(value) => handleChange('bankName', value)}
         onAccountChange={handleAccountNumberChange}
+        onBankButtonClick={() => setIsBankModalOpen(true)}
+      />
+
+      {/* 은행 선택 모달 */}
+      <BankSelectModal
+        isOpen={isBankModalOpen}
+        selectedBank={localUser.bankName}
+        onSelect={handleBankSelect}
+        onClose={() => setIsBankModalOpen(false)}
       />
       <hr />
 
@@ -434,6 +454,7 @@ interface AccountSectionProps {
   onSave: () => void;
   onBankChange: (value: string) => void;
   onAccountChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onBankButtonClick: () => void;
 }
 
 function AccountSection({
@@ -446,11 +467,14 @@ function AccountSection({
   onSave,
   onBankChange,
   onAccountChange,
+  onBankButtonClick,
 }: AccountSectionProps) {
   // 표시용 텍스트
   const displayText = bankName && accountNumber
     ? `${bankName} ${accountNumber}`
     : accountNumber || bankName || '';
+
+  const bankInfo = bankName ? BANK_INFO[bankName as BankName] : null;
 
   return (
     <div className="worker-mypage-field">
@@ -458,18 +482,20 @@ function AccountSection({
       <div className="worker-mypage-input-wrapper">
         {isEditing ? (
           <div className="worker-mypage-account-edit">
-            <select
-              value={bankName}
-              onChange={(e) => onBankChange(e.target.value)}
-              className={error ? 'worker-mypage-input-error' : ''}
+            <button
+              type="button"
+              className={`worker-mypage-bank-select-button ${error ? 'worker-mypage-input-error' : ''}`}
+              onClick={onBankButtonClick}
             >
-              <option value="">은행 선택</option>
-              {BANK_LIST.map((bank) => (
-                <option key={bank} value={bank}>
-                  {bank}
-                </option>
-              ))}
-            </select>
+              {bankInfo ? (
+                <>
+                  <img src={bankInfo.logo} alt={bankName} className="worker-mypage-bank-logo" />
+                  <span>{bankInfo.shortName}</span>
+                </>
+              ) : (
+                <span>은행 선택</span>
+              )}
+            </button>
             <input
               type="text"
               value={accountNumber}
