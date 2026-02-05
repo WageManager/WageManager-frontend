@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { BankName } from '../../../constants/bank';
-import { BANK_LIST } from '../../../constants/bank';
+import { BANK_NAMES } from '../../../constants/bank';
 import BankItem from './BankItem';
 import './BankSelectModal.css';
 
@@ -98,7 +98,7 @@ export default function BankSelectModal({
         </div>
 
         <div className="bank-modal-grid">
-          {BANK_LIST.map((bankName) => (
+          {BANK_NAMES.map((bankName) => (
             <BankItem
               key={bankName}
               bankName={bankName}

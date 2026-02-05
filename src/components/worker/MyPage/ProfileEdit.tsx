@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
 import '../../../pages/workers/WorkerMyPage.css';
 import EditButton from '../../common/EditButton';
-import { BANK_LIST, BANK_INFO } from '../../../constants/bank';
+import { BANK_INFO } from '../../../constants/bank';
 import type { BankName } from '../../../constants/bank';
 import BankSelectModal from '../../common/BankSelectModal/BankSelectModal';
 import { COMMON_VALIDATION, COMMON_VALIDATION_MESSAGES } from '../../../constants/validation';
@@ -490,7 +490,7 @@ function AccountSection({
               {bankInfo ? (
                 <>
                   <img src={bankInfo.logo} alt={bankName} className="worker-mypage-bank-logo" />
-                  <span>{bankInfo.shortName}</span>
+                  <span>{bankName}</span>
                 </>
               ) : (
                 <span>은행 선택</span>

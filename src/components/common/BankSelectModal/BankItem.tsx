@@ -26,7 +26,7 @@ export default function BankItem({ bankName, isSelected, onClick }: BankItemProp
       <div className="bank-item-logo">
         <img src={bankInfo.logo} alt={`${bankName} 로고`} />
       </div>
-      <div className="bank-item-name">{bankInfo.shortName}</div>
+      <div className="bank-item-name">{bankName}</div>
     </button>
   );
 }
