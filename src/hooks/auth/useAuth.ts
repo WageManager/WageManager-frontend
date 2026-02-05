@@ -42,7 +42,9 @@ export const useAuth = (): AuthState => {
             userType: response.data.userType as UserType,
           });
         } else {
-          // API 응답이 success=false인 경우
+          // API 응답이 success=false이거나 data가 없는 경우
+          // 토큰이 서버에서 유효하지 않다고 판단됨 → 토큰 삭제
+          sessionStorage.removeItem('token');
           setAuthState({
             isAuthenticated: false,
             isLoading: false,
