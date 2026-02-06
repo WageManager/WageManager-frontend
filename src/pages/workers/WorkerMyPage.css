@@ -427,6 +427,49 @@
   flex: 1;
 }
 
+/* 은행 선택 버튼 */
+.worker-mypage-bank-select-button {
+  font-family: "Noto Sans KR", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: bold;
+  font-style: normal;
+  font-size: 1em;
+  padding: 10px 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  flex: 0 0 auto;
+  width: 180px;
+  max-width: 180px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.worker-mypage-bank-select-button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.worker-mypage-bank-select-button:hover {
+  border-color: #4CAF50;
+  background-color: #f9f9f9;
+}
+
+.worker-mypage-bank-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .worker-mypage-password-input-wrapper {
   position: relative;
   flex: 1;
