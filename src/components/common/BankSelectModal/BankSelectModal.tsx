@@ -44,8 +44,8 @@ export default function BankSelectModal({
   // 모달 열릴 때 포커스 이동
   useEffect(() => {
     if (isOpen && modalRef.current) {
-      const firstFocusable = modalRef.current.querySelector('button');
-      firstFocusable?.focus();
+      const searchInput = modalRef.current.querySelector('input');
+      searchInput?.focus();
     }
   }, [isOpen]);
 

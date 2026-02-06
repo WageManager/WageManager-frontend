@@ -24,7 +24,11 @@ export default function BankItem({ bankName, isSelected, onClick }: BankItemProp
       aria-pressed={isSelected}
     >
       <div className="bank-item-logo">
-        <img src={bankInfo.logo} alt={`${bankName} 로고`} />
+        <img 
+          src={bankInfo.logo} 
+          alt={`${bankName} 로고`} 
+          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+        />
       </div>
       <div className="bank-item-name">{bankName}</div>
     </button>
