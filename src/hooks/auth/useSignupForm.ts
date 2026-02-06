@@ -16,11 +16,15 @@ export const useSignupForm = ({ kakaoAccessToken }: UseSignupFormProps) => {
   const [userType, setUserType] = useState<UserType | ''>('');
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
 
   // 유효성 검사
   const isValidName = name.trim().length >= AUTH_CONSTANTS.MIN_NAME_LENGTH;
   const isValidPhone = /^010-\d{4}-\d{4}$/.test(phone);
-  const isSubmitDisabled = !isValidName || !isValidPhone || !userType;
+  const isValidBankName = userType === 'WORKER' ? bankName.trim().length > 0 : true;
+  const isValidAccountNumber = userType === 'WORKER' ? accountNumber.trim().length >= 10 : true;
+  const isSubmitDisabled = !isValidName || !isValidPhone || !userType || !isValidBankName || !isValidAccountNumber;
 
   // 전화번호 포맷팅 핸들러
   const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,6 +38,12 @@ export const useSignupForm = ({ kakaoAccessToken }: UseSignupFormProps) => {
     }
     
     setPhone(formatted);
+  }, []);
+
+  // 계좌번호 입력 핸들러 (숫자만 입력 가능)
+  const handleAccountNumberChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const numbersOnly = e.target.value.replace(/[^0-9]/g, '');
+    setAccountNumber(numbersOnly);
   }, []);
 
   // 제출 핸들러
@@ -63,8 +73,8 @@ export const useSignupForm = ({ kakaoAccessToken }: UseSignupFormProps) => {
         kakaoAccessToken,
         userType,
         phone,
-        bankName: '', // 은행명 (현재 미사용)
-        accountNumber: '', // 계좌번호 (현재 미사용)
+        bankName: userType === 'WORKER' ? bankName : '',
+        accountNumber: userType === 'WORKER' ? accountNumber : '',
         profileImageUrl: '' // TODO: 카카오 OAuth 추가 호출 후 프로필 이미지 연동
       });
 
@@ -119,8 +129,8 @@ export const useSignupForm = ({ kakaoAccessToken }: UseSignupFormProps) => {
   };
 
   return {
-    formState: { name, phone, userType },
-    formActions: { setName, setUserType, handlePhoneChange, handleSubmit },
-    validation: { isValidName, isValidPhone, isSubmitDisabled },
+    formState: { name, phone, userType, bankName, accountNumber },
+    formActions: { setName, setUserType, handlePhoneChange, setBankName, handleAccountNumberChange, handleSubmit },
+    validation: { isValidName, isValidPhone, isValidBankName, isValidAccountNumber, isSubmitDisabled },
   };
 };
