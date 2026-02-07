@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { useSignupForm } from '../../hooks/auth/useSignupForm';
 import UserTypeSelector from './UserTypeSelector';
+import BankSelectModal from '../common/BankSelectModal/BankSelectModal';
 import '../../pages/auth/SignupPage.css'; 
 
 interface SignupFormProps {
@@ -10,12 +12,13 @@ interface SignupFormProps {
 
 export default function SignupForm({ kakaoAccessToken }: SignupFormProps) {
   const navigate = useNavigate();
+  const [isBankModalOpen, setIsBankModalOpen] = useState(false);
 
   const { 
-    formState: { name, phone, userType }, 
-    formActions: { setName, setUserType, handlePhoneChange, handleSubmit },
-    validation: { isValidName, isValidPhone, isSubmitDisabled }
-  } = useSignupForm({ kakaoAccessToken }); // Hook 사용 - useSignupForm
+      formState: { name, phone, userType, bankName, accountNumber }, 
+    formActions: { setName, setUserType, handlePhoneChange, setBankName, handleAccountNumberChange, handleSubmit },
+    validation: { isValidName, isValidPhone, isValidBankName, isValidAccountNumber, isSubmitDisabled }
+  } = useSignupForm({ kakaoAccessToken });
 
   return ( 
     // 하얀색 박스 
@@ -62,6 +65,37 @@ export default function SignupForm({ kakaoAccessToken }: SignupFormProps) {
           <UserTypeSelector value={userType} onChange={setUserType} />
         </div>
 
+        {/* 은행 선택 (WORKER만 표시) */}
+        {userType === 'WORKER' && (
+          <div className="form-group">
+            <label className="form-label">은행 <span className="required-star">*</span></label>
+            <button
+              type="button"
+              onClick={() => setIsBankModalOpen(true)}
+              className="form-input"
+              style={{ textAlign: 'left', cursor: 'pointer' }}
+            >
+              {bankName || '은행을 선택해주세요'}
+            </button>
+          </div>
+        )}
+
+        {/* 계좌번호 입력 (WORKER만 표시) */}
+        {userType === 'WORKER' && (
+          <div className="form-group">
+            <label className="form-label">계좌번호 <span className="required-star">*</span></label>
+            <input
+              type="text"
+              value={accountNumber}
+              onChange={handleAccountNumberChange}
+              placeholder="계좌번호를 입력해주세요"
+              maxLength={20}
+              className="form-input"
+            />
+            {accountNumber && !isValidAccountNumber && <p style={{color:'#ef4444', fontSize:'0.8rem'}}>계좌번호는 10자 이상 입력해주세요.</p>}
+          </div>
+        )}
+
         {/* 가입하기 버튼 */}
         <button
           onClick={handleSubmit}
@@ -75,6 +109,14 @@ export default function SignupForm({ kakaoAccessToken }: SignupFormProps) {
           가입하기
         </button>
       </div>
+
+      {/* 은행 선택 모달 */}
+      <BankSelectModal
+        isOpen={isBankModalOpen}
+        selectedBank={bankName}
+        onSelect={setBankName}
+        onClose={() => setIsBankModalOpen(false)}
+      />
     </div>
   );
 }
