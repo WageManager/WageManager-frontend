@@ -77,7 +77,6 @@ export default function SignupForm({ kakaoAccessToken }: SignupFormProps) {
             >
               {bankName || '은행을 선택해주세요'}
             </button>
-            {bankName && !isValidBankName && <p style={{color:'#ef4444', fontSize:'0.8rem'}}>은행을 선택해주세요.</p>}
           </div>
         )}
 
