@@ -180,8 +180,7 @@ export function useWorkplaceManagement({
     try {
       // 백엔드에 근무지 생성 요청
       const response = await createWorkplace({
-        businessName: workplaceName,
-        workplaceName: workplaceName,
+        name: workplaceName,
         address: newWorkplaceAddress.trim(),
         businessNumber: newWorkplaceBusinessNumber.trim(),
         isLessThanFiveEmployees: newWorkplaceIsSmallBusiness,
@@ -352,7 +351,6 @@ export function useWorkplaceManagement({
   const handleEditWorkplace = (workplace: WorkplaceDetails) => {
     setEditingWorkplace({
       id: workplace.id,
-      businessName: workplace.businessName || workplace.name || "",
       name: workplace.name || "",
       address: workplace.address || "",
       businessNumber: workplace.businessNumber || "",
@@ -393,8 +391,7 @@ export function useWorkplaceManagement({
     try {
       // 백엔드에 수정 요청
       await updateWorkplace(editingWorkplace.id, {
-        businessName: editingWorkplace.name.trim(),
-        workplaceName: editingWorkplace.name.trim(),
+        name: editingWorkplace.name.trim(),
         address: editingWorkplace.address?.trim() ?? "",
         isLessThanFiveEmployees: !!editingWorkplace.isSmallBusiness,
       });

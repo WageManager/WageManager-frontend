@@ -7,8 +7,6 @@ import type {
   CreateWorkRecordsBatchRequest,
   CreateContractRequest,
   UpdateContractRequest,
-  CalculateSalaryRequest,
-  GetSalariesParams,
   CreatePaymentRequest,
   CorrectionFilter,
   UpdateWorkerRequest,
@@ -31,14 +29,7 @@ export const getWorkplace = async (id: number | string) => {
 };
 
 export const createWorkplace = async (reqData: CreateWorkplaceRequest) => {
-  const { data } = await wageManagerApi.post("/api/employer/workplaces", {
-    businessNumber: reqData.businessNumber,
-    businessName: reqData.businessName,
-    name: reqData.workplaceName,
-    address: reqData.address,
-    colorCode: reqData.colorCode,
-    isLessThanFiveEmployees: reqData.isLessThanFiveEmployees ?? false,
-  });
+  const { data } = await wageManagerApi.post("/api/employer/workplaces", reqData);
   return data;
 };
 
@@ -46,14 +37,7 @@ export const updateWorkplace = async (
   id: number | string,
   reqData: UpdateWorkplaceRequest
 ) => {
-  // 참고: businessNumber는 수정 불가 (API 스펙)
-  const { data } = await wageManagerApi.put(`/api/employer/workplaces/${id}`, {
-    businessName: reqData.businessName,
-    name: reqData.workplaceName,
-    address: reqData.address,
-    colorCode: reqData.colorCode,
-    isLessThanFiveEmployees: reqData.isLessThanFiveEmployees,
-  });
+  const { data } = await wageManagerApi.put(`/api/employer/workplaces/${id}`, reqData);
   return data;
 };
 
@@ -160,18 +144,26 @@ export const deleteContract = async (id: number | string) => {
 
 // ============ 급여 (Salary) ============
 
-export const getSalaries = async (params?: GetSalariesParams) => {
-  const { data } = await wageManagerApi.get("/api/employer/salaries", { params });
+export const getSalariesByYearMonth = async (workplaceId: number, year: number, month: number) => {
+  const { data } = await wageManagerApi.get("/api/employer/salaries/year-month", {
+    params: { workplaceId, year, month }
+  });
   return data;
 };
+
+export const getSalaries = getSalariesByYearMonth;
 
 export const getSalary = async (id: number | string) => {
   const { data } = await wageManagerApi.get(`/api/employer/salaries/${id}`);
   return data;
 };
 
-export const calculateSalary = async (reqData: CalculateSalaryRequest) => {
-  const { data } = await wageManagerApi.post("/api/employer/salaries/calculate", reqData);
+export const calculateSalary = async (contractId: number, year: number, month: number) => {
+  const { data } = await wageManagerApi.post(
+    `/api/employer/salaries/contracts/${contractId}/calculate`,
+    null,
+    { params: { year, month } }
+  );
   return data;
 };
 
@@ -213,6 +205,31 @@ export const rejectCorrectionRequest = async (id: number | string) => {
 
 export const createPayment = async (reqData: CreatePaymentRequest) => {
   const { data } = await wageManagerApi.post("/api/employer/payments", reqData);
+  return data;
+};
+
+export const getPaymentsByYearMonth = async (workplaceId: number, year: number, month: number) => {
+  const { data } = await wageManagerApi.get("/api/employer/payments/year-month", {
+    params: { workplaceId, year, month }
+  });
+  return data;
+};
+
+export const getPaymentById = async (id: number) => {
+  const { data } = await wageManagerApi.get(`/api/employer/payments/${id}`);
+  return data;
+};
+
+export const completePayment = async (id: number) => {
+  const { data } = await wageManagerApi.put(`/api/employer/payments/${id}/complete`);
+  return data;
+};
+
+export const getCorrectionRequestsByWorkplace = async (workplaceId: number, params?: { status?: string }) => {
+  const { data } = await wageManagerApi.get(
+    `/api/employer/workplaces/${workplaceId}/correction-requests`,
+    { params }
+  );
   return data;
 };
 

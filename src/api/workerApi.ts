@@ -1,6 +1,6 @@
 import {wageManagerApi} from './axios';
 import type {
-  CreateCorrectionRequestPayload,
+  CorrectionRequestPayload,
 } from './workerApiRequest.type';
 import type {
   ApiResponse,
@@ -8,9 +8,11 @@ import type {
   ContractDetailResponse,
   CorrectionStatus,
   CorrectionRequestResponse,
+  CorrectionRequestData,
   WorkRecordsResponse,
   SalaryListItem,
   SalaryDetailResponse,
+  SalaryCalculateResponse,
   PaymentResponse,
 } from './workerApiResponse.type';
 import type { WorkerResponse } from './userApiResponse.type';
@@ -18,7 +20,10 @@ import type { WorkerResponse } from './userApiResponse.type';
 // 타입 re-export (다른 파일에서 import할 수 있도록)
 export type {
   CorrectionRequestType,
-  CreateCorrectionRequestPayload,
+  CorrectionRequestPayload,
+  CreateCorrectionRequest,
+  UpdateCorrectionRequest,
+  DeleteCorrectionRequest,
 } from './workerApiRequest.type';
 
 export type {
@@ -27,10 +32,12 @@ export type {
   ContractDetailResponse,
   CorrectionStatus,
   CorrectionRequestResponse,
+  CorrectionRequestData,
   WorkRecordsResponse,
   PayrollDeductionType,
   SalaryListItem,
   SalaryDetailResponse,
+  SalaryCalculateResponse,
   PaymentStatus,
   PaymentResponse,
 } from './workerApiResponse.type';
@@ -64,8 +71,20 @@ export const getCorrectionRequests = async (status?: CorrectionStatus): Promise<
 };
 
 // 근무 기록 정정 요청 생성
-export const createCorrectionRequest = async (payload: CreateCorrectionRequestPayload): Promise<ApiResponse<unknown>> => {
+export const createCorrectionRequest = async (payload: CorrectionRequestPayload): Promise<ApiResponse<CorrectionRequestData>> => {
   const { data } = await wageManagerApi.post('/api/worker/correction-requests', payload);
+  return data;
+};
+
+// 정정 요청 상세 조회
+export const getCorrectionRequestDetail = async (id: number): Promise<ApiResponse<CorrectionRequestData>> => {
+  const { data } = await wageManagerApi.get(`/api/worker/correction-requests/${id}`);
+  return data;
+};
+
+// 정정 요청 취소 (PENDING 상태만)
+export const deleteCorrectionRequest = async (id: number): Promise<ApiResponse<null>> => {
+  const { data } = await wageManagerApi.delete(`/api/worker/correction-requests/${id}`);
   return data;
 };
 
@@ -75,10 +94,9 @@ export const getWorkRecords = async (startDate: string, endDate: string): Promis
   return data;
 };
 
-// 근무 기록 생성 요청
-// TODO: 백엔드 엔드포인트 삭제됨 - 이 함수 제거 필요
-export const createWorkRecord = async (payload: any) => {
-  const { data } = await wageManagerApi.post('/api/worker/work-records', payload);
+// 근무 기록 상세 조회
+export const getWorkRecordDetail = async (id: number): Promise<ApiResponse<WorkRecordsResponse>> => {
+  const { data } = await wageManagerApi.get(`/api/worker/work-records/${id}`);
   return data;
 };
 
@@ -88,10 +106,18 @@ export const getSalaries = async (): Promise<ApiResponse<SalaryListItem[]>> => {
   return data;
 };
 
+// 급여 상세 조회
+export const getSalaryDetail = async (salaryId: number): Promise<ApiResponse<SalaryDetailResponse>> => {
+  const { data } = await wageManagerApi.get(`/api/worker/salaries/${salaryId}`);
+  return data;
+};
+
 // 급여 자동 계산
-export const calculateSalary = async (contractId: number, year: number, month: number): Promise<ApiResponse<SalaryDetailResponse>> => {
+export const calculateSalary = async (contractId: number, year: number, month: number): Promise<ApiResponse<SalaryCalculateResponse>> => {
   const { data } = await wageManagerApi.post(
-    `/api/worker/salaries/contracts/${contractId}/calculate`, { year, month }
+    `/api/worker/salaries/contracts/${contractId}/calculate`,
+    null,
+    { params: { year, month } }
   );
   return data;
 };
@@ -101,4 +127,3 @@ export const getPayments = async (): Promise<ApiResponse<PaymentResponse[]>> => 
   const { data } = await wageManagerApi.get('/api/worker/payments');
   return data;
 };
-

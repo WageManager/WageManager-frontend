@@ -36,8 +36,11 @@ const mockUser = {
   name: '홍길동',
   kakaoId: 'hong123',
   phone: '010-1234-5678',
-  role: 'WORKER',
+  userType: 'WORKER',
   profileImageUrl: 'https://example.com/profile.jpg',
+  workerCode: null,
+  bankName: null,
+  accountNumber: null,
 };
 
 const mockWorker = {

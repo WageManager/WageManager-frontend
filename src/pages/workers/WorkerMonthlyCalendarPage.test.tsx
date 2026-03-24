@@ -11,7 +11,6 @@ vi.mock('../../api/workerApi', () => ({
   getContracts: vi.fn(),
   getWorkRecords: vi.fn(),
   createCorrectionRequest: vi.fn(),
-  createWorkRecord: vi.fn(),
   getSalaries: vi.fn(),
 }));
 

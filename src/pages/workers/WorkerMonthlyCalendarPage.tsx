@@ -13,8 +13,7 @@ import {
   getContracts,
   getWorkRecords,
   createCorrectionRequest,
-  createWorkRecord,
-  type CreateCorrectionRequestPayload,
+  type CorrectionRequestPayload,
   type Contract,
   type WorkRecordsResponse,
 } from '../../api/workerApi';
@@ -34,16 +33,6 @@ import type {
 type MemosByDate = Record<string, string>;
 
 type ContractColorMap = Record<number, number>;
-
-/** 근무 추가 payload */
-interface CreateWorkRecordPayload {
-  contractId: number;
-  workDate: string;
-  startTime: string;
-  endTime: string;
-  breakMinutes: number;
-  memo: string;
-}
 
 // ============ 유틸리티 함수 ============
 
@@ -323,10 +312,9 @@ export default function WorkerMonthlyCalendarPage() {
         return;
       }
 
-      const payload: CreateCorrectionRequestPayload = {
+      const payload: CorrectionRequestPayload = {
         type: 'UPDATE',
         workRecordId: workRecordId,
-        contractId: form.contractId,
         requestedWorkDate: form.date,
         requestedStartTime: `${pad2(Number(form.startHour))}:${pad2(Number(form.startMinute))}:00`,
         requestedEndTime: `${pad2(Number(form.endHour))}:${pad2(Number(form.endMinute))}:00`,
@@ -426,16 +414,16 @@ export default function WorkerMonthlyCalendarPage() {
       const startTimeStr = `${pad2(Number(form.startHour))}:${pad2(Number(form.startMinute))}:00`;
       const endTimeStr = `${pad2(Number(form.endHour))}:${pad2(Number(form.endMinute))}:00`;
 
-      const payload: CreateWorkRecordPayload = {
+      const payload: CorrectionRequestPayload = {
+        type: 'CREATE',
         contractId: contractId,
-        workDate: form.date,
-        startTime: startTimeStr,
-        endTime: endTimeStr,
-        breakMinutes: form.breakMinutes || 0,
-        memo: '',
+        requestedWorkDate: form.date,
+        requestedStartTime: startTimeStr,
+        requestedEndTime: endTimeStr,
+        requestedBreakMinutes: form.breakMinutes || 0,
       };
 
-      const response = await createWorkRecord(payload);
+      const response = await createCorrectionRequest(payload);
 
       if (response?.success) {
         toast.success('근무 추가 요청이 접수되었습니다.', {

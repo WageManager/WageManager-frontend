@@ -34,6 +34,12 @@ export const devLogin = async (
 
 // 로그아웃
 export const logout = async () => {
-  const { data } = await wageManagerApi.post<ApiResponse<void>>('/api/auth/logout', {});  
+  const { data } = await wageManagerApi.post<ApiResponse<void>>('/api/auth/logout', {});
+  return data;
+};
+
+// 회원 탈퇴
+export const deleteMyAccount = async () => {
+  const { data } = await wageManagerApi.delete('/api/auth/withdraw');
   return data;
 };

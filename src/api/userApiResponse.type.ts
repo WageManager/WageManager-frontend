@@ -10,7 +10,10 @@ export interface UserResponse {
   name: string;
   phone: string;
   userType: UserType;
-  profileImageUrl?: string;
+  profileImageUrl: string | null;
+  workerCode: string | null;
+  bankName: string | null;
+  accountNumber: string | null;
 }
 
 // ============ 근로자 정보 관련 타입 ============

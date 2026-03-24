@@ -47,7 +47,7 @@ export default function ProfileBox({
 // ============ 내부 컴포넌트 ============
 
 interface ProfileAvatarProps {
-  imageUrl: string | undefined;
+  imageUrl: string | null;
 }
 
 function ProfileAvatar({ imageUrl }: ProfileAvatarProps) {
@@ -57,7 +57,7 @@ function ProfileAvatar({ imageUrl }: ProfileAvatarProps) {
     <div className="worker-mypage-avatar-wrapper">
       {hasImage ? (
         <img
-          src={imageUrl}
+          src={imageUrl!}
           alt="프로필"
           className="worker-mypage-avatar-image"
         />

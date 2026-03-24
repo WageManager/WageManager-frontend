@@ -3,16 +3,35 @@
 /** 정정 요청 타입 */
 export type CorrectionRequestType = 'CREATE' | 'UPDATE' | 'DELETE';
 
-/** 근무 기록 정정 요청 생성 payload(/api/worker/correction-requests) */
-export interface CreateCorrectionRequestPayload {
-  type: CorrectionRequestType;
-  workRecordId: number;
+/** 정정요청 Request (CREATE - 근무 추가 요청) */
+export interface CreateCorrectionRequest {
+  type: "CREATE";
   contractId: number;
   requestedWorkDate: string;
-  /** 시작 시간 (HH:mm:ss 형식) */
   requestedStartTime: string;
-  /** 종료 시간 (HH:mm:ss 형식) */
   requestedEndTime: string;
   requestedBreakMinutes?: number;
   requestedMemo?: string;
 }
+
+/** 정정요청 Request (UPDATE - 근무 수정 요청) */
+export interface UpdateCorrectionRequest {
+  type: "UPDATE";
+  workRecordId: number;
+  requestedWorkDate: string;
+  requestedStartTime: string;
+  requestedEndTime: string;
+  requestedBreakMinutes?: number;
+  requestedMemo?: string;
+}
+
+/** 정정요청 Request (DELETE - 근무 삭제 요청) */
+export interface DeleteCorrectionRequest {
+  type: "DELETE";
+  workRecordId: number;
+  requestedWorkDate: string;
+  requestedStartTime: string;
+  requestedEndTime: string;
+}
+
+export type CorrectionRequestPayload = CreateCorrectionRequest | UpdateCorrectionRequest | DeleteCorrectionRequest;

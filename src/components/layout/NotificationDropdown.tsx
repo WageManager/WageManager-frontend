@@ -4,16 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { MdNotificationsNone } from "react-icons/md";
 import { getNotifications, markNotificationAsRead } from "../../api/notificationApi";
+import type { NotificationResponse as ApiNotificationResponse } from "../../api/notificationApi";
 import { formatDateTime } from "../../utils/dateUtils";
 import "../../styles/notificationDropdown.css";
-
-interface Notification {
-  id: number;
-  type: string;
-  title: string;
-  createdAt: string;
-  isRead: boolean;
-}
 
 interface FormattedNotification {
   id: number;
@@ -22,14 +15,6 @@ interface FormattedNotification {
   time: string;
   icon: typeof MdNotificationsNone;
   isRead: boolean;
-}
-
-interface NotificationResponse {
-  success: boolean;
-  data?: {
-    notifications: Notification[];
-    unreadCount: number;
-  };
 }
 
 interface NotificationDropdownProps {
@@ -64,7 +49,7 @@ const NotificationDropdown: FC<NotificationDropdownProps> = ({
 
   // 읽지 않은 알림들을 읽음 처리 (병렬 실행)
   const markNotificationsAsRead = async (
-    notificationsList: Notification[]
+    notificationsList: ApiNotificationResponse[]
   ): Promise<void> => {
     const unreadNotifications = notificationsList.filter((n) => !n.isRead);
 
@@ -103,10 +88,10 @@ const NotificationDropdown: FC<NotificationDropdownProps> = ({
   const fetchNotifications = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const response = (await getNotifications({
+      const response = await getNotifications({
         size: 4,
         page: 1,
-      })) as NotificationResponse;
+      });
 
       if (response.success && response.data) {
         const { notifications: apiNotifications, unreadCount: apiUnreadCount } =

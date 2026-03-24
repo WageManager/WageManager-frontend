@@ -19,7 +19,7 @@ import {
   createContract,
   updateContract,
   deleteContract,
-  getSalaries,
+  getSalariesByYearMonth,
   getSalary,
   calculateSalary,
   getPendingApprovals,
@@ -91,7 +91,6 @@ describe("Workplace API", () => {
     data: [
       {
         id: 1,
-        businessName: "(주)좋은회사",
         name: "강남본점",
         colorCode: "#FF5733",
         workerCount: 12,
@@ -99,7 +98,6 @@ describe("Workplace API", () => {
       },
       {
         id: 2,
-        businessName: "(주)좋은회사",
         name: "성수점",
         colorCode: "#33FF57",
         workerCount: 4,
@@ -116,7 +114,7 @@ describe("Workplace API", () => {
 
     expect(result.success).toBe(true);
     expect(result.data).toHaveLength(2);
-    expect(result.data[0].businessName).toBe("(주)좋은회사");
+    expect(result.data[0].name).toBe("강남본점");
   });
 
   it("getWorkplace - 특정 사업장을 조회한다", async () => {
@@ -139,7 +137,6 @@ describe("Workplace API", () => {
       data: {
         id: 3,
         businessNumber: "123-45-67890",
-        businessName: "(주)메가커피",
         name: "강남역점",
         address: "서울시 강남구",
         colorCode: "#FF5733",
@@ -151,8 +148,7 @@ describe("Workplace API", () => {
 
     const result = await createWorkplace({
       businessNumber: "123-45-67890",
-      businessName: "(주)메가커피",
-      workplaceName: "강남역점",
+      name: "강남역점",
       address: "서울시 강남구",
       colorCode: "#FF5733",
       isLessThanFiveEmployees: true,
@@ -160,7 +156,6 @@ describe("Workplace API", () => {
 
     expect(result.success).toBe(true);
     expect(result.data.id).toBe(3);
-    expect(result.data.businessName).toBe("(주)메가커피");
     expect(result.data.name).toBe("강남역점");
   });
 
@@ -170,7 +165,6 @@ describe("Workplace API", () => {
       data: {
         id: 1,
         businessNumber: "123-45-67890",
-        businessName: "수정된회사",
         name: "수정된점포",
         address: "서울시 서초구",
         colorCode: "#00FF00",
@@ -180,14 +174,12 @@ describe("Workplace API", () => {
     mockApi.onPut("/api/employer/workplaces/1").reply(200, mockResponse);
 
     const result = await updateWorkplace(1, {
-      businessName: "수정된회사",
-      workplaceName: "수정된점포",
+      name: "수정된점포",
       address: "서울시 서초구",
       colorCode: "#00FF00",
     });
 
     expect(result.success).toBe(true);
-    expect(result.data.businessName).toBe("수정된회사");
     expect(result.data.name).toBe("수정된점포");
   });
 
@@ -439,7 +431,7 @@ describe("Contract API", () => {
 // ============ 급여 (Salary) 테스트 ============
 
 describe("Salary API", () => {
-  it("getSalaries - 급여 목록을 조회한다", async () => {
+  it("getSalariesByYearMonth - 급여 목록을 조회한다", async () => {
     const mockResponse = {
       success: true,
       data: [
@@ -456,9 +448,9 @@ describe("Salary API", () => {
       ],
       error: null,
     };
-    mockApi.onGet("/api/employer/salaries").reply(200, mockResponse);
+    mockApi.onGet("/api/employer/salaries/year-month").reply(200, mockResponse);
 
-    const result = await getSalaries({ workplaceId: 1, year: 2026, month: 1 });
+    const result = await getSalariesByYearMonth(1, 2026, 1);
 
     expect(result.success).toBe(true);
     expect(result.data[0].netPay).toBe(2245000);
@@ -506,13 +498,9 @@ describe("Salary API", () => {
       data: { id: 51, netPay: 1500000 },
       error: null,
     };
-    mockApi.onPost("/api/employer/salaries/calculate").reply(200, mockResponse);
+    mockApi.onPost("/api/employer/salaries/contracts/10/calculate").reply(200, mockResponse);
 
-    const result = await calculateSalary({
-      contractId: 10,
-      year: 2026,
-      month: 2,
-    });
+    const result = await calculateSalary(10, 2026, 2);
 
     expect(result.success).toBe(true);
     expect(result.data.netPay).toBe(1500000);
@@ -593,18 +581,17 @@ describe("Payment API", () => {
   it("createPayment - 송금을 생성한다", async () => {
     const mockResponse = {
       success: true,
-      data: { id: 1, salaryId: 50, amount: 2245000 },
+      data: { id: 1, salaryId: 50 },
       error: null,
     };
     mockApi.onPost("/api/employer/payments").reply(201, mockResponse);
 
     const result = await createPayment({
       salaryId: 50,
-      amount: 2245000,
     });
 
     expect(result.success).toBe(true);
-    expect(result.data.amount).toBe(2245000);
+    expect(result.data.salaryId).toBe(50);
   });
 });
 
