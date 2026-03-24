@@ -10,11 +10,12 @@ export interface ApiResponse<T> {
 // ============ 계약 관련 타입 ============
 
 /** 급여 공제 유형 */
-export type PayrollDeductionType = 'INCOME_TAX_3_3' | 'FOUR_MAJOR_INSURANCES';
+export type PayrollDeductionType = 'FREELANCER' | 'PART_TIME_NONE' | 'PART_TIME_TAX_ONLY' | 'PART_TIME_TAX_AND_INSURANCE';
 
 /** 계약 목록 조회 응답 아이템 (/api/worker/contracts) */
 export interface Contract {
   id: number;
+  workplaceId: number;
   workerName: string;
   workerCode: string;
   workerPhone: string;
@@ -22,7 +23,9 @@ export interface Contract {
   contractStartDate: string;
   contractEndDate: string | null;
   isActive: boolean;
-  workplaceName?: string;
+  workplaceName: string;
+  paymentDay: number;
+  payrollDeductionType: PayrollDeductionType;
 }
 
 /** 계약 상세 조회 응답 (/api/worker/contracts/{id}) */
@@ -83,6 +86,26 @@ export interface CorrectionRequestResponse {
   createdAt: string;
 }
 
+/** 정정 요청 상세 응답 (/api/worker/correction-requests/{id}) */
+export interface CorrectionRequestData {
+  id: number;
+  type: CorrectionRequestType;
+  workRecordId: number | null;
+  contractId: number | null;
+  originalWorkDate: string | null;
+  originalStartTime: string | null;
+  originalEndTime: string | null;
+  requestedWorkDate: string;
+  requestedStartTime: string;
+  requestedEndTime: string;
+  requestedBreakMinutes: number | null;
+  requestedMemo: string | null;
+  status: CorrectionStatus;
+  requester: CorrectionRequester;
+  reviewedAt: string | null;
+  createdAt: string;
+}
+
 /** 근무 기록 조회 응답 (/api/worker/work-records) */
 export interface WorkRecordsResponse {
   id: number;
@@ -129,8 +152,13 @@ export interface SalaryDetailResponse {
   overtimePay: number;
   nightPay: number;
   holidayPay: number;
+  weeklyPaidLeaveAmount: number;
   totalGrossPay: number;
   fourMajorInsurance: number;
+  nationalPension: number;
+  healthInsurance: number;
+  longTermCare: number;
+  employmentInsurance: number;
   incomeTax: number;
   localIncomeTax: number;
   totalDeduction: number;
@@ -138,10 +166,12 @@ export interface SalaryDetailResponse {
   paymentDueDate: string;
 }
 
+export type SalaryCalculateResponse = SalaryDetailResponse;
+
 // ============ 송금 관련 타입 ============
 
 /** 송금 상태 */
-export type PaymentStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
 
 /** 송금 내역 조회 응답 아이템 (/api/worker/payments) */
 export interface PaymentResponse {
