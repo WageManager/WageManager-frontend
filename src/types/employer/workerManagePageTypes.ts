@@ -82,7 +82,6 @@ export interface AddedWorkerInfo {
 // WorkplaceDetails 타입 (Workplace 확장)
 export interface WorkplaceDetails {
   id: number;
-  businessName?: string;
   name: string;
   colorCode?: string;
   workerCount?: number;

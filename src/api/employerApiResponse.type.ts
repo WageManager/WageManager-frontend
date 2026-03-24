@@ -5,11 +5,24 @@ import type { PayrollDeductionType } from "./employerApiRequest.type";
 // GET /api/employer/workplaces - 사업장 목록 조회
 export interface Workplace {
   id: number;
-  businessName: string;
   name: string;
   colorCode?: string;
   workerCount?: number;
   isActive?: boolean;
+}
+
+export type WorkplaceListItem = Workplace;
+
+// GET /api/employer/workplaces/{id} - 사업장 상세 조회
+export interface WorkplaceDetail {
+  id: number;
+  businessNumber: string;
+  name: string;
+  address: string;
+  colorCode?: string;
+  isLessThanFiveEmployees: boolean;
+  workerCount: number;
+  isActive: boolean;
 }
 
 // ============ 근무 기록 (Work Record) ============
@@ -82,6 +95,7 @@ export interface WorkScheduleItem {
   dayOfWeek: string; // "MONDAY", "TUESDAY", etc.
   startTime: string;
   endTime: string;
+  breakMinutes?: number;
 }
 
 // ============ 급여 (Salary) ============
@@ -168,6 +182,60 @@ export interface CorrectionRequestDetail {
 
 export type CorrectionRequestType = "CREATE" | "UPDATE" | "DELETE";
 export type CorrectionRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface CorrectionRequestPage {
+  content: CorrectionRequestListItem[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}
+
+// ============ 송금 (Payment) ============
+
+export interface SalaryPaymentItem {
+  id: number;
+  contractId: number;
+  workerName: string;
+  year: number;
+  month: number;
+  totalGrossPay: number;
+  netPay: number;
+  paymentDueDate: string;
+}
+
+export interface PaymentListItem {
+  id: number;
+  salaryId: number;
+  workerName: string;
+  year: number;
+  month: number;
+  netPay: number;
+  status: string;
+  paymentDate: string;
+  isPaid: boolean;
+}
+
+export interface PaymentRecord {
+  id: number;
+  salaryId: number;
+  workerId: number;
+  workerName: string;
+  workplaceId: number;
+  workplaceName: string;
+  year: number;
+  month: number;
+  netPay: number;
+  status: string;
+  paymentDate: string | null;
+  transactionId: string | null;
+  failureReason: string | null;
+  isPaid: boolean;
+  tossLink: string;
+}
 
 // ============ 근로자 (Worker) ============
 
