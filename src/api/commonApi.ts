@@ -15,6 +15,6 @@ export const updateMyInfo = async (reqData: UpdateMyInfoRequest) => {
 
 // 회원 탈퇴
 export const deleteMyAccount = async () => {
-  const { data } = await wageManagerApi.delete("/api/users/me");
+  const { data } = await wageManagerApi.delete("/api/auth/withdraw");
   return data;
 };

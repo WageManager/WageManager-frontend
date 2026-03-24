@@ -18,8 +18,11 @@ const mockUser: UserResponse = {
   name: '홍길동',
   kakaoId: 'hong123',
   phone: '010-1234-5678',
-  role: 'WORKER',
+  userType: 'WORKER',
   profileImageUrl: 'https://example.com/profile.jpg',
+  workerCode: null,
+  bankName: null,
+  accountNumber: null,
 };
 
 const mockOnTabChange = vi.fn();
@@ -68,7 +71,7 @@ describe('ProfileBox', () => {
     });
 
     it('프로필 이미지가 없으면 플레이스홀더가 표시된다', () => {
-      renderProfileBox({ profileImageUrl: undefined });
+      renderProfileBox({ profileImageUrl: null });
 
       // 이미지가 없고 플레이스홀더가 있어야 함
       expect(screen.queryByAltText('프로필')).not.toBeInTheDocument();
